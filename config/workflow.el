@@ -1,22 +1,22 @@
 ;; packages that improve my top-level emacs workflow
 
 (use-package which-key
-  :ensure t
+  :straight t
   :config
   (which-key-mode 1))
 
-(use-package popwin
-  :ensure t
-  :defer nil
-  :config
-  (require 'popwin)
-  (popwin-mode 1)
-  (push '("*helm M-x*" :height 20) popwin:special-display-config))
+;; (use-package popwin
+;;   :straight t
+;;   :defer nil
+;;   :config
+;;   (require 'popwin)
+;;   (popwin-mode 1)
+;;   (push '("*helm M-x*" :height 20) popwin:special-display-config))
 
 ;; projectile
 
 (use-package projectile
-  :ensure t
+  :straight t
   :defer t
   :config
   (projectile-mode +1)
@@ -26,12 +26,13 @@
   (setq projectile-completion-system 'ivy))
 
 (use-package helm-projectile
-  :ensure t
+  :straight t
+  :defer t
   :after (projectile helm))
 
 (use-package counsel-projectile
-  :ensure t
-  :after (projectile ivy)
+  :straight t
+  :after (projectile counsel)
   :config
   (counsel-projectile-mode))
 
@@ -42,13 +43,14 @@
 ;; magit
 
 (use-package magit
-  :ensure t
+  :straight t
   :defer t
   :hook (magit-mode-hook . turn-off-evil-snipe-override-mode)
   :config)
 
 (use-package evil-magit
-  :ensure t
+  :straight t
+  :defer t
   :after (magit))
 
 (general-define-key
@@ -58,25 +60,26 @@
 ;; narrowing
 
 (use-package helm
-  :ensure t
+  :straight t
+  :defer t
   :config (helm-mode 0))
 
 (use-package hydra
-  :ensure t
+  :straight t
   :defer t)
 
 (use-package ivy
-  :ensure t
+  :straight t
   :after (evil)
   :config
   (setq ivy-do-completion-in-region nil)
   (ivy-mode 1)
   (setq ivy-sort-matches-functions-alist
-      '((t)
-        (ivy-switch-buffer . ivy-sort-function-buffer)
-        (org-insert-link . ivy--sort-by-length)
-        (counsel-find-file . ivy--sort-by-length)
-        (counsel-projectile-find-file . ivy--sort-by-length))))
+        '((t)
+          (ivy-switch-buffer . ivy-sort-function-buffer)
+          (org-insert-link . ivy--sort-by-length)
+          (counsel-find-file . ivy--sort-by-length)
+          (counsel-projectile-find-file . ivy--sort-by-length))))
 
 (defun ivy--sort-by-length (_name candidates)
   (cl-sort (copy-sequence candidates)
@@ -84,7 +87,7 @@
              (< (length f1) (length f2)))))
 
 (use-package ivy-hydra
-  :ensure t
+  :straight t
   :after (hydra ivy)
   :config
   (setq ivy-use-selectable-prompt t)
@@ -95,38 +98,39 @@
    "<escape>" (lambda () (interactive) (hydra-ivy/keyboard-escape-quit-and-exit))))
 
 (use-package counsel
-  :ensure t
-  :defer t)
+  :straight t
+  :after (ivy))
 
 (use-package dired
   :config
   (setq dired-listing-switches "-alhv")
   (setq dired-recursive-copies 'always)
 
-  (require 'dired-details)
-  (setq dired-details-hidden-string "[...] ")
-  (dired-details-install)
-
-  (general-define-key
-   :keymaps 'dired-mode-map
-   "<tab>" 'dired-details-toggle
-   "C-c w" 'dired-toggle-read-only))
+  ;; (require 'dired-details)
+  ;; ;; (setq dired-details-hidden-string "[...] ")
+  ;; ;; (dired-details-install)
+  ;; 
+  ;; (general-define-key
+  ;;  :keymaps 'dired-mode-map
+  ;;  ;; "<tab>" 'dired-details-toggle
+  ;;  "C-c w" 'dired-toggle-read-only)
+  )
 
 (use-package diredfl
-  :ensure t
+  :straight t
   :after (dired)
   :config
   (diredfl-global-mode))
 
 (use-package dired-hide-dotfiles
-  :ensure t
+  :straight t
   :after (dired evil-collection)
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "." 'dired-hide-dotfiles))
 
 (use-package peep-dired
-  :ensure t
+  :straight t
   :after (dired evil-collection)
   :config
   (evil-define-key 'normal peep-dired-mode-map
@@ -137,15 +141,35 @@
     (kbd "k") 'peep-dired-prev-file)
   (add-hook 'peep-dired-hook 'evil-normalize-keymaps))
 
-(use-package persp-mode
-  :ensure t
-  :config
-  (persp-mode 1))
+;; (use-package direnv
+;;   :straight t
+;;   :defer t
+;;   :config
+;;   (direnv-mode))
 
-(use-package direnv
-  :ensure t
+(use-package eyebrowse
+  :straight t
   :config
-  (direnv-mode))
+  (eyebrowse-mode)
+  (setq eyebrowse-wrap-around t))
+
+(use-package shell-pop
+  :straight t
+  :config
+  (setq shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+  (setq shell-pop-term-shell "zsh")
+  (setq shell-pop-universal-key "C-t")
+  (setq shell-pop-window-size 30)
+  (setq shell-pop-full-span t)
+  (setq shell-pop-window-position "bottom")
+  ;; need to do this manually or not picked up by `shell-pop'
+  (shell-pop--set-shell-type 'shell-pop-shell-type shell-pop-shell-type))
+
+(general-define-key
+ :keymaps 'override
+ :states '(normal insert visual motion emacs)
+ "C-x t" 'shell-pop
+ "C-a t" 'shell-pop)
 
 ;; (use-package dired-details-s
 ;;   :after (dired)

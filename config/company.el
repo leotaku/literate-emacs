@@ -8,7 +8,7 @@
        (company-mode 1)))
 
 (use-package company
-  :ensure t
+  :straight t
   :defer t
   :init
   (setq company-tooltip-align-annotations t)
@@ -32,7 +32,7 @@
   (setq company-idle-delay 0.2))
 
 ;; (use-package company-quickhelp
-;;   :ensure t
+;;   :straight t
 ;;   :after company
 ;;   :hook
 ;;   (company-mode . company-quickhelp-mode))

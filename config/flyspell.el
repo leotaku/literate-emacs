@@ -1,32 +1,35 @@
 ;; all flyspell related configuration
 
 (use-package flyspell
-  :ensure t
+  :straight t
+  :defer t
   :config
-  (setq flyspell-duplicate-distance 0))
+  (setq flyspell-duplicate-distance 0)
+  (setq flyspell-issue-message-flag nil))
 
 (use-package flyspell-correct
-  :ensure t
+  :straight t
+  :defer t
   :after flyspell)
 
-(use-package flyspell-lazy
-  :ensure t
-  :config
-  (flyspell-lazy-mode 1))
+;; (use-package flyspell-lazy
+;;   :straight t
+;;   :config
+;;   (flyspell-lazy-mode 1))
 
 (defun flyspell-buffer-word ()
   (interactive)
   (let ((current-location (point))
-        (word (flyspell-get-word))
-	(when (consp word)
-	  (flyspell-do-correct 'buffer nil (car word) current-location (cadr word) (caddr word) current-location)))))
+        (word (flyspell-get-word)))
+    (when (consp word)
+      (flyspell-do-correct 'buffer nil (car word) current-location (cadr word) (caddr word) current-location))))
 
 (defun flyspell-global-word ()
   (interactive)
   (let ((current-location (point))
-        (word (flyspell-get-word))
-	(when (consp word)
-	  (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location)))))
+        (word (flyspell-get-word)))
+    (when (consp word)
+      (flyspell-do-correct 'save nil (car word) current-location (cadr word) (caddr word) current-location))))
 
 (general-define-key
  :keymaps 'flyspell-mode-map
@@ -63,3 +66,6 @@
 
 (setq ispell-dictionary "en_US")
 (setq flyspell-default-dictionary "en_US")
+
+(defun ispell-better () (interactive) (ispell) (deactivate-mark))
+(put 'ispell-skip-region-alist 'safe-local-variable (lambda (_) t))

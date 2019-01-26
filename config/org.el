@@ -1,196 +1,62 @@
 ;; all of my org mode specific configurations
 
-;; packages used
-
-(use-package org
-  :ensure t
-  :config
-  (require 'org-protocol))
-
-(use-package worf
-  :ensure t
-  :after (org))
-
-(use-package org-download
-  :ensure t
-  :after (org)
-  :config
-  (org-download-enable))
-
-(use-package ivy-bibtex
-  :ensure t
-  :after (org))
-
-(use-package org-ref
-  :ensure t
-  :after (org ivy-bibtex)
-  :init
-  (setq org-ref-completion-library 'org-ref-helm-cite)
-  ;; (setq org-ref-completion-library 'org-ref-ivy-cite)
-  :config
-  (setq orhc-multiline t)
-  (org-ref-helm-cite-completion)
-  (org-ref-ivy-cite-completion)
-  (defun orhc-bibtex-candidates ()
-    (setq bibtex-completion-bibliography org-ref-bibliography-files)
-    (bibtex-completion-candidates))
-  (setq bibtex-dialect 'biblatex)
-  (require 'doi-utils)
-  (require 'org-ref-isbn)
-
-  ;; (setq org-ref-default-bibliography
-  ;;  '("~/Projects/org.bib"
-  ;;    "~/Projects/zotero.bib"))
-  
-  ;; (setq bibtex-completion-bibliography org-ref-default-bibliography)
-
-  (general-define-key
-   :keymap org-mode-map
-   :prefix "C-c"
-   "c" 'org-ref-ivy-insert-cite-link
-   "C" 'org-ref-helm-cite
-   "r" 'org-ref-ivy-insert-ref-link
-   "R" 'org-ref-helm-insert-ref-link
-   "l" 'org-ref-ivy-insert-label-link
-   "L" 'org-ref-helm-insert-label-link))
-
-;; (use-package org-evil
-;;   :ensure t
-;;   :after (org)
-;;   :hook (org-mode . org-evil-mode))
-
-;; (use-package evil-org
-;;   :ensure t
-;;   :after org
-;;   :hook (org-mode . evil-org-mode)
-;;   :config
-;;   (general-define-key
-;;    :keymaps 'org-mode-map
-;;    "<C-tab>" 'org-dwim-cycle
-;;    "<C-return>" 'evil-org-meta-return))
-
-(add-hook 'org-mode-hook 'org-indent-mode)
-(add-hook 'org-mode-hook 'worf-mode)
-
-;; settings
-
-(setq org-ref-completion-library 'org-ref-helm-cite)
-
 (setq org-default-notes-file "~/Projects/notes.org")
-(setq org-latex-pdf-process (list "latexmk -interaction=nonstopmode -output-directory=%o -shell-escape -bibtex -f -pdf %f"))
-
-(setq org-image-actual-width 400)
-(setq org-startup-with-inline-images t)
-
-(setq org-checkbox-hierarchical-statistics nil)
-
 (setq org-todo-keywords
       '((sequence "TODO" "DOING" "|" "DONE BUT" "DONE")
         (sequence "MAYBE" "CANCELED" "|")
         (sequence "WATCHING" "READING" "|" "COMPLETED")
         (sequence "PLANNED" "DROPPED" "|")))
 
-(setq org-link-file-path-type 'relative)
+;;; packages
 
-;; (add-hook 'org-capture-mode-hook (lambda () (evil-insert-state) (end-of-line)))
-(add-hook 'org-capture-mode-hook (lambda () (evil-append 1)))
+(use-package org
+  :straight t
+  :after flyspell)
 
-;; keys/keybindings
+;; (use-package worf
+;;   :straight t
+;;   :defer t
+;;   :after (org))
 
-(general-define-key
- :keymaps '(org-mode-map worf-mode-map)
- "<tab>" 'org-force-cycle-archived
- "<C-tab>" 'org-dwim-cycle
- ;;"<C-S-iso-leftab>" 'org-shiftleft
- "<M-return>" (lambda () (interactive) (org-insert-heading-respect-content) (evil-append 1))
- "<C-return>" 'evil-org-meta-return
- "<C-S-return>" 'evil-org-meta-shift-return
- "<S-return>" 'newline-and-indent
- "<backspace>" 'evil-org-backspace
- "<C-backspace>" 'evil-org-c-backspace
- "M-j" 'org-metadown
- "M-k" 'org-metaup
- 
- "[" 'self-insert-command
- "]" 'self-insert-command)
+(use-package ivy-bibtex
+  :straight t
+  :defer t
+  :after (org))
 
-(general-define-key
- :keymaps 'org-mode-map
- :states 'insert
- "<return>" 'evil-org-insert-return)
+(use-package org-ref
+  :straight t
+  :defer t
+  :after (org ivy-bibtex)
+  :init
+  (setq org-ref-completion-library 'org-ref-helm-cite))
 
-(general-define-key
- :keymaps 'org-mode-map
- :states '(normal visual)
- ")" (lambda () (interactive) (org-next-visible-heading 1) (evil-forward-word-begin))
- "(" (lambda () (interactive) (org-previous-visible-heading 1) (evil-forward-word-begin))
- "]" (lambda () (interactive) (org-forward-heading-same-level 1) (evil-forward-word-begin))
- "[" (lambda () (interactive) (org-backward-heading-same-level 1) (evil-forward-word-begin))
- "{" (lambda () (interactive) (org-up-element) (evil-forward-word-begin))
- "}" (lambda () (interactive) (org-down-element) (evil-forward-word-begin)))
+(with-eval-after-load 'org
+  (require 'org-protocol))
 
-(general-define-key
- :keymaps 'org-mode-map
- :states '(normal visual)
- :prefix "g"
- "h" 'worf-goto-alt
- "H" (lambda () (interactive) (worf-goto-alt t)) 
- "r" (lambda () (interactive) (worf-refile t))
- "R" (lambda () (interactive) (call-interactively 'org-refile))
- "x" 'org-open-at-point
- "p" (lambda () (interactive) (org-previous-link) (org-show-siblings) (org-show-children))
- "n" (lambda () (interactive) (org-next-link) (org-show-siblings) (org-show-children)))
+(with-eval-after-load 'org-ref
+  (require 'doi-utils)
+  (require 'org-ref-isbn))
 
-(general-define-key
- :keymaps 'override
- "C-x c" 'org-capture
- "C-x C" (lambda () (interactive) (org-capture nil "g"))
- "C-x o g" (lambda () (interactive) (org-capture nil "g")))
+;;; settings
+;;;; defaults
 
-(general-define-key
- :keymaps 'override
- :prefix "C-x o"
- "o" (lambda () (interactive) (find-file org-default-notes-file))
- "l" 'org-store-link
- "a" 'org-agenda
- "c" 'org-capture
- "b" 'org-switchb)
+(with-eval-after-load 'org
+  (setq org-ref-completion-library 'org-ref-helm-cite)
 
-(general-define-key
- :keymaps 'org-mode-map
- "C-<left>" 'org-shiftleft
- "C-<right>" 'org-shiftright)
+  (setq org-latex-pdf-process (list "latexmk -interaction=nonstopmode -output-directory=%o -shell-escape -bibtex -f -pdf %f"))
 
-;; better highlight
+  (setq org-image-actual-width 400)
+  (setq org-startup-with-inline-images t)
 
-(font-lock-add-keywords 'org-mode
-      '(("^ *\\([0-9]+\\.\\)" (1 'bold))
-        ("^ *\\([0-9]+)\\)" (1 'bold))
-        ("^ *\\([+-]\\)" (1 'bold))
-        ("^ +\\([*]\\)" (1 'bold))))
+  (setq org-checkbox-hierarchical-statistics nil)
 
-(font-lock-add-keywords 'org-mode
-      '(("\\(->\\)" (1 'bold))))
+  (setq org-link-file-path-type 'relative)
 
-(defface org-canceled '() "")
-(defface org-maybe    '() "")
+  (setq org-adapt-indentation nil))
 
-(setq org-todo-keyword-faces
-      '(("TODO"      . 'org-todo)
-        ("DOING"     . 'org-todo)
-        ("DONE BUT"  . 'org-done)
-        ("DONE"      . 'org-done)
-        ("MAYBE"     . 'org-maybe)
-        ("PLANNED"   . 'org-maybe)
-        ("CANCELED"  . 'org-canceled)
-        ("DROPPED"   . 'org-canceled)))
+;; (add-hook 'org-mode-hook 'org-indent-mode)
 
-;; org links
-
-(org-add-link-type
- "project" 'projectile-switch-project-by-name)
-
-;; org-capture
+;;;; capture
 
 (setq org-capture-templates
       '(("g" "Generic" entry
@@ -213,9 +79,70 @@
          :immediate-finish t)
         ("p" "Protocol Selection" entry (file+headline org-default-notes-file "Weblinks")
          "* %:description\n[[%:link]]\n%t\n#+BEGIN_QUOTE\n%i\n#+END_QUOTE\n%?")))
-        
 
-;; evil/dwim functions for key bindings
+(with-eval-after-load 'org-capture
+  (add-hook 'org-capture-mode-hook (lambda () (evil-append 1))))
+
+;;;; org-ref
+
+(with-eval-after-load 'org-ref
+  (setq orhc-multiline t)
+  (org-ref-helm-cite-completion)
+  (org-ref-ivy-cite-completion)
+  (defun orhc-bibtex-candidates ()
+    (setq bibtex-completion-bibliography org-ref-bibliography-files)
+    (bibtex-completion-candidates))
+  (setq bibtex-dialect 'biblatex))
+
+;;;; links
+
+(with-eval-after-load 'org'
+  (org-add-link-type
+    "project" 'projectile-switch-project-by-name))
+
+;;;; highlighting
+
+(font-lock-add-keywords 'org-mode
+                        '(("^ *\\([0-9]+\\.\\)" (1 'bold))
+                          ("^ *\\([0-9]+)\\)" (1 'bold))
+                          ("^ *\\([+-]\\)" (1 'bold))
+                          ("^ +\\([*]\\)" (1 'bold))))
+
+(font-lock-add-keywords 'org-mode
+                        '(("\\(->\\)" (1 'bold))))
+
+(font-lock-add-keywords 'org-mode
+                        '(("\\(@\\)" (1 'org-meta-line))))
+
+(defface org-canceled '() "")
+(defface org-maybe    '() "")
+
+(setq org-todo-keyword-faces
+      '(("TODO"      . 'org-todo)
+        ("DOING"     . 'org-todo)
+        ("DONE BUT"  . 'org-done)
+        ("DONE"      . 'org-done)
+        ("MAYBE"     . 'org-maybe)
+        ("PLANNED"   . 'org-maybe)
+        ("CANCELED"  . 'org-canceled)
+        ("DROPPED"   . 'org-canceled)))
+
+;;; functions
+;;;; lib
+
+(defun org-show-from-top ()
+  (interactive)
+  (save-excursion
+    (ignore-errors
+      (org-back-to-heading t))
+    (org-show-entry)
+	(org-show-children)
+    (ignore-errors
+      (while t
+        (outline-up-heading 1 t)
+        (org-show-entry)
+        (org-show-children))))
+  (org-show-subtree))
 
 (defun org-folded-p ()
   "Returns non-nil if point is on a folded headline or plain list
@@ -223,6 +150,42 @@ item."
   (and (or (org-at-heading-p)
            (org-at-item-p))
        (or (invisible-p (point-at-eol)))))
+
+;;;; commands
+
+(defun org-toggle-export-on-save (type)
+  "Enable or disable export HTML when saving current buffer."
+  (interactive)
+  (when (not (eq major-mode 'org-mode))
+    (error "Not an org-mode file!"))
+  (if (memq type after-save-hook)
+      (progn (remove-hook 'after-save-hook type t)
+             (message "Disabled org export on save"))
+    (add-hook 'after-save-hook type nil t)
+    (set-buffer-modified-p t)
+    (message "Enabled org export on save")))
+
+;;;; TODO:naming interactive
+
+(defun org-better-cycle-back ()
+  (interactive)
+  (if (org-at-table-p)
+      (progn
+        (org-table-previous-field)
+        ;; (evil-forward-WORD-end)
+        ;; (evil-backward-WORD-begin)
+        )
+    (org-shifttab)))
+
+(defun org-better-cycle-forward ()
+  (interactive)
+  (if (org-at-table-p)
+      (progn
+        (org-table-next-field)
+        ;; (evil-forward-WORD-end)
+        ;; (evil-backward-WORD-begin)
+        )
+    (org-force-cycle-archived)))
 
 (defun org-dwim-cycle ()
   (interactive)
@@ -292,10 +255,122 @@ item."
       (org-update-statistics-cookies t)
       (evil-previous-line)
       (evil-append-line 1)))
-      ;;(insert " ")))
+   ;;(insert " ")))
    ((evil-delete-backward-char-and-join 1))))
 
-;; worf 
+(defun evil-org-forward-paren ()
+  (interactive)
+  (if (org-at-heading-p)
+      (progn
+        (org-next-visible-heading 1)
+        (evil-forward-WORD-begin))
+    (evil-forward-sentence-begin)))
+
+(defun evil-org-backward-paren ()
+  (interactive)
+  (if (org-at-heading-p)
+      (progn
+        (org-previous-visible-heading 1)
+        (evil-forward-WORD-begin))
+    (org-backward-sentence)))
+
+(defun evil-org-forward-bracket ()
+  (interactive)
+  (if (org-at-heading-p)
+      (progn
+        (org-forward-heading-same-level 1)
+        (evil-forward-WORD-begin))
+    (evil-forward-paragraph)))
+
+(defun evil-org-backward-bracket ()
+  (interactive)
+  (if (org-at-heading-p)
+      (progn
+        (org-backward-heading-same-level 1)
+        (evil-forward-WORD-begin))
+    (evil-backward-paragraph)))
+
+;;; keys/keybindings
+;;;; TODO:naming movement
+
+(with-eval-after-load 'org
+  (general-define-key
+   :keymaps '(org-mode-map worf-mode-map)
+   "<tab>" 'org-better-cycle-forward
+   "<S-iso-lefttab>" 'org-better-cycle-back
+   "<C-tab>" 'org-dwim-cycle
+   "<M-return>" (lambda () (interactive) (org-insert-heading-respect-content) (evil-append 1))
+   "<C-return>" 'evil-org-meta-return
+   "<C-S-return>" 'evil-org-meta-shift-return
+   "<S-return>" 'newline-and-indent
+   "<backspace>" 'evil-org-backspace
+   "<C-backspace>" 'evil-org-c-backspace
+   "M-j" 'org-metadown
+   "M-k" 'org-metaup)
+  
+  (general-define-key
+   :keymaps 'org-mode-map
+   "C-<left>" 'org-shiftleft
+   "C-<right>" 'org-shiftright)
+  
+  (general-define-key
+   :keymaps 'org-mode-map
+   :states 'insert
+   "<return>" 'evil-org-insert-return)
+  
+  (general-define-key
+   :keymaps 'org-mode-map
+   :states '(normal visual)
+   ")" 'evil-org-forward-paren
+   "(" 'evil-org-backward-paren
+   "]" 'evil-org-forward-bracket
+   "[" 'evil-org-backward-bracket
+   "{" (lambda () (interactive) (org-up-element) (evil-forward-word-begin))
+   "}" (lambda () (interactive) (org-down-element) (evil-forward-word-begin)))
+  
+  (general-define-key
+   :keymaps 'org-mode-map
+   :states '(normal visual)
+   :prefix "g"
+   "h" 'worf-goto-alt
+   "H" (lambda () (interactive) (worf-goto-alt t)) 
+   "r" (lambda () (interactive) (worf-refile t))
+   "R" (lambda () (interactive) (call-interactively 'org-refile))
+   "x" 'org-open-at-point
+   "p" (lambda () (interactive) (org-previous-link) (org-show-siblings) (org-show-children))
+   "n" (lambda () (interactive) (org-next-link) (org-show-siblings) (org-show-children))))
+
+;;;; global/capture
+
+(general-define-key
+ :keymaps 'override
+ :prefix "C-x o"
+ "o" (lambda () (interactive) (find-file org-default-notes-file))
+ "l" 'org-store-link
+ "a" 'org-agenda
+ "c" 'org-capture
+ "b" 'org-switchb)
+
+(general-define-key
+ :keymaps 'override
+ "C-x c" 'org-capture
+ "C-x C" (lambda () (interactive) (org-capture nil "g"))
+ "C-x o g" (lambda () (interactive) (org-capture nil "g")))
+
+;;;; org-ref
+
+(with-eval-after-load 'org
+  (general-define-key
+    :keymap org-mode-map
+    :prefix "C-c"
+    "c" 'org-ref-ivy-insert-cite-link
+    "C" 'org-ref-helm-cite
+    "r" 'org-ref-ivy-insert-ref-link
+    "R" 'org-ref-helm-insert-ref-link
+    "l" 'org-ref-ivy-insert-label-link
+    "L" 'org-ref-helm-insert-label-link))
+
+;;; TODO:naming worf
 
 (defun worf-get (&optional alt buffer)
   (save-excursion
@@ -365,10 +440,12 @@ item."
 
 (defun worf-goto-alt (&optional close-others)
   (interactive)
-  (goto-char (worf-get t))
-  (if close-others (evil-close-folds) nil)
-  (outline-show-children 1000)
-  (worf-more))
+  (let ((olp-char (worf-get t)))
+    (if close-others (evil-close-folds) nil)
+    (goto-char olp-char)
+    (org-show-from-top))
+  (evil-beginning-of-line)
+  (evil-forward-WORD-begin 1))
 
 (defun worf-refile (&optional alt buffer)
   (interactive)
@@ -395,26 +472,6 @@ item."
       (reverse org-map-tree-better-list))))
 
 (require 's)
-
-;; (defun worf-get-scoped (&optional go-up)
-;;   (interactive)
-;;   (save-excursion
-;;     (ivy-read ""
-;;            (let ((level (org-current-level)))
-;;              (if (and (= level 1) go-up)
-;;                  (org-map-entries #'worf--print-olp)
-;;                (if go-up (org-up-element) nil)
-;;                (org-map-tree-better #'worf--print-olp))))))
-
-;; (defun worf-get-scoped-alt (&optional go-up)
-;;   (interactive)
-;;   (save-excursion
-;;     (ivy-read ""
-;;            (let ((level (org-current-level)))
-;;              (if (and (= level 1) go-up)
-;;                  (org-map-entries #'worf--get-olp-and-point)
-;;                (if go-up (org-up-element) nil)
-;;                (org-map-tree-better #'worf--get-olp-and-point))))))
 
 (defun worf--get-olp-and-point ()
   (let ((olp (org-get-outline-path t)))

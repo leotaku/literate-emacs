@@ -2,32 +2,39 @@
 
 (use-package lsp-mode
   :commands lsp
-  :ensure t
+  :straight t
+  :defer t
   :config
   (set-face-attribute 'lsp-face-highlight-textual nil :background (doom-color 'base1)))
 
 (use-package lsp-ui
-  :ensure t
+  :straight t
+  :defer t
   :commands lsp-ui-mode)
 
 (use-package company-lsp
-  :ensure t
+  :straight t
+  :defer t
   :commands company-lsp)
 
 (use-package flycheck
-  :ensure t)
+  :straight t
+  :defer t)
 
 (use-package flycheck-rust
-  :ensure t)
+  :straight t
+  :defer t)
 
 (use-package yasnippet
-  :ensure t)
+  :straight t
+  :defer t)
 
 (add-hook 'rust-mode-hook #'lsp)
 (add-hook 'flycheck-mode-hook #'flycheck-rust-setup)
 
 ;; (use-package company-lsp
-;;   :ensure t
+;;   :straight t
+;;   :defer t
 ;;   :after (lsp-mode)
 ;;   :config
 ;;   (push 'company-lsp company-backends))
@@ -38,53 +45,57 @@
 (add-hook 'lsp-mode-hook #'yas-minor-mode)
 
 ;; (use-package lsp-ui
-;;   :ensure t
+;;   :straight t
+;;   :defer t
 ;;   :config
 ;;   (add-hook 'lsp-mode-hook 'lsp-ui-mode))
 
 ;; (la)tex
 
 (use-package tex
+  :straight auctex
   :defer t
-  :ensure auctex
   :hook
   (TeX-mode . visual-line-mode)
   (LaTeX-mode . visual-line-mode)
   :config
   (setq TeX-auto-save t)
   (setq preview-default-option-list 
-    '("titlesec" "pagestyles" "displaymath" "floats" "graphics" "textmath" "sections" "footnotes"))
+        '("titlesec" "pagestyles" "displaymath" "floats" "graphics" "textmath" "sections" "footnotes"))
   (TeX-source-correlate-mode)
   (TeX-PDF-mode)
   (add-to-list 'TeX-view-program-selection
                '(output-pdf "Zathura"))
   (add-to-list 'TeX-expand-list
-             '("%sn" (lambda () server-name)))
+               '("%sn" (lambda () server-name)))
   (add-to-list 'TeX-view-program-list
-             '("Zathura"
-               ("zathura %o"
-                (mode-io-correlate " --synctex-forward %n:0:%b -x \"emacsclient --socket-name=%sn --no-wait +%{line} %{input}\""))
-               "zathura")))
+               '("Zathura"
+                 ("zathura %o"
+                  (mode-io-correlate " --synctex-forward %n:0:%b -x \"emacsclient --socket-name=%sn --no-wait +%{line} %{input}\""))
+                 "zathura")))
 
 (use-package magic-latex-buffer
-  :ensure t
+  :straight t
+  :defer t
   :hook TeX-mode-hook
   :config
   (setq magic-latex-enable-block-highlight t
-      magic-latex-enable-suscript        t
-      magic-latex-enable-pretty-symbols  t
-      magic-latex-enable-block-align     nil
-      magic-latex-enable-inline-image    nil
-      magic-latex-enable-minibuffer-echo t))
+        magic-latex-enable-suscript        t
+        magic-latex-enable-pretty-symbols  t
+        magic-latex-enable-block-align     nil
+        magic-latex-enable-inline-image    nil
+        magic-latex-enable-minibuffer-echo t))
 
 (use-package auctex-latexmk
-  :ensure t
+  :straight t
+  :defer t
   :after tex
   :init
   (auctex-latexmk-setup))
 
 (use-package company-auctex
-  :ensure t
+  :straight t
+  :defer t
   :after tex
   :init
   (company-auctex-init))
@@ -92,7 +103,8 @@
 ;; markdown
 
 (use-package markdown-mode
-  :ensure t
+  :straight t
+  :defer t
   :hook (markdown-mode . visual-line-mode)
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
@@ -102,19 +114,21 @@
 ;; nix
 
 (use-package nix-mode
-  :ensure t
+  :straight t
+  :defer t
   :mode "\\.nix\\'"                                                                                                                                                                                                
   :config
-  (setf nix-indent-function #'nix-indent-line))
+  ;; (setf nix-indent-function #'indent-relative)
+  )
 
 ;; (use-package company-nixos-options
-;;   :ensure t
+;;   :straight t
 ;;   :after company
 ;;   :config
 ;;   (add-to-list 'company-backends 'company-nixos-options))
 
 (use-package helm-nixos-options
-  :ensure t
+  :straight t
   :defer t)
 
 ;; rust
@@ -140,7 +154,7 @@
 ;; (add-hook 'rust-mode-hook #'lsp-rust-enable)
 
 (use-package rust-mode
-  :ensure t
+  :straight t
   :mode "\\.rs\\'") ;; this is already done by rust-mode
 
 
@@ -157,24 +171,27 @@
    ((newline-and-indent))))
 
 (general-define-key
- :keymap 'rust-mode-map
+ :keymaps 'rust-mode-map
  "RET" 'rust-mode-newline-and-indent)
 
 (use-package cargo
-  :ensure t
+  :straight t
+  :defer t
   :after (rust-mode)
   :config
   (add-hook 'rust-mode-hook 'cargo-minor-mode)
   (setq rust-format-on-save t))
 
 ;; (use-package company-racer
-;;   :ensure t
+;;   :straight t
+;;   :defer t
 ;;   :after (rust-mode racer company)
 ;;   :config
 ;;   (add-to-list 'company-backends 'company-racer))
 
 ;; (use-package racer
-;;   :ensure t
+;;   :straight t
+;;   :defer t
 ;;   :after (rust-mode)
 ;;   :config
 ;;   (setq-mode-local racer-mode
@@ -188,7 +205,7 @@
 
 ;; (require 'evil)
 ;; (use-package parinfer
-;;   :ensure t
+;;   :straight t
 ;;   :defer t
 ;;   :bind
 ;;   (:map
@@ -213,7 +230,8 @@
 ;;            smart-yank)))  ;; Yank behavior depend on mode.
 
 ;; (use-package parinfer
-;;   :ensure t
+;;   :straight t
+;;   :defer t
 ;;   :bind
 ;;   (("C-," . parinfer-toggle-mode))
 ;;   :init
@@ -233,12 +251,14 @@
 ;;     (add-hook 'lisp-mode-hook #'parinfer-mode)))
 
 (use-package aggressive-indent
-  :ensure t
+  :straight t
+  :defer t
   :config
   (add-hook 'emacs-lisp-mode-hook #'aggressive-indent-mode))
 
 (use-package lispy
-  :ensure t
+  :straight t
+  :defer t
   :hook (emacs-lisp-mode . lispy-mode))
 
 (defun conditionally-enable-lispy ()
@@ -248,7 +268,7 @@
 (add-hook 'minibuffer-setup-hook 'conditionally-enable-lispy)
 
 (use-package lispyville
-  :ensure t
+  :straight t
   :defer t
   :hook (lispy-mode . lispyville-mode)
   :config

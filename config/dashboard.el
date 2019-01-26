@@ -1,7 +1,7 @@
 ;; Set up the dashboard page which is shown after emacs is first started.
 
 (use-package dashboard
-  :ensure t
+  :straight t
   :after evil
   :config
   (setq dashboard-startup-banner "~/.emacs.d/resources/icon.png")
@@ -14,6 +14,7 @@
 (defun my-display-startup-screen (&optional concise)
   ;; DONE: Prevent recursive calls from server-process-filter.
   (let ((buffer (get-buffer "*dashboard*")))
+    (recentf-cleanup)
     (if buffer
         buffer
       (progn

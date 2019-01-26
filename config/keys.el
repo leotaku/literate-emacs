@@ -15,14 +15,19 @@
  :keymaps 'override
  :states '(normal insert visual motion emacs)
  :prefix "C-a"
- "c" 'persp-copy
- "n" 'persp-next
- "p" 'persp-prev
+ "d" (lambda () (interactive) (switch-to-buffer "*dashboard*"))
+ "c" 'eyebrowse-create-window-config
+ "n" 'eyebrowse-next-window-config
+ "p" 'eyebrowse-prev-window-config
  "a" 'delete-other-windows
  "w" 'split-window-vertically
  "q" 'split-window-horizontally
- "X" 'persp-kill
- "x" 'evil-window-delete
+ "X" 'eyebrowse-close-window-config
+ "x" (lambda ()
+       (interactive)
+       (if (condition-case nil (evil-window-delete) (error t))
+           (eyebrowse-close-window-config)
+         ()))
  "k" 'evil-window-up
  "l" 'evil-window-right
  "h" 'evil-window-left
