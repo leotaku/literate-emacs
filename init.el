@@ -4,7 +4,7 @@
 ;;;; load-path
 
 (add-to-list 'load-path "~/.emacs.d/external/")
-(add-to-list 'load-path "~/.emacs.d/themes/")
+(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 
 ;;;; straight.el
 
