@@ -54,7 +54,12 @@
 
 (setq make-backup-files t)
 (setq backup-directory-alist `(("." . "~/.emacs.d/var/backups")))
+(setq version-control t)
+(setq delete-old-versions t)
 (setq backup-by-copying t)
+
+(setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save/files")
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/var/auto-save/files" t)))
 
 (setq-default truncate-lines t)
 (require 'mode-local)

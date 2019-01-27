@@ -11,7 +11,7 @@
                           (bookmarks . 5)
                           (agenda . 5))))
 
-(defun my-display-startup-screen (&optional concise)
+(defun get-or-create-dashboard (&optional concise)
   ;; DONE: Prevent recursive calls from server-process-filter.
   (let ((buffer (get-buffer "*dashboard*")))
     (recentf-cleanup)
@@ -22,7 +22,7 @@
         (get-buffer "*dashboard*")))))
 
 (setq inhibit-splash-screen nil)
-(setq initial-buffer-choice (lambda () (my-display-startup-screen)))
+(setq initial-buffer-choice (lambda () (get-or-create-dashboard)))
 
 (general-define-key
  :keymaps 'dashboard-mode-map
