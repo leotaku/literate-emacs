@@ -10,3 +10,4 @@ This configuration makes heavy use of the great
 and also defines a new =use-config= macro.
 
 [[./screenshot.png]]
+[[./screenshot2.png]]
