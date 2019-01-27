@@ -9,4 +9,4 @@ This configuration makes heavy use of the great
 [[https://github.com/raxod502/straight.el][straight.el]] and [[https://github.com/jwiegley/use-package][use-package]] for configuration management,
 and also defines a new =use-config= macro.
 
-[[./screenshot.png][The current default look]]
+[[./screenshot.png]]
