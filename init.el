@@ -1171,8 +1171,20 @@ Inserted by installing org-mode or when a release is made."
   :config
   (diredfl-global-mode))
 
-(use-package dired-hide-dotfiles
+(use-package dired-filter
   :straight t
+  :after (dired)
+  :hook (dired-mode . dired-filter-mode))
+
+(use-package dired-ranger
+  :straight t
+  :after (dired))
+
+(use-package dired+
+  :straight (dired+
+             :type git :host github
+             :repo "emacsmirror/emacswiki.org"
+             :files ("dired+.el"))
   :after (dired))
 
 (use-package peep-dired
@@ -1185,15 +1197,74 @@ Inserted by installing org-mode or when a release is made."
   (setq dired-listing-switches "-alhv")
   (setq dired-recursive-copies 'always))
 
+(use-config peep-dired
+  (setq peep-dired-cleanup-eagerly t)
+  (setq peep-dired-cleanup-on-disable t)
+  (setq peep-dired-enable-on-directories nil))
+
+(use-config dired-filter
+  (setq dired-filter-group
+        '(("default" (dot-files))
+          ("dotfiles"
+           (not (dot-files))))))
+
 ;;;;;; keys
 
 (general-define-key
  :keymaps 'dired-mode-map
- :states 'normal
- "." 'dired-hide-dotfiles-mode
- "p" 'peep-dired
+ :states '(normal visual)
+ "<C-tab>" 'dired-filter-group-toggle-header
+ "H" 'dired-hide-details-mode
+ "U" (lambda ()
+       (interactive)
+       (dired-unmark-all-marks)
+       (ring-remove dired-ranger-copy-ring 0))
+ "v" 'evil-visual-line
+ "y" 'dired-ranger-copy
+ "p" 'dired-ranger-paste
+ "P" 'dired-ranger-move
  "h" 'dired-up-directory
- "l" 'dired-find-file)
+ "l" 'dired-find-file
+ "k" 'dired-previous-line
+ "j" 'dired-next-line
+ "q" (lambda ()
+       (interactive)
+       (if (bound-and-true-p peep-dired)
+           (peep-dired-disable))
+       (kill-this-buffer)
+       (peep-dired-kill-buffers-without-window)))
+
+(evil-collection-define-key '(normal visual) 'dired-mode-map
+  "k" 'evil-previous-line
+  "j" 'evil-next-line
+  "S" 'peep-dired
+  "s" (lambda () (interactive)
+        (if (bound-and-true-p peep-dired)
+            (peep-dired-display-file-other-window)
+          (peep-dired))))
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states 'visual
+ "u" 'diredp-unmark-region-files
+ "y" (lambda ()
+       (interactive)
+       (call-interactively 'dired-mark)
+       (call-interactively 'dired-ranger-copy)))
+
+(general-unbind
+  :keymaps 'dired-mode-map
+  :states 'normal
+  "F")
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states 'normal
+ "F" dired-filter-map
+ "M" dired-filter-mark-map
+ "G" 'dired-filter-group-mode)
+
+(use-config dired-filter)
 
 ;;;;; nov.el
 
