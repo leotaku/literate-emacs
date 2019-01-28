@@ -198,7 +198,14 @@ Inserted by installing org-mode or when a release is made."
       
       desktop-restore-in-current-display nil)
 
-(desktop-save-mode 1)
+;; only allow the first server instance
+;; to enable desktop-mode
+
+(when (not (file-exists-p
+            (concat (file-name-as-directory desktop-dirname)
+                    desktop-base-lock-name)))
+  (desktop-save-mode 1)
+  (message "Desktop save is on!"))
 
 ;;;;;; undo-tree
 
