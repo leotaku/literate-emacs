@@ -252,31 +252,39 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;; commands
 
-(defun next-code-buffer ()
+(defun this-or-next-real-buffer (&optional allow-dired)
   (interactive)
-  (let ((current-buffer (buffer-name)))
-    (next-buffer)
+  (let ((start-buffer (buffer-name)))
     (while
-        (and
-         (string-match-p "^\*" (buffer-name))
-         (not (string-match-p "\*dashboard\*" (buffer-name)))
-         (not (string-match-p "\*scratch\*" (buffer-name)))
-         (not (string-match-p "\*terminal\*" (buffer-name)))
-         (not (equal current-buffer (buffer-name))))
+        (not (or
+              (buffer-file-name)
+              (string-match-p "\*dashboard\*" (buffer-name))
+              (string-match-p "\*scratch\*" (buffer-name))
+              (and allow-dired (bound-and-true-p dired-filter-mode))))
       (next-buffer))))
 
-(defun previous-code-buffer ()
+(defun this-or-previous-real-buffer (&optional allow-dired)
   (interactive)
-  (let ((current-buffer (buffer-name)))
-    (previous-buffer)
+  (let ((start-buffer (buffer-name)))
     (while
-        (and
-         (string-match-p "^\*" (buffer-name))
-         (not (string-match-p "\*dashboard\*" (buffer-name)))
-         (not (string-match-p "\*scratch\*" (buffer-name)))
-         (not (string-match-p "\*terminal\*" (buffer-name)))
-         (not (equal current-buffer (buffer-name))))
+        (not (or
+              (buffer-file-name)
+              (string-match-p "\*dashboard\*" (buffer-name))
+              (string-match-p "\*scratch\*" (buffer-name))
+              (and allow-dired (bound-and-true-p dired-filter-mode))))
       (previous-buffer))))
+
+(defun next-real-buffer ()
+  (interactive)
+  (let ((dired-p (bound-and-true-p dired-filter-mode)))
+    (next-buffer)
+    (this-or-next-real-buffer dired-p)))
+
+(defun previous-real-buffer ()
+  (interactive)
+  (let ((dired-p (bound-and-true-p dired-filter-mode)))
+    (previous-buffer)
+    (this-or-previous-real-buffer dired-p)))
 
 (defun close-window-or-eyebrowse ()
   (interactive)
