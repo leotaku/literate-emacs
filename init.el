@@ -239,6 +239,17 @@ Inserted by installing org-mode or when a release is made."
 (use-config eyebrowse
   (setq eyebrowse-wrap-around t))
 
+;;;;;; ace-window
+;;;;;;; use-package
+
+(use-package ace-window
+  :straight t
+  :defer t)
+
+;;;;;;; customize
+
+(setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+
 ;;;;;; commands
 
 (defun next-code-buffer ()
@@ -292,6 +303,8 @@ Inserted by installing org-mode or when a release is made."
  :keymaps 'override
  :states '(normal insert visual motion emacs)
  :prefix "C-a"
+ "s" 'ace-window
+ "j" 'ace-window
  "d" 'switch-to-dashboard
  "c" 'eyebrowse-dashboard
  "n" 'eyebrowse-next-window-config
