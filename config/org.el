@@ -10,8 +10,11 @@
 ;;; packages
 
 (use-package org
-  :straight t
-  :after flyspell)
+  :straight org-plus-contrib
+  :demand t
+  :after flyspell
+  :config
+  (require 'org-capture))
 
 ;; (use-package worf
 ;;   :straight t

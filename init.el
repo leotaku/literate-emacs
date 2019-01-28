@@ -27,27 +27,10 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;;;; use-package
-
-(straight-use-package 'use-package)
-(setq use-package-inject-hooks t)
-
-(defmacro use-config (name &rest body)
-  "use-package like wrapper for configurations"
-  `(with-eval-after-load ',name
-     ,@body))
-
-(put 'use-config 'lisp-indent-function 'defun)
-
-;;;; recipes
-;;;;; requires for recipes
+;;;;; org-mode hack
 
 (require 'subr-x)
-(use-package git
-  :straight t
-  :defer t)
-
-;;;;; org-mode
+(straight-use-package 'git)
 
 (defun org-git-version ()
   "The Git version of org-mode.
@@ -75,7 +58,19 @@ Inserted by installing org-mode or when a release is made."
                "--abbrev=0"
                "HEAD")))))
 
-(provide 'org-version)
+(straight-use-package 'org-plus-contrib)
+
+;;;; use-package
+
+(straight-use-package 'use-package)
+(setq use-package-inject-hooks t)
+
+(defmacro use-config (name &rest body)
+  "use-package like wrapper for configurations"
+  `(with-eval-after-load ',name
+     ,@body))
+
+(put 'use-config 'lisp-indent-function 'defun)
 
 ;;; configurations
 ;;;; early-load
