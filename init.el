@@ -8,9 +8,10 @@
 
 ;;;; straight.el
 
-(setq straight-check-for-modifications nil)
+(setq straight-check-for-modifications
+      '(find-when-checking check-on-save))
 (setq straight-recipe-repositories
-      '(org-elpa melpa emacsmirror))
+      '(org-elpa melpa emacsmirror gnu-elpa))
 
 ;;;;; bootstrap
 
