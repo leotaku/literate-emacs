@@ -634,7 +634,7 @@ Inserted by installing org-mode or when a release is made."
 (setq evil-visual-state-cursor 'box)  ; █
 (setq evil-normal-state-cursor 'box)  ; █
 (setq evil-insert-state-cursor 'bar)  ; ⎸
-(setq evil-emacs-state-cursor  'box)  ; █
+(setq evil-emacs-state-cursor  'hbar) ; _
 
 
 ;;;;;; commands
