@@ -301,8 +301,8 @@ Inserted by installing org-mode or when a release is made."
 
 (general-define-key
  :keymaps 'override
- "<XF86Back>" 'previous-code-buffer
- "<XF86Forward>" 'next-code-buffer
+ "<XF86Back>" 'previous-real-buffer
+ "<XF86Forward>" 'next-real-buffer
  "C-q" 'kill-this-buffer)
 
 ;;;;;;; C-a
