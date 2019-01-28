@@ -693,6 +693,13 @@ Inserted by installing org-mode or when a release is made."
            (lambda (f1 f2)
              (< (length f1) (length f2)))))
 
+(defun ivy--matcher-desc ()
+  "Return description of `ivy--regex-function'."
+  (let ((cell (assq ivy--regex-function ivy-preferred-re-builders)))
+    (if cell
+        (cdr cell)
+      "other")))
+
 ;;;;;; configure
 
 (use-config ivy
@@ -704,19 +711,70 @@ Inserted by installing org-mode or when a release is made."
           (counsel-find-file . ivy--sort-by-length)
           (counsel-projectile-find-file . ivy--sort-by-length))))
 
-;;;;;; keys
-;;;;;;; swiper
+;;;;;; hydras
 
+;; TODO demand
+(with-eval-after-load 'hydra
+  (defhydra better-ivy (:hint nil :color pink)
+    "
+ Move     ^^^^^^^^^^ | Call         ^^^^ | Cancel^^ | Options^^ | Action _w_/_s_/_a_: %s(ivy-action-name)
+----------^^^^^^^^^^-+--------------^^^^-+-------^^-+--------^^-+---------------------------------
+ _g_ ^ ^ _k_ ^ ^ _u_ | _f_orward _o_ccur | _i_nsert | _c_alling: %-7s(if ivy-calling \"on\" \"off\") _C_ase-fold: %-10`ivy-case-fold-search
+ ^↨^ _h_ ^+^ _l_ ^↕^ | _RET_ done     ^^ | _q_uit   | _m_atcher: %-7s(ivy--matcher-desc) _t_runcate: %-11`truncate-lines
+ _G_ ^ ^ _j_ ^ ^ _d_ | _TAB_ alt-done ^^ | ^ ^      | _<_/_>_: shrink/grow
+"
+    ;; arrows
+    ("j" ivy-next-line)
+    ("k" ivy-previous-line)
+    ("l" ivy-alt-done)
+    ("h" ivy-backward-delete-char)
+    ("g" ivy-beginning-of-buffer)
+    ("G" ivy-end-of-buffer)
+    ("d" ivy-scroll-up-command)
+    ("u" ivy-scroll-down-command)
+    ("e" ivy-scroll-down-command)
+    ;; actions
+    ("q" keyboard-escape-quit :exit t)
+    ("C-g" keyboard-escape-quit :exit t)
+    ("<escape>" keyboard-escape-quit :exit t)
+    ("C-o" nil)
+    ("i" nil)
+    ("TAB" ivy-alt-done :exit nil)
+    ("C-j" ivy-alt-done :exit nil)
+    ;; ("d" ivy-done :exit t)
+    ("RET" ivy-done :exit t)
+    ("C-m" ivy-done :exit t)
+    ("f" ivy-call)
+    ("c" ivy-toggle-calling)
+    ("m" ivy-toggle-fuzzy)
+    (">" ivy-minibuffer-grow)
+    ("<" ivy-minibuffer-shrink)
+    ("w" ivy-prev-action)
+    ("s" ivy-next-action)
+    ("a" ivy-read-action)
+    ("t" (setq truncate-lines (not truncate-lines)))
+    ("C" ivy-toggle-case-fold)
+    ("o" ivy-occur :exit t)))
+
+(general-define-key
+ :keymaps 'ivy-minibuffer-map
+ :states '(insert normal)
+ "C-o" 'better-ivy/body
+ "<escape>" 'better-ivy/keyboard-escape-quit-and-exit)
+
+;;;;;; keys
+
+(general-define-key
+ :keymaps 'ivy-minibuffer-map
+ :states 'insert
+ "<RET>" 'ivy-done
+ "<tab>" 'ivy-partial-or-done)
+
+;; swiper
 (general-define-key
  :keymaps 'override
  :states '(normal visual)
  "/" 'swiper)
-
-(general-define-key
- :keymaps 'swiper-map
- :states 'insert
- "<RET>" (lambda () (interactive) (ivy-exit-with-action 'swiper--action))
- "<tab>" (lambda () (interactive) (ivy-exit-with-action 'swiper--action)))
 
 ;;;;; helm
 ;;;;;; use-package
@@ -731,18 +789,6 @@ Inserted by installing org-mode or when a release is made."
 (use-package hydra
   :straight t
   :defer t)
-
-(use-package ivy-hydra
-  :straight t
-  :after (hydra ivy))
-
-;;;;;; keys
-
-(general-define-key
- :keymaps 'ivy-minibuffer-map
- :states '(insert normal)
- "C-o" 'hydra-ivy/body
- "<escape>" (lambda () (interactive) (hydra-ivy/keyboard-escape-quit-and-exit)))
 
 ;;;;; projectile
 ;;;;;; use-package
