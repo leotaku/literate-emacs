@@ -1,5 +1,14 @@
 ;; my emacs configuration
 
+(advice-add 'evil-write :before-while 'advice-evil-write)
+
+(defun advice-evil-write (&rest ignore)
+  (if (org-src-edit-buffer-p)
+      (progn 
+        (org-edit-src-save)
+        nil)
+    t))
+
 ;;; package management
 ;;;; load-path
 
@@ -64,25 +73,61 @@ Inserted by installing org-mode or when a release is made."
 ;;;; use-package
 
 (straight-use-package 'use-package)
-(setq use-package-inject-hooks t)
 
-(defmacro use-config (name &rest body)
+;;;;; use-config macro 
+
+(defmacro use-config (after &rest body)
   "use-package like wrapper for configurations"
-  `(with-eval-after-load ',name
-     ,@body))
+  (macroexp-progn
+   (use-package-require-after-load after body)))
+
+;; `(with-eval-after-load ',after ,@body)
 
 (put 'use-config 'lisp-indent-function 'defun)
 
-;;; configurations
-;;;; early-load
-;; packages that need to be loaded early
+;;;; other
 
 (use-package no-littering
-  :straight t
-  :config
-  (require 'recentf)
+  :straight t)
+
+(use-config (no-littering recentf)
   (add-to-list 'recentf-exclude no-littering-var-directory)
   (add-to-list 'recentf-exclude no-littering-etc-directory))
+
+;;; configurations
+;;;; away 
+(use-config (straight hydra)
+  (defhydra hydra-straight-helper (:hint nil)
+    "
+_c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
+_C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
+----------------^^+--------------^^+---------------^^+----------------^^+----_q_uit----|
+_r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
+_R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
+    ("c" straight-check-all)
+    ("C" straight-check-package)
+    ("r" straight-rebuild-all)
+    ("R" straight-rebuild-package)
+    ("f" straight-fetch-all)
+    ("F" straight-fetch-package)
+    ("p" straight-pull-all)
+    ("P" straight-pull-package)
+    ("m" straight-merge-all)
+    ("M" straight-merge-package)
+    ("n" straight-normalize-all)
+    ("N" straight-normalize-package)
+    ("u" straight-push-all)
+    ("U" straight-push-package)
+    ("v" straight-freeze-versions)
+    ("V" straight-thaw-versions)
+    ("w" straight-watcher-start)
+    ("W" straight-watcher-quit)
+    ("g" straight-get-recipe)
+    ("e" straight-prune-build)
+    ("q" nil)))
+
+;;;; early-load
+;; packages that need to be loaded early
 
 (use-package bug-hunter
   :straight t
@@ -132,10 +177,13 @@ Inserted by installing org-mode or when a release is made."
 (setq gc-cons-threshold 50000000)
 
 (setq inhibit-message nil)
-(setq enable-recursive-minibuffers t)
+(setq enable-recursive-minibuffers nil)
 (setq help-window-select t)
 (setq find-file-visit-truename nil)
 (setq custom-safe-themes t)
+
+(setq max-specpdl-size 1200)
+(setq max-lisp-eval-depth 800)
 
 (use-package page-break-lines
   :straight t
@@ -162,10 +210,10 @@ Inserted by installing org-mode or when a release is made."
   :config
   (recentf-mode 1)
 
-  (setq recentf-max-menu-items 10)
-  (setq recentf-max-saved-items 40)
+  (setq recentf-max-menu-items 20)
+  (setq recentf-max-saved-items 50)
   (add-to-list 'recentf-exclude "/\\.emacs\\.d/elpa")
-  (add-to-list 'recentf-exclude "/\\.emacs\\.d/straight")
+  ;; (add-to-list 'recentf-exclude "/\\.emacs\\.d/straight")
   (add-to-list 'recentf-exclude "/nix/store")
   (add-to-list 'recentf-exclude "\\.orhc-bibtex-cache"))
 
@@ -181,7 +229,6 @@ Inserted by installing org-mode or when a release is made."
 
 (setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save/files")
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/var/auto-save/files" t)))
-
 
 ;;;;;; desktop
 
@@ -201,11 +248,13 @@ Inserted by installing org-mode or when a release is made."
 ;; only allow the first server instance
 ;; to enable desktop-mode
 
-(when (not (file-exists-p
-            (concat (file-name-as-directory desktop-dirname)
-                    desktop-base-lock-name)))
-  (desktop-save-mode 1)
-  (message "Desktop save is on!"))
+(if (file-exists-p
+     (concat (file-name-as-directory desktop-dirname)
+             desktop-base-lock-name))
+    nil
+  (progn
+    (desktop-save-mode 1)
+    (message "Desktop save is on!")))
 
 ;;;;;; undo-tree
 
@@ -217,7 +266,35 @@ Inserted by installing org-mode or when a release is made."
   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/var/undo")))
   (global-undo-tree-mode 1))
 
-;;;;; window-management
+;;;;; system
+
+(use-package openwith
+  :straight t
+  :config
+  (openwith-mode t)
+  (setq openwith-associations nil))
+
+(setq browse-url-generic-program "firefox")
+(add-to-list 'openwith-associations '("\\.pdf\\'" "zathura" (file)))
+
+;;;; window-management/navigation
+;;;;;; shackle
+
+(use-package shackle
+  :straight t)
+
+(use-config shackle
+  (setq shackle-default-rule '()
+        shackle-rules '(("\\*helm.*?\\*" :regexp t :align t :size 0.4)
+                        ("\\*Completions\\*" :regexp t :select nil)
+                        (image-mode :select nil :popup t)
+                        (dired-mode :custom (lambda (buf alist plist)
+                                              (if (bound-and-true-p dired-filter-mode)
+                                                  (switch-to-buffer buf)
+                                                (display-buffer-pop-up-window buf nil))))))
+
+  (shackle-mode 1))
+
 ;;;;;; eyebrowse
 ;;;;;;; use-package
 
@@ -303,7 +380,7 @@ Inserted by installing org-mode or when a release is made."
  :keymaps 'override
  "<XF86Back>" 'previous-real-buffer
  "<XF86Forward>" 'next-real-buffer
- "C-q" 'kill-this-buffer)
+ "C-q" (lambda () (interactive) (quit-window t)))
 
 ;;;;;;; C-a
 
@@ -312,6 +389,8 @@ Inserted by installing org-mode or when a release is made."
  :states '(normal insert visual motion emacs)
  :prefix "C-a"
  "s" 'ace-window
+ "o" 'other-window
+ "O" (lambda () (interactive) (other-window -1))
  "j" 'ace-window
  "d" 'switch-to-dashboard
  "c" 'eyebrowse-dashboard
@@ -343,17 +422,6 @@ Inserted by installing org-mode or when a release is made."
  "f" 'counsel-find-file
  "C-f" 'counsel-locate
  "F" 'counsel-fzf)
-
-;;;;; system
-
-(use-package openwith
-  :straight t
-  :config
-  (openwith-mode t)
-  (setq openwith-associations nil))
-
-(setq browse-url-generic-program "firefox")
-(add-to-list 'openwith-associations '("\\.pdf\\'" "zathura" (file)))
 
 ;;;; look
 ;;;;; dashboard
@@ -466,6 +534,14 @@ Inserted by installing org-mode or when a release is made."
   :straight t
   :defer t)
 
+;; (use-package moody
+;;   :straight t
+;;   :config
+;;   (setq x-underline-at-descent-line t)
+;;   (when (not (member '(vc-mode moody-vc-mode) mode-line-format))
+;;     (moody-replace-mode-line-buffer-identification)
+;;     (moody-replace-vc-mode)))
+
 ;;;;;; configure
 
 (use-config doom-modeline
@@ -495,34 +571,6 @@ Inserted by installing org-mode or when a release is made."
 
 (global-yascroll-bar-mode 1)
 
-;;;; MOVE? UI
-;;;;; shell-pop
-;;;;;; use-package
-
-(use-package shell-pop
-  :straight t
-  :defer t)
-
-;;;;;; configure
-
-(use-config shell-pop
-  (setq shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
-  (setq shell-pop-term-shell "zsh")
-  (setq shell-pop-universal-key "C-t")
-  (setq shell-pop-window-size 30)
-  (setq shell-pop-full-span t)
-  (setq shell-pop-window-position "bottom")
-  ;; need to do this manually or not picked up by `shell-pop'
-  (shell-pop--set-shell-type 'shell-pop-shell-type shell-pop-shell-type))
-
-;;;;;; keys
-
-(general-define-key
- :keymaps 'override
- :states '(normal insert visual motion emacs)
- "C-x t" 'shell-pop
- "C-a t" 'shell-pop)
-
 ;;;; integration packages
 ;;;;; evil
 ;;;;;; use-package
@@ -542,15 +590,15 @@ Inserted by installing org-mode or when a release is made."
 (use-package evil-terminal-cursor-changer
   :straight t)
 
-;; TODO
-(use-package evil-snipe
-  :straight t
-  :after evil
-  :config
-  (setq evil-snipe-spillover-scope 'visible)
-  (setq evil-snipe-repeat-scope 'buffer)
-  (evil-snipe-mode +1)
-  (evil-snipe-override-mode +1))
+;; TODO fix with dired
+;; (use-package evil-snipe
+;;   :straight t
+;;   :after evil
+;;   :config
+;;   (setq evil-snipe-spillover-scope 'visible)
+;;   (setq evil-snipe-repeat-scope 'buffer)
+;;   (evil-snipe-mode +1)
+;;   (evil-snipe-override-mode +1))
 
 (use-package evil-surround
   :straight t
@@ -564,14 +612,15 @@ Inserted by installing org-mode or when a release is made."
   :config
   (evil-commentary-mode 1))
 
-(use-package evil-multiedit
-  :straight t
-  :after (evil)
-  :config
-  (evil-multiedit-default-keybinds))
-  (use-package evil-mc
-  :straight t
-  :after evil)
+;; (use-package evil-multiedit
+;;   :straight t
+;;   :after (evil)
+;;   :config
+;;   (evil-multiedit-default-keybinds))
+
+;; (use-package evil-mc
+;;   :straight t
+;;   :after evil)
 
 ;;;;;; lib
 
@@ -608,25 +657,28 @@ Inserted by installing org-mode or when a release is made."
           term
           dired
           image
-          ediff))
+          ediff
+          notmuch
+          mu4e))
   
   ;; TODO Update to general
-  (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "C-o") 'evil-ex-normal)
-  (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "<escape>") (lambda () (interactive) (top-level)))
-  (evil-collection-define-key 'normal
-    'evil-ex-completion-map (kbd "<escape>") 'abort-recursive-edit)
+  ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "C-o") 'evil-ex-normal)
+  ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "<escape>") (lambda () (interactive) (top-level)))
+  ;; (evil-collection-define-key 'normal
+  ;;   'evil-ex-completion-map (kbd "<escape>") 'abort-recursive-edit)
 
-  (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "C-o") 'evil-ex-normal)
-  (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
-  (evil-collection-define-key 'normal 'evil-ex-search-keymap (kbd "<escape>") 'abort-recursive-edit)
+  ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "C-o") 'evil-ex-normal)
+  ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
+  ;; (evil-collection-define-key 'normal 'evil-ex-search-keymap (kbd "<escape>") 'abort-recursive-edit)
 
-  (evil-collection-define-key 'normal 'evil-ex-completion-map
-    (kbd ":") 'evil-delete-whole-line
-    (kbd "k") 'previous-history-element
-    (kbd "j") 'next-history-element)
+  ;; (evil-collection-define-key 'normal 'evil-ex-completion-map
+  ;;   (kbd ":") 'evil-delete-whole-line
+  ;;   (kbd "k") 'previous-history-element
+  ;;   (kbd "j") 'next-history-element)
 
-  (evil-collection-define-key 'insert 'helm-map
-    (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit))))
+  ;; (evil-collection-define-key 'insert 'helm-map
+  ;;   (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
+  )
 
 ;;;;;;; terminal-cursor
 
@@ -644,6 +696,12 @@ Inserted by installing org-mode or when a release is made."
   (evil-ex-define-cmd "ll" 'helm-mini))
 
 ;;;;;; keys
+;;;;;;; mouse fix
+
+(general-define-key
+ :keymaps 'evil-motion-state-map
+ [down-mouse-1] 'mouse-set-point)
+
 ;;;;;;; visual-line
 
 (general-define-key
@@ -668,9 +726,23 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;;; C-x
 
+general-unbind
+"C-x ESC"
+
 (general-define-key
  :keymaps 'override
- "C-x l" 'counsel-ibuffer)
+ "C-x l" 'counsel-recentf)
+
+;;;;;;; misc
+
+(general-define-key
+ :states '(normal insert)
+ "C-y" 'hippie-expand)
+
+;; (general-define-key
+;;  :states '(normal visual)
+;;  "]" 'evil-forward-paragraph
+;;  "[" 'evil-backward-paragraph)
 
 ;;;;; ivy
 ;;;;;; use-package
@@ -704,12 +776,13 @@ Inserted by installing org-mode or when a release is made."
 
 (use-config ivy
   (setq ivy-use-selectable-prompt t)
-  (setq ivy-sort-matches-functions-alist
-        '((t)
-          (ivy-switch-buffer . ivy-sort-function-buffer)
-          (org-insert-link . ivy--sort-by-length)
-          (counsel-find-file . ivy--sort-by-length)
-          (counsel-projectile-find-file . ivy--sort-by-length))))
+  ;; (setq ivy-sort-matches-functions-alist
+  ;;       '((t)
+  ;;         (ivy-switch-buffer . ivy-sort-function-buffer)
+  ;;         (org-insert-link . ivy--sort-by-length)
+  ;;         (counsel-find-file . ivy--sort-by-length)
+  ;;         (counsel-projectile-find-file . ivy--sort-by-length)))
+  )
 
 ;;;;;; hydras
 
@@ -765,6 +838,20 @@ Inserted by installing org-mode or when a release is made."
 ;;;;;; keys
 
 (general-define-key
+ :keymaps '(minibuffer-local-map ivy-minibuffer-map evil-ex-completion-map)
+ :states 'insert
+ "[" 'lispy-brackets
+ "]" 'self-insert-command
+ ";" 'self-insert-command
+ ":" 'self-insert-command)
+
+(general-define-key
+ :keymaps '(minibuffer-local-map ivy-minibuffer-map evil-ex-completion-map)
+ :states 'insert
+ "<RET>" 'exit-minibuffer)
+
+
+(general-define-key
  :keymaps 'ivy-minibuffer-map
  :states 'insert
  "<RET>" 'ivy-done
@@ -782,6 +869,56 @@ Inserted by installing org-mode or when a release is made."
 (use-package helm
   :straight t
   :defer t)
+
+;; configure
+
+(use-config helm
+  (setq helm-display-function 'pop-to-buffer)) ; make helm play nice
+
+;;;;;; hydras
+
+(general-define-key
+ :keymaps 'helm-map
+ :states '(insert normal emacs visual)
+ "C-o" 'hydra-helm/body)
+
+(use-config (hydra helm)
+  (defhydra hydra-helm (:hint nil :color pink)
+    "
+                                                                          ╭──────┐
+   Navigation   Other  Sources     Mark             Do             Help   │ Helm │
+  ╭───────────────────────────────────────────────────────────────────────┴──────╯
+        ^_k_^         _K_       _p_   [_m_] mark         [_v_] view         [_H_] helm help
+        ^^↑^^         ^↑^       ^↑^   [_t_] toggle all   [_d_] delete       [_s_] source help
+    _h_ ←   → _l_     _c_       ^ ^   [_u_] unmark all   [_f_] follow: %(helm-attr 'follow)
+        ^^↓^^         ^↓^       ^↓^    ^ ^               [_y_] yank selection
+        ^_j_^         _J_       _n_    ^ ^               [_w_] toggle windows
+  --------------------------------------------------------------------------------
+        "
+    ("<tab>" helm-keyboard-quit "back" :exit t)
+    ("<escape>" nil "quit")
+    ("\\" (insert "\\") "\\" :color blue)
+    ("h" helm-beginning-of-buffer)
+    ("j" helm-next-line)
+    ("k" helm-previous-line)
+    ("l" helm-end-of-buffer)
+    ("g" helm-beginning-of-buffer)
+    ("G" helm-end-of-buffer)
+    ("n" helm-next-source)
+    ("p" helm-previous-source)
+    ("K" helm-scroll-other-window-down)
+    ("J" helm-scroll-other-window)
+    ("c" helm-recenter-top-bottom-other-window)
+    ("m" helm-toggle-visible-mark)
+    ("t" helm-toggle-all-marks)
+    ("u" helm-unmark-all)
+    ("H" helm-help)
+    ("s" helm-buffer-help)
+    ("v" helm-execute-persistent-action)
+    ("d" helm-persistent-delete-marked)
+    ("y" helm-yank-selection)
+    ("w" helm-toggle-resplit-and-swap-windows)
+    ("f" helm-follow-mode)))
 
 ;;;;; hydra
 ;;;;;; use-package
@@ -827,6 +964,8 @@ Inserted by installing org-mode or when a release is made."
 
 (use-package which-key
   :straight t
+  :init
+  (setq which-key-allow-evil-operators t)
   :config
   (which-key-mode 1))
 
@@ -1006,6 +1145,16 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;; configure
 
+;; terrible hack
+(use-config outshine
+  (ignore-errors
+    (mapc (lambda (buffer)
+            (with-current-buffer buffer
+              (if (bound-and-true-p outshine-mode)
+                  (font-lock-add-keywords nil (outshine-fontify-headlines (outshine-calc-outline-regexp)))
+                (outshine-font-lock-flush))))
+          (buffer-list))))
+
 (use-config outshine
   (set-face-attribute 'outshine-level-1 nil :inherit 'org-level-1 :height 100)
   (set-face-attribute 'outshine-level-2 nil :inherit 'org-level-2 :height 100)
@@ -1018,10 +1167,16 @@ Inserted by installing org-mode or when a release is made."
 
 ;;;;;; keys
 
+(general-unbind
+  :keymaps 'lispy-mode-map
+  "<backtab>")
+
+;; TODO fix this to be less intrusive
 (general-define-key
  :keymaps 'outline-minor-mode-map
+ :states 'normal
  "<tab>" 'outshine-smart-tab
- "<backtab>" 'outshine-cycle-buffer)
+ "<S-iso-lefttab>" 'outshine-cycle-buffer)
 
 ;;;;; smartparens
 ;;;;;; use-package
@@ -1042,6 +1197,14 @@ Inserted by installing org-mode or when a release is made."
   (indent-according-to-mode)
   (forward-line -1)
   (indent-according-to-mode))
+
+;;;;;; keys
+
+(general-define-key
+ :keymaps 'org-mode-map
+ :states 'normal
+ ">" 'sp-slurp-hybrid-sexp
+ "<" 'sp-forward-barf-sexp)
 
 ;;;; languages
 ;;;;; nix
@@ -1118,23 +1281,36 @@ Inserted by installing org-mode or when a release is made."
   :straight t
   :defer t
   :hook ((emacs-lisp-mode . lispy-mode)
-         (minibuffer-setup . lispy-mode)))
+         ;;  (minibuffer-setup . lispy-mode)
+         ))
 
 (use-package lispyville
   :straight t
-  :defer t
-  :hook (lispy-mode . lispyville-mode))
+  :hook (lispy-mode . lispyville-mode)
+  :config
+  (general-define-key
+   :keymaps 'lispyville-mode-map
+   :states 'normal
+   "M-O" nil
+   "M-[" nil)
+  :init
+  (setq lispyville-key-theme
+        '(additional-movement
+          wrap
+          additional
+          additional-insert
+          slurp/barf-cp
+          operators)))
 
 ;;;;;; configure
 
-(use-config lispyville
-  (lispyville-set-key-theme
-   '(additional-movement
-     wrap
-     additional
-     additional-insert
-     slurp/barf-cp
-     operators)))
+;;;;;; keys
+
+(general-define-key
+ :keymaps 'lispy-mode-map
+ :states '(normal visual)
+ "[" 'lispy-backward
+ "]" 'lispy-forward)
 
 ;;;;; TeX
 ;;;;;; use-package
@@ -1185,7 +1361,7 @@ Inserted by installing org-mode or when a release is made."
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "markdown"))
 
-;;;;; org
+;;;; org
 ;;;; misc
 ;;;;; MOVE? magit
 ;;;;;; use-package
@@ -1197,8 +1373,9 @@ Inserted by installing org-mode or when a release is made."
 
 (use-package evil-magit
   :straight t
-  :defer t
-  :after (magit))
+  :after (magit)
+  :config
+  (evil-magit-init))
 
 ;;;;;; keys
 
@@ -1206,7 +1383,7 @@ Inserted by installing org-mode or when a release is made."
  :prefix "C-x"
  "g" 'magit-status)
 
-;;;;; TODO dired
+;;;;; dired
 ;;;;;; use-package
 
 (use-package dired)
@@ -1231,63 +1408,83 @@ Inserted by installing org-mode or when a release is made."
              :type git :host github
              :repo "emacsmirror/emacswiki.org"
              :files ("dired+.el"))
+  :init
   :after (dired))
+
+(use-package dired-quick-sort
+  :straight t)
 
 (use-package peep-dired
   :straight t
-  :after (dired evil-collection))
+  :after (dired))
+
+(use-package org-download
+  :straight t
+  :after (dired org)
+  :hook (dired-mode . org-download-enable))
 
 ;;;;;; configure
 
 (use-config dired
   (setq dired-listing-switches "-alhv")
-  (setq dired-recursive-copies 'always))
+  (setq dired-recursive-copies 'always)
+  (setq dired-dwim-target t))
 
 (use-config peep-dired
   (setq peep-dired-cleanup-eagerly t)
   (setq peep-dired-cleanup-on-disable t)
   (setq peep-dired-enable-on-directories nil))
 
-(use-config dired-filter
-  (setq dired-filter-group
-        '(("default" (dot-files))
-          ("dotfiles"
-           (not (dot-files))))))
+;; (use-config dired-filter
+;;   (setq dired-filter-group
+;;         '(("default" (dot-files))
+;;           ("dotfiles"
+;;            (not (dot-files))))))
 
 ;;;;;; keys
 
 (general-define-key
  :keymaps 'dired-mode-map
  :states '(normal visual)
- "<C-tab>" 'dired-filter-group-toggle-header
- "H" 'dired-hide-details-mode
- "U" (lambda ()
-       (interactive)
-       (dired-unmark-all-marks)
-       (ring-remove dired-ranger-copy-ring 0))
- "v" 'evil-visual-line
- "y" 'dired-ranger-copy
- "p" 'dired-ranger-paste
- "P" 'dired-ranger-move
- "h" 'dired-up-directory
- "l" 'dired-find-file
- "k" 'dired-previous-line
- "j" 'dired-next-line
+ "h" 'backward-char
+ "j" 'next-line
+ "k" 'previous-line
+ "l" 'forward-char
+
+ "<backspace>" 'dired-up-directory
+ "<RET>" 'dired-find-file
+
  "q" (lambda ()
        (interactive)
        (if (bound-and-true-p peep-dired)
            (peep-dired-disable))
-       (kill-this-buffer)
+       (quit-window)
        (peep-dired-kill-buffers-without-window)))
 
-(evil-collection-define-key '(normal visual) 'dired-mode-map
-  "k" 'evil-previous-line
-  "j" 'evil-next-line
-  "S" 'peep-dired
-  "s" (lambda () (interactive)
-        (if (bound-and-true-p peep-dired)
-            (peep-dired-display-file-other-window)
-          (peep-dired))))
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "f" dired-filter-map
+ "M" dired-filter-mark-map
+ "o" 'hydra-dired-quick-sort/body
+ "H" 'dired-hide-details-mode
+ "W" (lambda ()
+       (interactive)
+       (wdired-change-to-wdired-mode)
+       (evil-normal-state) (forward-char))
+ "U" (lambda ()
+       (interactive)
+       (dired-unmark-all-marks)
+       (ring-remove dired-ranger-copy-ring 0)))
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "v" 'evil-visual-line
+ "y" 'dired-ranger-copy
+ "a" (lambda () (interactive) (dired-ranger-copy 1))
+ "p" 'dired-ranger-paste
+ "P" 'dired-ranger-move)
 
 (general-define-key
  :keymaps 'dired-mode-map
@@ -1296,72 +1493,365 @@ Inserted by installing org-mode or when a release is made."
  "y" (lambda ()
        (interactive)
        (call-interactively 'dired-mark)
-       (call-interactively 'dired-ranger-copy)))
+       (dired-ranger-copy nil))
+ "a" (lambda ()
+       (interactive)
+       (call-interactively 'dired-mark)
+       (dired-ranger-copy t)))
 
-(general-unbind
-  :keymaps 'dired-mode-map
-  :states 'normal
-  "F")
+(evil-collection-define-key '(normal visual) 'dired-mode-map
+  "S" 'peep-dired
+  "s" (lambda () (interactive)
+        (if (bound-and-true-p peep-dired)
+            (peep-dired-display-file-other-window)
+          (peep-dired))))
+
 
 (general-define-key
  :keymaps 'dired-mode-map
- :states 'normal
- "F" dired-filter-map
- "M" dired-filter-mark-map
- "G" 'dired-filter-group-mode)
+ :states 'insert
+ "<backspace>" 'backward-delete-char)
 
 (use-config dired-filter)
 
 ;;;;; nov.el
-
 ;;;;;; use-package
 
 (use-package nov
   :straight t
-  :defer t
   :mode ("\\.epub\\'" . nov-mode))
 
 ;;;;;; configure 
 
-(add-hook 'nov-mode-hook
-          (lambda ()
-            (face-remap-add-relative 'variable-pitch
-                                     :family "Liberation Serif"
-                                     :height 1.5)))
+;; (add-hook 'nov-mode-hook
+;;           (lambda ()
+;;             (face-remap-add-relative 'variable-pitch
+;;                                      :family "Liberation Serif"
+;;                                      :height 1.5)))
 
+;;;;; mail 
 ;;;;; erc
 ;;;;; rss
 ;;;;; mpdel
-;;; imports
-;;;; functions
+;;;;; shell-pop
+;;;;;; use-package
 
-(defun load-config-file (file)
-  (interactive "f")
-  "Load a file in current user's configuration directory"
-  (mapc
-   (lambda (path)
-     (let ((full (expand-file-name file path)))
-       (if (file-exists-p full)
-           (load-file (expand-file-name full)))))
-   '("~/.emacs.d/config"
-     "~/.emacs.d")))
+(use-package shell-pop
+  :straight t
+  :defer t)
 
-(defun load-configuration (list)
-  (mapcar 'load-config-file list))
+;;;;;; configure
 
-;;;; load-configuration
+(use-config shell-pop
+  (setq shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+  (setq shell-pop-term-shell "zsh")
+  (setq shell-pop-universal-key "C-t")
+  (setq shell-pop-window-size 30)
+  (setq shell-pop-full-span t)
+  (setq shell-pop-window-position "bottom")
+  ;; need to do this manually or not picked up by `shell-pop'
+  (shell-pop--set-shell-type 'shell-pop-shell-type shell-pop-shell-type))
 
-(load-configuration
- '("org.el"))
+;;;;;; keys
+
+(general-define-key
+ :keymaps 'override
+ :states '(normal insert visual motion emacs)
+ "C-x t" 'shell-pop
+ "C-a t" 'shell-pop)
+
+;;; configurations2
+;;;; emacs
+;;;;; prelude
+;;;;; look
+;;;;; integration
+;;;;; navigation
+;;;; editing
+;;;;; expand-region
+
+(use-package expand-region
+  :straight t)
+
+(general-define-key
+ :keymaps 'override
+ "C-0" 'er/expand-region)
+
+;;;; programming
+;;;; languages
+;;;; misc
+;;;;; mail
+
+(setq mail-host-address "brg-feldkirchen.at")
+(setq user-full-name "Leo Gaskin")
+(setq user-mail-address "leo.gaskin@brg-feldkirchen.at")
+
+;;;;;; smtp/sendmail
+
+;; (setq smtpmail-queue-mail nil
+;;       smtpmail-queue-dir "~/.maildir/queue/cur")
+
+;; substitute sendmail with msmtp
+(setq sendmail-program "sendmail")
+
+(setq message-send-mail-function 'message-send-mail-with-sendmail
+      send-mail-function 'sendmail-send-it)
+
+;; allow setting account through email header
+;; (setq message-sendmail-extra-arguments '("--read-envelope-from"))
+(setq message-sendmail-f-is-evil 't)
+
+(add-hook 'message-send-hook
+          (lambda ()
+            (unless (yes-or-no-p "Sure you want to send this?")
+              (signal 'quit nil))))
+
+;; (use-package NetworkManager
+;;   :straight (NetworkManager
+;;              :type git :host github
+;;              :repo "tromey/emacs-network-manager")
+;;   :config
+;;   (NetworkManager-add-listener
+;;    (lambda (state)
+;;      (mu4e~main-toggle-mail-sending-mode)
+;;      (when (eq major-mode 'mu4e-main-mode)
+;;        (let ((pos (point)))
+;;          (mu4e~main-view-real nil nil)
+;;          (goto-char pos))))))
+
+;;;;;; mu4e
+
+;; (add-to-list 'load-path "~/result/share/emacs/site-lisp/mu4e")
+
+(use-package mu4e)
+
+(when (fboundp 'imagemagick-register-types)
+  (imagemagick-register-types))
+
+(require 'mu4e)
+(add-hook 'mu4e-view-mode-hook 'visual-line-mode)
+(add-hook 'mu4e-compose-mode-hook 'visual-line-mode)
+(add-hook 'mu4e-compose-mode-hook (lambda () (auto-save-mode -1)))
+
+(use-package org-mu4e)
+
+(general-define-key
+ :keymaps 'mu4e-compose-mode-map
+ "C-c C-x C-o" 'org-mu4e-compose-org-mode)
+
+(setq mail-user-agent 'mu4e-user-agent)
+
+(use-config mu4e
+  (setq mu4e-compose-signature "Leo Gaskin\nleo.gaskin@brg-feldkirchen.at"
+        mu4e-compose-signature-auto-include nil)
+  
+  (setq mu4e-maildir (format "%s/.maildir"
+                             (getenv "HOME"))
+        mu4e-sent-folder "/outlook/Sent Items"
+        mu4e-drafts-folder "/outlook/Drafts"
+        mu4e-trash-folder "/outlook/Trash")
+
+  (setq mu4e-attachment-dir "~/Downloads/Mail")
+  (setq mu4e-get-mail-command "systemctl --user start mbsync.service"))
+
+(use-config mu4e
+  (setq mu4e-completing-read-function 'completing-read)
+  (setq mu4e-html2text-command "elinks -dump")
+  (setq mu4e-use-fancy-chars nil)
+  (setq mu4e-view-show-images t)
+
+  (setq mu4e-headers-show-threads t)
+  (setq mu4e-headers-include-related nil)
+  (setq mu4e-headers-results-limit 400)
+
+  (setq mu4e-confirm-quit nil))
+
+(use-config (mu4e dired)
+  (require 'gnus-dired)
+  
+  ;; make the `gnus-dired-mail-buffers' function also work on
+  ;; message-mode derived modes, such as mu4e-compose-mode
+  (defun gnus-dired-mail-buffers ()
+    "Return a list of active message buffers."
+    (let (buffers)
+      (save-current-buffer
+        (dolist (buffer (buffer-list t))
+     	  (set-buffer buffer)
+     	  (when (and (derived-mode-p 'message-mode)
+     		         (null message-sent-message-via))
+     	    (push (buffer-name buffer) buffers))))
+      (nreverse buffers))))
+
+(setq gnus-dired-mail-mode 'mu4e-user-agent)
+(add-hook 'dired-mode-hook 'turn-on-gnus-dired-mode)
+
+(general-define-key
+ :keymaps 'override
+ "C-x m" 'hydra-mu4e-entry/body)
+
+;;;;;;; hydra
+
+(defvar my/mu4e-persist-searches nil)
+
+(advice-add 'mu4e~headers-search-execute :around 'my/mu4e-persist-searches-advice)
+
+(defun my/mu4e-persist-searches-advice (fun expr ignore-history)
+  (when (not ignore-history)
+    (setq my/mu4e-persist-searches (delete expr my/mu4e-persist-searches))
+    (add-to-list 'my/mu4e-persist-searches expr))
+  (apply fun expr ignore-history nil))
+
+(add-to-list 'desktop-globals-to-save 'my/mu4e-persist-searches)
+
+(defhydra hydra-mu4e-entry (:color amaranth :hint nil :foreign-keys run)
+  "
+ ^Actions^        ^^|                 %-s(org-add-props \"mu4e - mu for emacs v1.0 C\" nil 'face 'hydra-face-blue)   
+-^^---------------^^+-----------------------------------------------------------------
+_c_/_C_: compose    |  ^ ^                                           
+_s_: search       ^^| [_1_] %-30s(nth 0 my/mu4e-persist-searches) [_5_] %-20s(nth 4 my/mu4e-persist-searches)
+_S_: edit search  ^^| [_2_] %-30s(nth 1 my/mu4e-persist-searches) [_6_] %-20s(nth 5 my/mu4e-persist-searches)                                       
+_b_: search bkmk  ^^| [_3_] %-30s(nth 2 my/mu4e-persist-searches) [_7_] %-20s(nth 6 my/mu4e-persist-searches)                              
+_B_: edit bkmk    ^^| [_4_] %-30s(nth 3 my/mu4e-persist-searches) [_8_] %-20s(nth 7 my/mu4e-persist-searches)
+                ^^^^|
+                ^^^^+----------------------------------------------------------------- 
+_h_/_H_: help       | _u_: reindex          _;_: context: %s(or (mu4e-context-current) \"None\")
+_q_/_e_: quit/enter | _U_: fetch + reindex  _,_: switch to maildir "
+  ;;_*_: queue: %s(if smtpmail-queue-mail \"queued\" \"direct\")
+
+  ;; actions
+  ("R" mu4e-compose-reply)
+  ("c" mu4e-compose-new :exit t)
+  ("C" mu4e-compose-new :exit t)
+  ("s" mu4e-headers-search)
+  ("S" mu4e-headers-search-edit)
+  ("b" mu4e-headers-search-bookmark)
+  ("B" mu4e-headers-search-bookmark-edit)
+  ;; ("RET" nil :color blue)
+  ("q" mu4e-quit :exit t)
+  ("e" nil :exit t)
+  ;; ("x" mu4e-quit)
+  ("h" mu4e-display-manual :exit t)
+  ("H" mu4e-display-manual :exit t)
+  
+  ;; miscellany
+  ("u" mu4e-update-index :color amaranth)
+  ("U" mu4e-update-mail-and-index :color amaranth)
+  (";" mu4e-context-switch :color amaranth)
+  ("," mu4e~headers-jump-to-maildir :color amaranth)
+  ("*" mu4e~main-toggle-mail-sending-mode)
+  ;; searches
+  ("1" (lambda () (interactive) (mu4e~headers-search-execute (nth 0 my/mu4e-persist-searches) t)))
+  ("2" (lambda () (interactive) (mu4e~headers-search-execute (nth 1 my/mu4e-persist-searches) t)))
+  ("3" (lambda () (interactive) (mu4e~headers-search-execute (nth 2 my/mu4e-persist-searches) t)))
+  ("4" (lambda () (interactive) (mu4e~headers-search-execute (nth 3 my/mu4e-persist-searches) t)))
+  ("5" (lambda () (interactive) (mu4e~headers-search-execute (nth 4 my/mu4e-persist-searches) t)))
+  ("6" (lambda () (interactive) (mu4e~headers-search-execute (nth 5 my/mu4e-persist-searches) t)))
+  ("7" (lambda () (interactive) (mu4e~headers-search-execute (nth 6 my/mu4e-persist-searches) t)))
+  ("8" (lambda () (interactive) (mu4e~headers-search-execute (nth 7 my/mu4e-persist-searches) t)))
+
+  ("." nil))
+
+(defhydra hydra-mu4e-headers (:color blue :hint nil)
+  "
+ ^General^   | ^Search^           | _!_: read    | _#_: deferred  | ^Switches^
+-^^----------+-^^-----------------| _?_: unread  | _%_: pattern   |-^^------------------
+_n_: next    | _s_: search        | _r_: refile  | _&_: custom    | _O_: sorting
+_p_: prev    | _S_: edit prev qry | _u_: unmk    | _+_: flag      | _P_: threading
+_]_: n unred | _/_: narrow search | _U_: unmk *  | _-_: unflag    | _Q_: full-search
+_[_: p unred | _b_: search bkmk   | _d_: trash   | _T_: thr       | _V_: skip dups 
+_y_: sw view | _B_: edit bkmk     | _D_: delete  | _t_: subthr    | _W_: include-related
+_R_: reply   | _{_: previous qry  | _m_: move    |-^^-------------+-^^------------------ 
+_C_: compose | _}_: next query    | _a_: action  | _|_: thru shl  | _`_: update, reindex
+_F_: forward | _C-+_: show more   | _A_: mk4actn | _H_: help      | _;_: context-switch
+_o_: org-cap | _C--_: show less   | _*_: *thing  | _q_: quit hdrs | _j_: jump2maildir "
+
+  ;; general
+  ("n" mu4e-headers-next)
+  ("p" mu4e-headers-previous)
+  ("[" mu4e-select-next-unread)
+  ("]" mu4e-select-previous-unread)
+  ("y" mu4e-select-other-view)
+  ("R" mu4e-compose-reply)
+  ("C" mu4e-compose-new)
+  ("F" mu4e-compose-forward)
+  ("o" my/org-capture-mu4e)             ; differs from built-in
+
+  ;; search
+  ("s" mu4e-headers-search)
+  ("S" mu4e-headers-search-edit)
+  ("/" mu4e-headers-search-narrow)
+  ("b" mu4e-headers-search-bookmark)
+  ("B" mu4e-headers-search-bookmark-edit)
+  ("{" mu4e-headers-query-prev)         ; differs from built-in
+  ("}" mu4e-headers-query-next)         ; differs from built-in
+  ("C-+" mu4e-headers-split-view-grow)
+  ("C--" mu4e-headers-split-view-shrink)
+
+  ;; mark stuff 
+  ("!" mu4e-headers-mark-for-read)
+  ("?" mu4e-headers-mark-for-unread)
+  ("r" mu4e-headers-mark-for-refile)
+  ("u" mu4e-headers-mark-for-unmark)
+  ("U" mu4e-mark-unmark-all)
+  ("d" mu4e-headers-mark-for-trash)
+  ("D" mu4e-headers-mark-for-delete)
+  ("m" mu4e-headers-mark-for-move)
+  ("a" mu4e-headers-action)             ; not really a mark per-se
+  ("A" mu4e-headers-mark-for-action)    ; differs from built-in
+  ("*" mu4e-headers-mark-for-something)
+
+  ("#" mu4e-mark-resolve-deferred-marks)
+  ("%" mu4e-headers-mark-pattern)
+  ("&" mu4e-headers-mark-custom)
+  ("+" mu4e-headers-mark-for-flag)
+  ("-" mu4e-headers-mark-for-unflag)
+  ("t" mu4e-headers-mark-subthread)
+  ("T" mu4e-headers-mark-thread)
+
+  ;; miscellany
+  ("q" mu4e~headers-quit-buffer)
+  ("H" mu4e-display-manual)
+  ("|" mu4e-view-pipe)             ; does not seem built-in any longer
+
+  ;; switches
+  ("O" mu4e-headers-change-sorting)
+  ("P" mu4e-headers-toggle-threading)
+  ("Q" mu4e-headers-toggle-full-search)
+  ("V" mu4e-headers-toggle-skip-duplicates)
+  ("W" mu4e-headers-toggle-include-related)
+
+  ;; more miscellany
+  ("`" mu4e-update-mail-and-index)      ; differs from built-in
+  (";" mu4e-context-switch)  
+  ("j" mu4e~headers-jump-to-maildir)
+
+  ("." nil))
+
+(general-define-key
+ :keymaps 'mu4e-headers-mode-map
+ :states 'normal
+ "SPC" 'hydra-mu4e-headers/body)
+
+;;;;;; notmuch
+
+(use-package notmuch
+  :straight t)
+
+(add-hook 'notmuch-hello-mode-hook 'evil-emacs-state)
+
+;;;;; irc
+;;;;; git
+;;; import
+
+(load-file "~/.emacs.d/config/org.el")
 
 ;;; custom
 
 (setq custom-file "~/.emacs.d/etc/custom.el")
 ;; (load custom-file)
 
-;;; end
-
 (if (not custom-enabled-themes)
     (load-theme 'emacs-sexy-day t))
+
+;;; end
 
 (provide 'init)

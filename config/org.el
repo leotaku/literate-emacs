@@ -11,10 +11,13 @@
 
 (use-package org
   :straight org-plus-contrib
-  :demand t
-  :after flyspell
+  ;; :demand t
+  ;; :after flyspell
   :config
-  (require 'org-capture))
+  (require 'org-capture)
+  (require 'org-protocol)
+  (load-library "org-tempo")
+  :hook (org-mode . visual-line-mode))
 
 ;; (use-package worf
 ;;   :straight t
@@ -31,20 +34,20 @@
   :defer t
   :after (org ivy-bibtex)
   :init
-  (setq org-ref-completion-library 'org-ref-helm-cite))
-
-(with-eval-after-load 'org
-  (require 'org-protocol))
-
-(with-eval-after-load 'org-ref
+  (setq org-ref-completion-library 'org-ref-helm-cite)
+  :config
   (require 'doi-utils)
-  (require 'org-ref-isbn))
+  (require 'org-ref-isbn)
+  (require 'org-ref-ivy)
+  (require 'org-ref-helm))
 
 ;;; settings
 ;;;; defaults
 
 (with-eval-after-load 'org
   (setq org-ref-completion-library 'org-ref-helm-cite)
+
+  (setq org-src-window-setup 'current-window)
 
   (setq org-latex-pdf-process (list "latexmk -interaction=nonstopmode -output-directory=%o -shell-escape -bibtex -f -pdf %f"))
 
@@ -55,7 +58,10 @@
 
   (setq org-link-file-path-type 'relative)
 
-  (setq org-adapt-indentation nil))
+  (setq org-adapt-indentation nil)
+  
+  (setq org-src-preserve-indentation nil 
+        org-edit-src-content-indentation 0))
 
 ;; (add-hook 'org-mode-hook 'org-indent-mode)
 
@@ -133,19 +139,21 @@
 ;;; functions
 ;;;; lib
 
-(defun org-show-from-top ()
-  (interactive)
-  (save-excursion
-    (ignore-errors
-      (org-back-to-heading t))
-    (org-show-entry)
-	(org-show-children)
-    (ignore-errors
-      (while t
-        (outline-up-heading 1 t)
-        (org-show-entry)
-        (org-show-children))))
-  (org-show-subtree))
+;; (defun org-show-from-top ()
+;;   (interactive)
+;;   (save-excursion
+;;     (ignore-errors
+;;       (org-back-to-heading t))
+;;     (org-show-entry)
+;; 	(org-show-children)
+;;     (ignore-errors
+;;       (while t
+;;         (outline-up-heading 1 t)
+;;         (org-show-entry)
+;;         (org-show-children))))
+;;   (org-show-subtree))
+
+(setq org-blank-before-new-entry nil)
 
 (defun org-folded-p ()
   "Returns non-nil if point is on a folded headline or plain list
@@ -239,11 +247,9 @@ item."
   (cond
    ((org-at-heading-or-item-p)
     (progn
-      (kill-whole-line)
-      (org-update-checkbox-count)
-      (org-update-statistics-cookies t)
-      (evil-previous-line)
-      (evil-append-line 1)))
+      (evil-beginning-of-line)
+      (evil-forward-WORD-begin)
+      (call-interactively 'evil-delete-line)))
    ((backward-kill-word 1))))   
 
 (defun evil-org-backspace ()
@@ -267,7 +273,7 @@ item."
       (progn
         (org-next-visible-heading 1)
         (evil-forward-WORD-begin))
-    (evil-forward-sentence-begin)))
+    (org-forward-sentence)))
 
 (defun evil-org-backward-paren ()
   (interactive)
@@ -299,7 +305,7 @@ item."
 (with-eval-after-load 'org
   (general-define-key
    :keymaps '(org-mode-map worf-mode-map)
-   "<tab>" 'org-better-cycle-forward
+   ;; "<tab>" 'org-better-cycle-forward
    "<S-iso-lefttab>" 'org-better-cycle-back
    "<C-tab>" 'org-dwim-cycle
    "<M-return>" (lambda () (interactive) (org-insert-heading-respect-content) (evil-append 1))
@@ -326,10 +332,17 @@ item."
    :states '(normal visual)
    ")" 'evil-org-forward-paren
    "(" 'evil-org-backward-paren
-   "]" 'evil-org-forward-bracket
-   "[" 'evil-org-backward-bracket
-   "{" (lambda () (interactive) (org-up-element) (evil-forward-word-begin))
-   "}" (lambda () (interactive) (org-down-element) (evil-forward-word-begin)))
+   ;; "]" 'evil-org-forward-bracket
+   ;; "[" 'evil-org-backward-bracket
+   ;; "{" (lambda () (interactive) (org-up-element) (evil-forward-word-begin))
+   ;; "}" (lambda () (interactive) (org-down-element) (evil-forward-word-begin))
+   )
+
+  (general-define-key
+   :keymaps 'org-mode-map
+   :states '(normal visual)
+   :prefix "z"
+   "n" narrow-map)
   
   (general-define-key
    :keymaps 'org-mode-map
@@ -348,6 +361,8 @@ item."
 (general-define-key
  :keymaps 'override
  :prefix "C-x o"
+ ;; TODO move this
+ "i" (lambda () (interactive) (find-file user-init-file))
  "o" (lambda () (interactive) (find-file org-default-notes-file))
  "l" 'org-store-link
  "a" 'org-agenda
@@ -364,14 +379,14 @@ item."
 
 (with-eval-after-load 'org
   (general-define-key
-    :keymap org-mode-map
-    :prefix "C-c"
-    "c" 'org-ref-ivy-insert-cite-link
-    "C" 'org-ref-helm-cite
-    "r" 'org-ref-ivy-insert-ref-link
-    "R" 'org-ref-helm-insert-ref-link
-    "l" 'org-ref-ivy-insert-label-link
-    "L" 'org-ref-helm-insert-label-link))
+   :keymap org-mode-map
+   :prefix "C-c"
+   "c" 'org-ref-insert-cite-with-completion
+   "C" 'org-ref-helm-insert-cite-link
+   "r" 'org-ref-insert-ref-link
+   "R" 'org-ref-helm-insert-ref-link
+   "l" 'org-ref-ivy-insert-label-link
+   "L" 'org-ref-helm-insert-label-link))
 
 ;;; TODO:naming worf
 
@@ -446,7 +461,7 @@ item."
   (let ((olp-char (worf-get t)))
     (if close-others (evil-close-folds) nil)
     (goto-char olp-char)
-    (org-show-from-top))
+    (org-reveal))
   (evil-beginning-of-line)
   (evil-forward-WORD-begin 1))
 
