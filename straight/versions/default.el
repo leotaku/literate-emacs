@@ -34,7 +34,6 @@
  ("evil-magit" . "624ebf784e2f1d8922971535b9b179cbc055ac9a")
  ("evil-mc" . "2af29ecd2fbed1571c4cc2501dfb2e38ffd4bfa2")
  ("evil-multiedit" . "cb35914ffabb4f65d22ab2f812ff6e7622cc5c26")
- ("evil-snipe" . "8dd076cc56eb9b04494e4e303b86a959b048350b")
  ("evil-surround" . "9e445b7ab1b2381a1882804553af2789c2282987")
  ("evil-terminal-cursor-changer" . "b49ca4393d2f3cc6014174950059b36a5cb22949")
  ("eyebrowse" . "a11c9044861318c8c2ca0b3387205c7b2bd83a06")
