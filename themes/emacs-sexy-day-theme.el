@@ -149,6 +149,7 @@ determine the exact padding."
    ;; misc
 
    (secondary-selection    :background bg)
+   (lazy-highlight         :background dark-cyan :foreground bg)
 
    ;; --- major-mode faces -------------------
    ;; css-mode / scss-mode
@@ -207,7 +208,7 @@ determine the exact padding."
    (lsp-face-highlight-read    :background (doom-blend red bg 0.3))
    (lsp-face-highlight-textual :inherit 'lsp-face-highlight-read)
    (lsp-face-highlight-write   :inherit 'lsp-face-highlight-read))
-   
+  
 
   ;; --- extra variables ---------------------
   ;; ()

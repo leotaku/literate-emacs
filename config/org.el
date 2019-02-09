@@ -24,29 +24,26 @@
 ;;   :defer t
 ;;   :after (org))
 
-(use-package ivy-bibtex
-  :straight t
-  :defer t
-  :after (org))
+;; (use-package ivy-bibtex
+;;   :straight t
+;;   :defer t
+;;   :after (org))
 
 (use-package org-ref
   :straight t
-  :defer t
-  :after (org ivy-bibtex)
   :init
-  (setq org-ref-completion-library 'org-ref-helm-cite)
+  (setq org-ref-completion-library 'org-ref-ivy-cite)
   :config
-  (require 'doi-utils)
-  (require 'org-ref-isbn)
-  (require 'org-ref-ivy)
-  (require 'org-ref-helm))
+  ;; (require 'doi-utils)
+  ;; (require 'org-ref-isbn)
+  ;; (require 'org-ref-ivy)
+  ;; (require 'org-ref-helm)
+  )
 
 ;;; settings
 ;;;; defaults
 
 (with-eval-after-load 'org
-  (setq org-ref-completion-library 'org-ref-helm-cite)
-
   (setq org-src-window-setup 'current-window)
 
   (setq org-latex-pdf-process (list "latexmk -interaction=nonstopmode -output-directory=%o -shell-escape -bibtex -f -pdf %f"))
@@ -61,7 +58,8 @@
   (setq org-adapt-indentation nil)
   
   (setq org-src-preserve-indentation nil 
-        org-edit-src-content-indentation 0))
+        org-edit-src-content-indentation 0
+        org-src-tab-acts-natively t))
 
 ;; (add-hook 'org-mode-hook 'org-indent-mode)
 
@@ -96,18 +94,19 @@
 
 (with-eval-after-load 'org-ref
   (setq orhc-multiline t)
-  (org-ref-helm-cite-completion)
-  (org-ref-ivy-cite-completion)
-  (defun orhc-bibtex-candidates ()
-    (setq bibtex-completion-bibliography org-ref-bibliography-files)
-    (bibtex-completion-candidates))
-  (setq bibtex-dialect 'biblatex))
+  ;; (org-ref-helm-cite-completion)
+  ;; (org-ref-ivy-cite-completion)
+  ;; (defun orhc-bibtex-candidates ()
+  ;;   (setq bibtex-completion-bibliography org-ref-bibliography-files)
+  ;;   (bibtex-completion-candidates))
+  ;; (setq bibtex-dialect 'biblatex)
+  )
 
 ;;;; links
 
-(with-eval-after-load 'org'
+(with-eval-after-load 'org
   (org-add-link-type
-    "project" 'projectile-switch-project-by-name))
+   "project" 'projectile-switch-project-by-name))
 
 ;;;; highlighting
 
@@ -139,19 +138,19 @@
 ;;; functions
 ;;;; lib
 
-;; (defun org-show-from-top ()
-;;   (interactive)
-;;   (save-excursion
-;;     (ignore-errors
-;;       (org-back-to-heading t))
-;;     (org-show-entry)
-;; 	(org-show-children)
-;;     (ignore-errors
-;;       (while t
-;;         (outline-up-heading 1 t)
-;;         (org-show-entry)
-;;         (org-show-children))))
-;;   (org-show-subtree))
+(defun org-show-from-top ()
+  (interactive)
+  (save-excursion
+    (ignore-errors
+      (org-back-to-heading t))
+    (org-show-entry)
+	(org-show-children)
+    (ignore-errors
+      (while t
+        (outline-up-heading 1 t)
+        (org-show-entry)
+        (org-show-children))))
+  (org-show-subtree))
 
 (setq org-blank-before-new-entry nil)
 
@@ -302,21 +301,48 @@ item."
 ;;; keys/keybindings
 ;;;; TODO:naming movement
 
+(defun my/narrow-or-widen-dwim (p)
+  "Widen if buffer is narrowed, narrow-dwim otherwise.
+Dwim means: region, org-src-block, org-subtree, or
+defun, whichever applies first. Narrowing to
+org-src-block actually calls `org-edit-src-code'.
+
+With prefix P, don't widen, just narrow even if buffer
+is already narrowed."
+  (interactive "P")
+  (declare (interactive-only))
+  (cond ((and (buffer-narrowed-p) (not p)) (widen))
+        ((region-active-p)
+         (narrow-to-region (region-beginning)
+                           (region-end)))
+        ((derived-mode-p 'org-mode)
+         ;; `org-edit-src-code' is not a real narrowing
+         ;; command. Remove this first conditional if
+         ;; you don't want it.
+         (cond ((ignore-errors (org-edit-src-code) t)
+                (delete-other-windows))
+               ((ignore-errors (org-narrow-to-block) t))
+               (t (org-narrow-to-subtree))))
+        ((derived-mode-p 'latex-mode)
+         (LaTeX-narrow-to-environment))
+        (t (narrow-to-defun))))
+
+(general-define-key
+ :states '(normal insert emacs)
+ :keymaps '(org-mode-map worf-mode-map)
+ "<tab>" 'org-better-cycle-forward
+ "<S-iso-lefttab>" 'org-better-cycle-back
+ "<C-tab>" 'org-dwim-cycle
+ "<M-return>" (lambda () (interactive) (org-insert-heading-respect-content) (evil-append 1))
+ "<C-return>" 'evil-org-meta-return
+ "<C-S-return>" 'evil-org-meta-shift-return
+ "<S-return>" 'newline-and-indent
+ "<backspace>" 'evil-org-backspace
+ "<C-backspace>" 'evil-org-c-backspace
+ "M-j" 'org-metadown
+ "M-k" 'org-metaup)
+
 (with-eval-after-load 'org
-  (general-define-key
-   :keymaps '(org-mode-map worf-mode-map)
-   ;; "<tab>" 'org-better-cycle-forward
-   "<S-iso-lefttab>" 'org-better-cycle-back
-   "<C-tab>" 'org-dwim-cycle
-   "<M-return>" (lambda () (interactive) (org-insert-heading-respect-content) (evil-append 1))
-   "<C-return>" 'evil-org-meta-return
-   "<C-S-return>" 'evil-org-meta-shift-return
-   "<S-return>" 'newline-and-indent
-   "<backspace>" 'evil-org-backspace
-   "<C-backspace>" 'evil-org-c-backspace
-   "M-j" 'org-metadown
-   "M-k" 'org-metaup)
-  
   (general-define-key
    :keymaps 'org-mode-map
    "C-<left>" 'org-shiftleft
@@ -342,14 +368,19 @@ item."
    :keymaps 'org-mode-map
    :states '(normal visual)
    :prefix "z"
-   "n" narrow-map)
-  
+   "n" 'my/narrow-or-widen-dwim)
+
+  (use-package org-pretty-jump
+    :straight (org-pretty-jump :type git :host github
+                               :repo "LeOtaku/org-pretty-jump")
+    :after org)
+
   (general-define-key
    :keymaps 'org-mode-map
    :states '(normal visual)
    :prefix "g"
-   "h" 'worf-goto-alt
-   "H" (lambda () (interactive) (worf-goto-alt t)) 
+   "h" 'opj/contrib-jump
+   "H" (lambda () (interactive) (opj/contrib-jump t))
    "r" (lambda () (interactive) (worf-refile t))
    "R" (lambda () (interactive) (call-interactively 'org-refile))
    "x" 'org-open-at-point
@@ -377,124 +408,119 @@ item."
 
 ;;;; org-ref
 
-(with-eval-after-load 'org
-  (general-define-key
-   :keymap org-mode-map
-   :prefix "C-c"
-   "c" 'org-ref-insert-cite-with-completion
-   "C" 'org-ref-helm-insert-cite-link
-   "r" 'org-ref-insert-ref-link
-   "R" 'org-ref-helm-insert-ref-link
-   "l" 'org-ref-ivy-insert-label-link
-   "L" 'org-ref-helm-insert-label-link))
+;; (with-eval-after-load 'org
+;;   (general-define-key
+;;    :keymap org-mode-map
+;;    :prefix "C-c ]"
+;;    c (key-fn )))
 
 ;;; TODO:naming worf
 
-(defun worf-get (&optional alt buffer)
-  (save-excursion
-    (let ((old-buffer (current-buffer)))
-      (if buffer (switch-to-buffer buffer t) nil)
-      (let ((cands (if alt
-                       (org-map-entries (lambda () (cons (org-format-outline-path (org-get-outline-path t) nil) (point))))
-                     (worf--goto-candidates))))
-        (switch-to-buffer old-buffer)
-        (cdr (assoc (ivy-read "Heading: " cands) cands))))))
+;; (defun worf-get (&optional alt buffer)
+;;   (save-excursion
+;;     (let ((old-buffer (current-buffer)))
+;;       (if buffer (switch-to-buffer buffer t) nil)
+;;       (let ((cands (if alt
+;;                        (org-map-entries (lambda () (cons (org-format-outline-path (org-get-outline-path t) nil) (point))))
+;;                      (worf--goto-candidates))))
+;;         (switch-to-buffer old-buffer)
+;;         (cdr (assoc (ivy-read "Heading: " cands) cands))))))
 
-(defun worf-get-this-buffer (&optional alt)
-  (let ((cands (if alt
-                   (org-map-entries (lambda () (cons (org-format-outline-path (org-get-outline-path t)) (point))))
-                 (worf--goto-candidates))))
-    (cdr (assoc (ivy-read "Heading: " cands) cands))))
+;; (defun worf-get-this-buffer (&optional alt)
+;;   (let ((cands (if alt
+;;                    (org-map-entries (lambda () (cons (org-format-outline-path (org-get-outline-path t)) (point))))
+;;                  (worf--goto-candidates))))
+;;     (cdr (assoc (ivy-read "Heading: " cands) cands))))
 
-(defun worf-get-scoped (&optional alt buffer olp go-up max-level min-level)
-  (let ((cands (save-excursion
-                 (setq worf-scoped-min-level min-level)
-                 (setq worf-scoped-max-level max-level)
-                 (let ((old-buffer (current-buffer))
-                       (fun (lambda ()
-                              (if (and
-                                   (or (not worf-scoped-min-level) (<= worf-scoped-min-level (org-outline-level)))
-                                   (or (not worf-scoped-max-level) (>= worf-scoped-max-level (org-outline-level))))
-                                  (if alt
-                                      (cons (org-format-outline-path (org-get-outline-path t)) (point))
-                                    (worf--get-olp-and-point))
-                                nil))))
-                   (if buffer (switch-to-buffer buffer t) nil)
-                   (if olp (goto-char (org-find-olp olp t)) nil)
-                   (let ((level (org-current-level)))
-                     (if (and (/= level 1) go-up) (org-up-element) nil)
-                     (let ((cands (if (and (= level 1) go-up)
-                                      (org-map-entries fun)
-                                    (org-map-tree-better fun))))
-                       (switch-to-buffer old-buffer)
-                       (--filter it cands)))))))
-    (cdr (assoc (ivy-read "Heading: " cands) cands))))
+;; (defun worf-get-scoped (&optional alt buffer olp go-up max-level min-level)
+;;   (let ((cands (save-excursion
+;;                  (setq worf-scoped-min-level min-level)
+;;                  (setq worf-scoped-max-level max-level)
+;;                  (let ((old-buffer (current-buffer))
+;;                        (fun (lambda ()
+;;                               (if (and
+;;                                    (or (not worf-scoped-min-level) (<= worf-scoped-min-level (org-outline-level)))
+;;                                    (or (not worf-scoped-max-level) (>= worf-scoped-max-level (org-outline-level))))
+;;                                   (if alt
+;;                                       (cons (org-format-outline-path (org-get-outline-path t)) (point))
+;;                                     (worf--get-olp-and-point))
+;;                                 nil))))
+;;                    (if buffer (switch-to-buffer buffer t) nil)
+;;                    (if olp (goto-char (org-find-olp olp t)) nil)
+;;                    (let ((level (org-current-level)))
+;;                      (if (and (/= level 1) go-up) (org-up-element) nil)
+;;                      (let ((cands (if (and (= level 1) go-up)
+;;                                       (org-map-entries fun)
+;;                                     (org-map-tree-better fun))))
+;;                        (switch-to-buffer old-buffer)
+;;                        (--filter it cands)))))))
+;;     (cdr (assoc (ivy-read "Heading: " cands) cands))))
 
-(defun worf-get-scoped-this-buffer (&optional alt olp go-up max-level min-level)
-  (let ((cands (progn
-                 (setq worf-scoped-min-level min-level)
-                 (setq worf-scoped-max-level max-level)
-                 (let ((fun (lambda ()
-                             (if (and
-                                  (or (not worf-scoped-min-level) (<= worf-scoped-min-level (org-outline-level)))
-                                  (or (not worf-scoped-max-level) (>= worf-scoped-max-level (org-outline-level))))
-                                 (if alt
-                                     (cons (org-format-outline-path (org-get-outline-path t)) (point))
-                                   (worf--get-olp-and-point))
-                               nil)))))
-                 (if olp (goto-char (org-find-olp olp t)) nil)
-                 (let ((level (org-current-level)))
-                   (if (and (/= level 1) go-up) (org-up-element) nil)
-                   (let ((cands (if (and (= level 1) go-up)
-                                    (org-map-entries fun)
-                                  (org-map-tree-better fun))))
-                     (--filter it cands)))))))
-  (cdr (assoc (ivy-read "Heading: " cands) cands)))
+;; (defun worf-get-scoped-this-buffer (&optional alt olp go-up max-level min-level)
+;;   (let ((cands (progn
+;;                  (setq worf-scoped-min-level min-level)
+;;                  (setq worf-scoped-max-level max-level)
+;;                  (let ((fun (lambda ()
+;;                               (if (and
+;;                                    (or (not worf-scoped-min-level) (<= worf-scoped-min-level (org-outline-level)))
+;;                                    (or (not worf-scoped-max-level) (>= worf-scoped-max-level (org-outline-level))))
+;;                                   (if alt
+;;                                       (cons (org-format-outline-path (org-get-outline-path t)) (point))
+;;                                     (worf--get-olp-and-point))
+;;                                 nil)))))
+;;                  (if olp (goto-char (org-find-olp olp t)) nil)
+;;                  (let ((level (org-current-level)))
+;;                    (if (and (/= level 1) go-up) (org-up-element) nil)
+;;                    (let ((cands (if (and (= level 1) go-up)
+;;                                     (org-map-entries fun)
+;;                                   (org-map-tree-better fun))))
+;;                      (--filter it cands)))))))
+;;   (cdr (assoc (ivy-read "Heading: " cands) cands)))
 
-(defun get-olp-from-pos (pos)
-  (save-excursion
-    (goto-char pos)
-    (org-get-outline-path t)))
+;; (defun get-olp-from-pos (pos)
+;;   (save-excursion
+;;     (goto-char pos)
+;;     (org-get-outline-path t)))
 
-(defun worf-goto-alt (&optional close-others)
-  (interactive)
-  (let ((olp-char (worf-get t)))
-    (if close-others (evil-close-folds) nil)
-    (goto-char olp-char)
-    (org-reveal))
-  (evil-beginning-of-line)
-  (evil-forward-WORD-begin 1))
+;; (defun worf-goto-alt (&optional close-others)
+;;   (interactive)
+;;   (let ((olp-char (worf-get t)))
+;;     (if close-others (evil-close-folds) nil)
+;;     (goto-char olp-char)
+;;     (org-reveal))
+;;   (evil-beginning-of-line)
+;;   (evil-forward-WORD-begin 1))
 
-(defun worf-refile (&optional alt buffer)
-  (interactive)
-  (let ((pos (if alt (worf-get t buffer) (worf-get nil buffer)))
-        (buffer (or buffer (current-buffer))))
-    (let
-        ((marker (set-marker (make-marker) pos buffer))
-         (headline (car (last (get-olp-from-pos pos)))))
-      (org-refile nil nil (list headline (buffer-file-name buffer) nil marker)))))
+;; (defun worf-refile (&optional alt buffer)
+;;   (interactive)
+;;   (let ((pos (if alt (worf-get t buffer) (worf-get nil buffer)))
+;;         (buffer (or buffer (current-buffer))))
+;;     (let
+;;         ((marker (set-marker (make-marker) pos buffer))
+;;          (headline (car (last (get-olp-from-pos pos)))))
+;;       (org-refile nil nil (list headline (buffer-file-name buffer) nil marker)))))
 
-(defun org-map-tree-better (fun &optional max-level)
-  "Call FUN for every heading underneath the current one."
-  (org-back-to-heading t)
-  (setq org-map-tree-better-list nil)
-  (let ((level (funcall outline-level)))
-    (save-excursion
-      (funcall fun)
-      (while (and (progn
-                    (outline-next-heading)
-                    (> (funcall outline-level) level))
-                  (not (eobp)))
-        (if (or (not max-level) (<= (outline-level) max-level))
-            (push (funcall fun) org-map-tree-better-list)))
-      (reverse org-map-tree-better-list))))
+;; (defun org-map-tree-better (fun &optional max-level)
+;;   "Call FUN for every heading underneath the current one."
+;;   (org-back-to-heading t)
+;;   (setq org-map-tree-better-list nil)
+;;   (let ((level (funcall outline-level)))
+;;     (save-excursion
+;;       (funcall fun)
+;;       (while (and (progn
+;;                     (outline-next-heading)
+;;                     (> (funcall outline-level) level))
+;;                   (not (eobp)))
+;;         (if (or (not max-level) (<= (outline-level) max-level))
+;;             (push (funcall fun) org-map-tree-better-list)))
+;;       (reverse org-map-tree-better-list))))
 
-(require 's)
+;; (require 's)
 
-(defun worf--get-olp-and-point ()
-  (let ((olp (org-get-outline-path t)))
-    (cons (worf--pretty-heading (s-concat (s-repeat (length olp) "")
-                                          ""
-                                          (car (last olp)))
-                                (length olp))
-          (point))))
+;; (defun worf--get-olp-and-point ()
+;;   (let ((olp (org-get-outline-path t)))
+;;     (cons (worf--pretty-heading (s-concat (s-repeat (length olp) "")
+;;                                           ""
+;;                                           (car (last olp)))
+;;                                 (length olp))
+;;           (point))))
