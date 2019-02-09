@@ -21,6 +21,9 @@ These are some of the things that (probably) will need to be fixed at some point
 + Language
   + Inconsistent third/first person
   + Inconsistent formality
+  + Active/Passive
+    + This does that
+    + Do that here
   + Repetition of phrases
   + Strange sentence structure
 + Spelling
