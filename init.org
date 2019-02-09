@@ -1459,7 +1459,7 @@ Load it here.
 (load-library "org-tempo")
 #+end_src
 
-Navigating huge Org buffers can be difficult, org-pretty-jump tries to make that task easier by providing a good-looking ivy-based menu that can be used to jump to any headline.
+Navigating huge Org buffers can be difficult. org-pretty-jump tries to make that task easier by providing a good-looking ivy-based menu that can be used to jump to any headline.
 It also provides some additional functions for common Org task such as refiling as well as an easy to understand API for creating custom actions using the central menu.
 #+begin_src elisp
 (use-package org-pretty-jump
@@ -1468,7 +1468,13 @@ It also provides some additional functions for common Org task such as refiling 
   :after org)
 #+end_src
 
-#+RESULTS:
+Worf also makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting.
+
+#+begin_src elisp
+(use-package worf
+  :straight t
+  :after org)
+#+end_src
 
 Do not adapt indentation by inserting whitespace. This is better handled by =org-indent-mode=.
 #+begin_src elisp
