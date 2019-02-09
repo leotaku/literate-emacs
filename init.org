@@ -1319,6 +1319,7 @@ Set them after the first call to =rust-mode-hook=.
 
 *** Shell
 ** Misc
+*** Files/Dired
 *** Git/Magit
 Git is the most common VC system today.
 Most open-source project use it, partly because of its great hosting support with Github and Gitlab providing near-unlimited public storage.
