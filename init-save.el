@@ -1,14 +1,5 @@
 ;; my emacs configuration
 
-(setq visible-bell t)
-(setq ring-bell-function
-      (lambda ()
-        (let ((orig-fg (face-foreground 'mode-line)))
-          (set-face-foreground 'mode-line (face-foreground 'org-level-1))
-          (run-with-idle-timer 0.1 nil
-                               (lambda (fg) (set-face-foreground 'mode-line fg))
-                               orig-fg))))
-
 (advice-add 'evil-write :before-while 'advice-evil-write)
 
 (defun advice-evil-write (&rest ignore)
@@ -23,8 +14,6 @@
 
 (add-to-list 'load-path "~/.emacs.d/external/")
 (add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
-
-;; (require 'undo-tree)
 
 ;;;; straight.el
 
@@ -106,29 +95,7 @@ Inserted by installing org-mode or when a release is made."
   (add-to-list 'recentf-exclude no-littering-etc-directory))
 
 ;;; configurations
-;;;; early-load
-;; packages that need to be loaded early
-
-(use-package bug-hunter
-  :straight t
-  :defer t)
-
-(use-package general
-  :straight t
-  :defer t)
-
-(use-package dash
-  :straight t
-  :config
-  (dash-enable-font-lock))
-;;;; away
-(general-define-key
- :keymaps 'override
- "C-c r" 'revert-buffer)
-
-(use-package nameless
-  :straight t)
-
+;;;; away 
 (use-config (straight hydra)
   (defhydra hydra-straight-helper (:hint nil)
     "
@@ -159,6 +126,21 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
     ("e" straight-prune-build)
     ("q" nil)))
 
+;;;; early-load
+;; packages that need to be loaded early
+
+(use-package bug-hunter
+  :straight t
+  :defer t)
+
+(use-package general
+  :straight t
+  :defer t)
+
+(use-package dash
+  :straight t
+  :config
+  (dash-enable-font-lock))
 
 ;;;; vanilla
 ;;;;; commands
@@ -200,8 +182,8 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (setq find-file-visit-truename nil)
 (setq custom-safe-themes t)
 
-(setq max-specpdl-size 120)
-(setq max-lisp-eval-depth 200)
+(setq max-specpdl-size 1200)
+(setq max-lisp-eval-depth 800)
 
 (use-package page-break-lines
   :straight t
@@ -536,7 +518,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   (set-frame-width (selected-frame) FRAME-WIDTH nil t))
 
 (defun disable-all-themes ()
-  (interactive)
   "disable all active themes."
   (dolist (i custom-enabled-themes)
     (disable-theme i)))
@@ -547,33 +528,19 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (use-package doom-modeline
   :straight t
   :defer t
-  ;; :hook (after-init . doom-modeline-init)
-  )
+  :hook (after-init . doom-modeline-init))
 
 (use-package all-the-icons
   :straight t
   :defer t)
 
-(use-package minions
-  :straight t
-  :config
-  (minions-mode 1))
-
-(use-package moody
-  :straight t
-  :config
-  (setq x-underline-at-descent-line t)
-  (let ((line (face-attribute 'mode-line :underline)))
-    (set-face-attribute 'mode-line nil :overline line)
-    (set-face-attribute 'mode-line-inactive nil :overline line)
-    (set-face-attribute 'mode-line-inactive nil :underline line)
-    (set-face-attribute 'mode-line nil :box nil)
-    (set-face-attribute 'mode-line-inactive nil :box nil)
-    ;; (set-face-attribute 'mode-line-inactive nil :background "#f9f2d9")
-    (set-face-attribute 'mode-line-highlight nil :inherit 'mode-line))
-  :hook (after-init . (lambda ()
-                        (moody-replace-mode-line-buffer-identification)
-                        (moody-replace-vc-mode))))
+;; (use-package moody
+;;   :straight t
+;;   :config
+;;   (setq x-underline-at-descent-line t)
+;;   (when (not (member '(vc-mode moody-vc-mode) mode-line-format))
+;;     (moody-replace-mode-line-buffer-identification)
+;;     (moody-replace-vc-mode)))
 
 ;;;;;; configure
 
@@ -618,9 +585,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (use-package evil-collection
   :straight t
   :init
-  (setq evil-collection-setup-minibuffer t)
-  :config
-  (evil-collection-init))
+  (setq evil-collection-setup-minibuffer t))
 
 (use-package evil-terminal-cursor-changer
   :straight t)
@@ -672,36 +637,48 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;;;;;; configure
 ;;;;;;; evil + collection
 
-(use-package evil-search-highlight-persist
-  :straight t)
-
 (use-config evil
   (evil-mode 1)
-  ;; (evil-select-search-module 'evil-search-module 'evil-search)
+  (evil-select-search-module 'evil-search-module 'evil-search)
   (setq evil-ex-complete-emacs-commands t)
   (setq evil-cross-lines nil
         evil-move-beyond-eol nil
         evil-want-fine-undo t
         evil-symbol-word-search t))
 
-(;; TODO Update to general
- ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "C-o") 'evil-ex-normal)
- ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "<escape>") (lambda () (interactive) (top-level)))
- ;; (evil-collection-define-key 'normal
- ;;   'evil-ex-completion-map (kbd "<escape>") 'abort-recursive-edit)
+(use-config evil-collection
+  (mapc 'evil-collection-init
+        '(minibuffer
+          package-menu
+          custom
+          ivy
+          helm
+          help
+          term
+          dired
+          image
+          ediff
+          notmuch
+          mu4e))
+  
+  ;; TODO Update to general
+  ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "C-o") 'evil-ex-normal)
+  ;; (evil-collection-define-key 'insert 'evil-ex-completion-map (kbd "<escape>") (lambda () (interactive) (top-level)))
+  ;; (evil-collection-define-key 'normal
+  ;;   'evil-ex-completion-map (kbd "<escape>") 'abort-recursive-edit)
 
- ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "C-o") 'evil-ex-normal)
- ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
- ;; (evil-collection-define-key 'normal 'evil-ex-search-keymap (kbd "<escape>") 'abort-recursive-edit)
+  ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "C-o") 'evil-ex-normal)
+  ;; (evil-collection-define-key 'insert 'evil-ex-search-keymap (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
+  ;; (evil-collection-define-key 'normal 'evil-ex-search-keymap (kbd "<escape>") 'abort-recursive-edit)
 
- ;; (evil-collection-define-key 'normal 'evil-ex-completion-map
- ;;   (kbd ":") 'evil-delete-whole-line
- ;;   (kbd "k") 'previous-history-element
- ;;   (kbd "j") 'next-history-element)
+  ;; (evil-collection-define-key 'normal 'evil-ex-completion-map
+  ;;   (kbd ":") 'evil-delete-whole-line
+  ;;   (kbd "k") 'previous-history-element
+  ;;   (kbd "j") 'next-history-element)
 
- ;; (evil-collection-define-key 'insert 'helm-map
- ;;   (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
- )
+  ;; (evil-collection-define-key 'insert 'helm-map
+  ;;   (kbd "<escape>") (lambda () (interactive) (abort-recursive-edit)))
+  )
 
 ;;;;;;; terminal-cursor
 
@@ -799,12 +776,12 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 
 (use-config ivy
   (setq ivy-use-selectable-prompt t)
-  (setq ivy-sort-matches-functions-alist
-        '((t)
-          (ivy-switch-buffer . ivy-sort-function-buffer)
-          (org-insert-link . ivy--sort-by-length)
-          (counsel-find-file . ivy--sort-by-length)
-          (counsel-projectile-find-file . ivy--sort-by-length)))
+  ;; (setq ivy-sort-matches-functions-alist
+  ;;       '((t)
+  ;;         (ivy-switch-buffer . ivy-sort-function-buffer)
+  ;;         (org-insert-link . ivy--sort-by-length)
+  ;;         (counsel-find-file . ivy--sort-by-length)
+  ;;         (counsel-projectile-find-file . ivy--sort-by-length)))
   )
 
 ;;;;;; hydras
@@ -903,8 +880,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 (general-define-key
  :keymaps 'helm-map
  :states '(insert normal emacs visual)
- "C-o" 'hydra-helm/body
- "<escape>" 'helm-keyboard-quit)
+ "C-o" 'hydra-helm/body)
 
 (use-config (hydra helm)
   (defhydra hydra-helm (:hint nil :color pink)
@@ -1038,10 +1014,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   :hook ((prog-mode . company-mode)
          (company-mode . yas-minor-mode)))
 
-(use-package company-box
-  :straight t
-  :after company)
-
 ;;;;;; configure
 
 (use-config company
@@ -1060,12 +1032,9 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
 ;; TODO evaluate how to make this better
 (general-define-key
  :keymaps 'company-active-map
- :states 'insert
  "<RET>" 'company-complete
  "<tab>" 'company-select-next
- "<backtab>" 'company-select-previous
- "<C-y>" 'company-complete
- ";" (lambda () (interactive) (company-complete) (insert ";")))
+ "<backtab>" 'company-select-previous)
 
 ;;;;; fly/ispell
 
@@ -1296,7 +1265,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   (sp-local-pair 'rust-mode "(" nil :post-handlers
                  '((create-newline-and-enter-sexp "RET"))))
 
-(use-config rust-mode
+(use-config cargo
   (setq rust-format-on-save t))
 
 ;;;;; haskell
@@ -1319,11 +1288,11 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   :straight t
   :hook (lispy-mode . lispyville-mode)
   :config
-  ;; (general-unbind
-  ;;   :keymaps 'lispyville-mode-map
-  ;;   :states 'normal
-  ;;   "M-O"
-  ;;   "M-[")
+  (general-define-key
+   :keymaps 'lispyville-mode-map
+   :states 'normal
+   "M-O" nil
+   "M-[" nil)
   :init
   (setq lispyville-key-theme
         '(additional-movement
@@ -1365,7 +1334,7 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   (TeX-source-correlate-mode)
   (TeX-PDF-mode)
   
-  ;; (setq TeX-auto-save t)
+  (setq TeX-auto-save t)
   (setq preview-default-option-list 
         '("titlesec" "pagestyles" "displaymath" "floats" "graphics" "textmath" "sections" "footnotes")))
 
@@ -1466,7 +1435,6 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
   (setq peep-dired-cleanup-on-disable t)
   (setq peep-dired-enable-on-directories nil))
 
-
 ;; (use-config dired-filter
 ;;   (setq dired-filter-group
 ;;         '(("default" (dot-files))
@@ -1494,19 +1462,9 @@ _R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_
        (peep-dired-kill-buffers-without-window)))
 
 (general-define-key
- :states '(normal visual insert emacs)
- :keymaps 'dired-mode-map
- "C-t C-r" 'image-dired)
-
-(evil-set-initial-state 'image-dired-minor-mode 'emacs)
-
-(general-define-key
  :keymaps 'dired-mode-map
  :states '(normal visual)
- "f" 'find-file
- "n" 'dired-next-marked-file
- "N" 'dired-prev-marked-file
- "F" dired-filter-map
+ "f" dired-filter-map
  "M" dired-filter-mark-map
  "o" 'hydra-dired-quick-sort/body
  "H" 'dired-hide-details-mode
@@ -1898,20 +1856,5 @@ _o_: org-cap | _C--_: show less   | _*_: *thing  | _q_: quit hdrs | _j_: jump2ma
     (load-theme 'emacs-sexy-day t))
 
 ;;; end
-
-;; (use-config evil-collection
-;;   (evil-collection-init
-;;    '(minibuffer
-;;      package-menu
-;;      custom
-;;      ivy
-;;      helm
-;;      help
-;;      term
-;;      dired
-;;      image
-;;      ediff
-;;      notmuch
-;;      mu4e)))
 
 (provide 'init)

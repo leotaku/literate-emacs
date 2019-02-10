@@ -239,7 +239,7 @@ It also extends generals which-key integration.
 #+begin_src elisp
 
 (defmacro key-fn (action &rest args)
-  (let ((fun-name (intern (format "my/general-which-key-functions-%s-%s" (symbol-name action) args))))
+  (let ((fun-name (intern (format "hack/general-which-key-functions-%s-%s" (symbol-name action) args))))
     `(progn
        (defun ,fun-name ()
          (interactive)
@@ -505,7 +505,7 @@ This package automatically replaces them with a pretty horizontal line.
 Switching from mostly using terminal utilities to Emacs, the challenge I have faced is having to navigate the large amount of buffers that accumulate during a typical Emacs session.
 I still consider what I have achieved so far suboptimal and will have to thoroughly and incrementally improve this part of my configuration until I get something that is usable.
 
-Important concepts include window management, buffer management, finding of files [fn:dired-where] as well as automatic grouping and skipping of buffers.
+Important concepts include window management, buffer management, finding files [fn:dired-where] as well as automatic grouping and skipping of buffers.
 
 *** OS Integration
 While living in Emacs is /of course/ the ultimate goal, I would also like to enjoy some of the benefits the last +40 years have brought us.
@@ -1320,6 +1320,10 @@ Set them after the first call to =rust-mode-hook=.
 *** Shell
 ** Misc
 *** Files/Dired
+Dired is an Emacs mode for editing directories. It shows the output of =ls -l= which can then be acted upon.
+
+Dired is also very extensible through custom keybindings and extensions, I use a lot of them.
+
 *** Git/Magit
 Git is the most common VC system today.
 Most open-source project use it, partly because of its great hosting support with Github and Gitlab providing near-unlimited public storage.
@@ -1359,7 +1363,59 @@ Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel fo
 #+end_src
 
 *** Mail
+Emacs is, in my opinion, the best MUA currently out there.
+
+This is my current setup for mail in Emacs:
++ Sending
+  + message-mode :: easily send mail from an Emacs buffer
+  + sendmail.el :: call the external sendmail command from emacs
+  + msmtp :: a simple nullclient sendmail alternative (external)
+  + postfix :: a powerful mail server, can be used as a nullclient or relay server (external)
++ Sync
+  + mbsync :: a faster alternative to the well know offlineimap (external)
++ Reading
+  + notmuch :: a fast tag-based mail indexer - has an Emacs frontend
+
+Alternative readers:
++ gnus :: gnus is the default Emacs mail reader. It's good but hard to configure
++ mu4e :: mu4e is the Emacs frontent for mu, another mail indexer similar to notmuch
++ wanderlust :: idk, apparently very badly documented
++ mew :: idk
+
 **** Message
+Message-mode automatically reads, updates and then sends the contents of a buffer with a correctly formatted mail header.
+
+The way the mail is send can be customized using the =message-send-mail-function= variable. I prefer just calling an external command over using the synchronous elisp sendmail implementation.
+
+#+begin_src elisp
+(setq message-send-mail-function 'message-send-mail-with-sendmail
+      send-mail-function 'sendmail-send-it)
+#+end_src
+
+While we're at it, also configure sendmail.
+
+#+begin_src elisp
+
+;; substitute sendmail with msmtp
+(setq sendmail-program "msmtp")
+
+;; allow setting account through email header
+(setq message-sendmail-extra-arguments '("--read-envelope-from"))
+(setq message-sendmail-f-is-evil t)
+
+#+end_src
+
+Sending mail is a potentially dangerous action, so I want to be asked to confirm it.
+
+#+begin_src elisp
+
+(add-hook 'message-send-hook
+          (lambda ()
+            (unless (y-or-n-p "Sure you want to send this?")
+              (signal 'quit nil))))
+
+#+end_src
+
 **** Notmuch
 *** Org
 Org is a system for keeping easily navigable plain text notes, lists, and structured documents.
@@ -1469,7 +1525,7 @@ It also provides some additional functions for common Org task such as refiling 
   :after org)
 #+end_src
 
-Worf also makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting.
+Worf also makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting. [TODO: with evil,hook,"]"]
 
 #+begin_src elisp
 (use-package worf
@@ -1599,7 +1655,7 @@ It may also be used in conjunction with the ivy/helm-bibtex packages.
 
 #+end_src
 
-The uppercase versions of BibTeX links defined by org-ref clutter the insert link menu while not having any apparent use. Remove them for now. [TODO: test this]
+The uppercase versions of BibTeX links defined by org-ref clutter the insert link menu while not having any apparent use. Remove them for now. [TODO: test this -- doesn't work]
 
 #+begin_src elisp
 
