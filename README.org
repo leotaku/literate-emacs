@@ -7,7 +7,7 @@ This repository contains several important files:
 - snippets.org :: the file where my yasnippet snippets are stored. 
 - unmanaged :: lisp code or other resources that are not substantial enough to be packaged
   - themes :: my personal emacs theme(s)
-  - icons :: png icons taken from [[https:emacs.sexy][emacs.sexy]]
+  - icons :: png icons taken from [[http://emacs.sexy][emacs.sexy]]
 - straight :: directory where straight.el stores its files.
   - versions/defaut.el :: lockfile for straight.el
 - var :: managed by no-littering.el
