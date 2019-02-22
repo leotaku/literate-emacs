@@ -1,7 +1,5 @@
 #+TITLE: Literate Emacs
-#+babel: :cache yes
-#+property: tangle ./org-init.el
-#+property: header-args :tangle ./org-init.el :comments yes :results output silent
+#+property: header-args :tangle ./init.el :comments no :results output silent
 
 * Preface
 This is my attempt at modularizing my =.emacs.d= directory and preventing eventual /Emacs Bankruptcy/ by exporting my configurations through the [[http://orgmode.org/][org-mode]] [[https://orgmode.org/manual/tangle.html][tangle]] system.
@@ -18,6 +16,7 @@ These are some of the things that (probably) will need to be fixed at some point
     + Blank lines at beginning/end?
     + Blank lines before/after?
   + Footnotes
+  + Uppercase/Downcase in headings
 + Language
   + Inconsistent third/first person
   + Inconsistent formality
@@ -53,7 +52,7 @@ This package is responsible for correctly setting the load path to various colle
       '(find-when-checking check-on-save))
       
 (setq straight-recipe-repositories
-      '(org-elpa melpa emacsmirror gnu-elpa))
+      '(org-elpa melpa emacsmirror gnu-elpa-mirror))
       
 #+end_src
 
@@ -74,6 +73,12 @@ This package has to be loaded first and using a manual `bootstrap` procedure, be
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
   
+#+end_src
+
+I also manually require =straight-x= which provides some additional experimental functions, most notably =straight-x-fetch-all=.
+
+#+begin_src elisp
+(require 'straight-x)
 #+end_src
 
 *** org-mode hack
@@ -121,42 +126,53 @@ Inserted by installing org-mode or when a release is made."
 #+end_src
 
 *** hydra
-The official hydra wiki provides a hydra for working with straight.el
+The official hydra wiki provides a hydra for working with straight.el. I edit then bind it to =C-x s=.
 
 The code uses =with-eval-after-load= instead of the superior =use-config= because it has not yet been defined at this point.
 
 #+begin_src elisp
 
-(with-eval-after-load straight
-  (with-eval-after-load hydra
+(with-eval-after-load 'straight
+  (with-eval-after-load 'hydra
     (defhydra hydra-straight-helper (:hint nil)
       "
-_c_heck all       |_f_etch all     |_m_erge all      |_n_ormalize all   |p_u_sh all
-_C_heck package   |_F_etch package |_M_erge package  |_N_ormlize package|p_U_sh package
-----------------^^+--------------^^+---------------^^+----------------^^+----_q_uit----|
-_r_ebuild all     |_p_ull all      |_v_ersions freeze|_w_atcher start   |_g_et recipe
-_R_ebuild package |_P_ull package  |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
-      ("c" straight-check-all)
-      ("C" straight-check-package)
-      ("r" straight-rebuild-all)
-      ("R" straight-rebuild-package)
-      ("f" straight-fetch-all)
-      ("F" straight-fetch-package)
-      ("p" straight-pull-all)
-      ("P" straight-pull-package)
-      ("m" straight-merge-all)
-      ("M" straight-merge-package)
-      ("n" straight-normalize-all)
-      ("N" straight-normalize-package)
-      ("u" straight-push-all)
-      ("U" straight-push-package)
+_c_heck package   |_f_etch package     |_m_erge package  |_n_ormalize pack  |p_u_sh package
+_C_heck all       |_F_etch all (async) |_M_erge all      |_N_ormlize all    |p_U_sh all    
+----------------^^+------------------^^+---------------^^+----------------^^+----_q_uit----|
+_r_ebuild package |_p_ull package      |_v_ersions freeze|_w_atcher start   |_g_et recipe
+_R_ebuild all     |_P_ull all          |_V_ersions thaw  |_W_atcher quit    |prun_e_ build"
+      ("c" straight-check-package)
+      ("C" straight-check-all)
+      ("r" straight-rebuild-package)
+      ("R" straight-rebuild-all)
+      ("f" straight-fetch-package)
+      ("F" straight-x-fetch-all)
+      ("p" straight-pull-package)
+      ("P" straight-pull-all)
+      ("m" straight-merge-package)
+      ("M" straight-merge-all)
+      ("n" straight-normalize-package)
+      ("N" straight-normalize-all)
+      ("u" straight-push-package)
+      ("U" straight-push-all)
       ("v" straight-freeze-versions)
       ("V" straight-thaw-versions)
       ("w" straight-watcher-start)
       ("W" straight-watcher-quit)
       ("g" straight-get-recipe)
       ("e" straight-prune-build)
-      ("q" nil))))
+      ;; For now, automatically close the fetcher window when this hydra exits
+      ("q" (lambda ()
+             (interactive)
+             (ignore-errors
+               (let ((buffer "*straight*"))
+                 (delete-window (get-buffer-window buffer))
+                 (kill-buffer buffer))))
+       :color blue))))
+
+(with-eval-after-load 'general
+  (general-define-key
+    "C-x s" 'hydra-straight-helper/body))
 
 #+end_src
 
@@ -229,25 +245,25 @@ General allows for easy mapping of keys to commands by adding an abstraction ove
   :straight t
   :defer t)
 
+;; TODO: test this
+(put 'general-define-key 'lisp-indent-function 'defun)
+
 #+end_src
 
 **** general key-fn
 
 =key-fn= is an elisp macro written by myself in order to ease the mapping of non-=interactive= functions to keys with general. 
-It also extends generals which-key integration.
+It also makes use of general which-key integration to automatically show clear descriptions.
 
 #+begin_src elisp
 
 (defmacro key-fn (action &rest args)
-  (let ((fun-name (intern (format "hack/general-which-key-functions-%s-%s" (symbol-name action) args))))
-    `(progn
-       (defun ,fun-name ()
-         (interactive)
-         (apply ',action ',args))
-       (quote (,fun-name
-               :wk ,(concat (symbol-name action)
-                            "-"
-                            (mapconcat 'identity args "-")))))))
+  (let* ((args `(,@args))
+         (desc (concat (symbol-name action) "-" (mapconcat (lambda (it) (format "%s" it)) args "-")))
+         (fn `(lambda (&optional _)
+                (interactive)
+                (apply ',action ',args))))
+    `(list ,fn :wk ,desc)))
 
 #+end_src
 
@@ -260,14 +276,29 @@ Here are some usage examples:
 
 #+end_src
 
+*** key-chord
+Key-chord allows mapping the simultaneous pressing of two keys to an additional action. General also includes integration for it through =general-chord=.
+
+Im not quite sure what to think of it yet, but I will enable it for the time being.
+Key-chord strangely sends a message when it is enabled. Mitigate this by checking if it has already been enabled.
+
+#+begin_src elisp
+(use-package key-chord
+ :straight t
+ :config
+ (when (not (bound-and-true-p key-chord-mode))
+   (key-chord-mode 1)))
+#+end_src
+
 *** lib
-**** subr
-Subr is an emacs-lisp library that provides common reusable subroutines.
-It is distributed with Emacs.
+**** async
+Async is an emacs-lisp library which offers primitive async/multithreading support through additional processes.
+It additionally provides some predefined improvements for builtin Emacs modes.
 I use it in some of my functions and configurations.
 
 #+begin_src elisp
-(use-package subr)
+(use-package async
+  :straight t)
 #+end_src
 
 **** dash
@@ -297,6 +328,15 @@ I use it in some of my functions and configurations.
 #+begin_src elisp
 (use-package s
   :straight t)
+#+end_src
+
+**** subr
+Subr is an emacs-lisp library that provides common reusable subroutines.
+It is distributed with Emacs and some parts load automatically.
+I use it in some of my functions and configurations.
+
+#+begin_src elisp
+(use-package subr-x)
 #+end_src
 
 ** Emacs
@@ -330,6 +370,59 @@ Disallow recursive minibuffers, as they can sometimes cause weird glitches that 
 Disable Emacs from following symlinks as it can lead to unexpected behavior.
 #+begin_src elisp
 (setq find-file-visit-truename nil)
+#+end_src
+
+*** Commands
+This subtree contains miscellaneous user-facing commands that I use to manage my Emacs sessions.
+They are not prefixed with =my/=.
+
+#+begin_src elisp
+
+(defun reload ()
+  "Reload init.el with optional straight integration"
+  (interactive)
+  (if (featurep 'straight)
+      ;; straight.el
+      (straight-transaction
+        (straight-mark-transaction-as-init)
+        (load user-init-file))
+    ;; vanilla
+    (load user-init-file)))
+
+(defun nuke-buffers ()
+  "Kill all emacs buffers but *dashboard* and current"
+  (interactive)
+  (-each (-difference
+          (buffer-list)
+          `(,(get-buffer "*dashboard*") ,(current-buffer)))
+    'kill-buffer))
+
+(defun nuke-emacs ()
+  "Kill all buffers and emacs"
+  (interactive)
+  (-each (buffer-list) 'kill-buffer)
+  (kill-emacs))
+
+#+end_src
+
+*** Keys
+Many common tasks by default have some very cumbersome keybindings.
+I bind them to shorter/easier keys in this subtree.
+
++ Reverting
++ Text scaling
+
+#+begin_src elisp
+
+(general-define-key
+ "C-c r" 'revert-buffer
+ "C-c R" 'auto-revert-mode)
+
+(general-define-key
+ "C-=" (key-fn text-scale-set 0)
+ "C-+" 'text-scale-increase
+ "C--" 'text-scale-decrease)
+
 #+end_src
 
 *** Look
@@ -393,10 +486,12 @@ Because I switch between different themes relatively often, I would like Emacs t
 This is achieved here using desktop-mode. [TODO: test this]
 
 #+begin_src elisp
-(add-to-list 'desktop-globals-to-save 'custom-enabled-themes)
-(add-hook 'desktop-after-read-hook (lambda ()
-                                     (mapc 'load-theme
-                                           custom-enabled-themes)))
+;; [TODO: maybe use-config]
+(with-eval-after-load 'desktop
+  (add-to-list 'desktop-globals-to-save 'custom-enabled-themes)
+  (add-hook 'desktop-after-read-hook (lambda ()
+                                       (mapc 'load-theme
+                                             custom-enabled-themes))))
 #+end_src
 
 **** Modeline
@@ -404,7 +499,7 @@ The Emacs modeline is a place for buffers to display arbitrary information group
 The content it shows is defined in the =mode-line-format= variable.
 
 There are different packages that allow one to easily create nice modeline setups.
-I currently am swithing between doom-modeline and moody.
+I currently am switching between doom-modeline and moody.
 
 #+begin_src elisp
 
@@ -426,10 +521,62 @@ I currently am swithing between doom-modeline and moody.
 ;;     (moody-replace-mode-line-buffer-identification)
 ;;     (moody-replace-vc-mode)))
 
+(use-config doom-modeline
+  (setq doom-modeline-height 25)
+  (setq doom-modeline-bar-width 5)
+  (setq doom-modeline-icon t)
+  (setq doom-modeline-major-mode-icon nil)
+  (setq doom-modeline-major-mode-color-icon nil)
+  (setq doom-modeline-persp-name t)
+  (setq doom-modeline-lsp t)
+  (setq doom-modeline-github nil)
+  (setq doom-modeline-github-interval (* 30 60))
+  (setq doom-modeline-version t))
+
+#+end_src
+
+**** Bell
+I find both the default Emacs beep as well as the visual bell to be annoying.
+Instead, simply flash the modeline red as an indicator. [TODO: what is red?]
+
+#+begin_src elisp
+(setq ring-bell-function
+      (lambda ()
+        (let ((orig-fg (face-foreground 'mode-line)))
+          (set-face-foreground 'mode-line (face-foreground 'org-level-1))
+          (run-with-idle-timer 0.1 nil
+                               (lambda (fg) (set-face-foreground 'mode-line fg))
+                               orig-fg))))
+#+end_src
+
+**** Fonts
+Just like with themes, I would like Emacs to remember the my font across restarts. Again, I use desktop-mode for this.
+
+#+begin_src elisp
+;; [TODO: maybe use-config]
+(with-eval-after-load 'desktop
+  (add-to-list 'desktop-globals-to-save 'my/current-font)
+  (add-to-list 'desktop-globals-to-save 'my/current-font-size))
+
+(add-hook 'after-make-frame-functions 'my/restore-font)
+#+end_src
+
+I also define a simple function that allows me to change the global font. My font-remembrance method relies on this function being used to correctly determine the current font. [TODO: maybe read frame font]
+
+#+begin_src elisp
+(defun set-font (font size)
+  (setq my/current-font font)
+  (setq my/current-font-size size)
+  (set-frame-font (format "%s-%d" font size) nil t))
+
+(defun my/restore-font (&rest _)
+  (when (and (bound-and-true-p my/current-font)
+             (bound-and-true-p my/current-font-size))
+    (set-frame-font (format "%s-%d" my/current-font my/current-font-size) nil t)))
 #+end_src
 
 **** Dashboard
-Dashboard is an Emacs package ripped from the spacemacs distribution.
+Dashboard is an Emacs package ripped from the Spacemacs distribution.
 It, like the name suggests, provides a dashboard that can display all different types of content.
 
 Some keys for easier dashboard navigation are bound.
@@ -502,10 +649,198 @@ This package automatically replaces them with a pretty horizontal line.
 #+end_src
 
 *** Navigation
-Switching from mostly using terminal utilities to Emacs, the challenge I have faced is having to navigate the large amount of buffers that accumulate during a typical Emacs session.
+Switching from mostly using terminal utilities to Emacs, the challenge I have faced is having to navigate the large amount of buffers and windows that accumulate during a typical Emacs session.
 I still consider what I have achieved so far suboptimal and will have to thoroughly and incrementally improve this part of my configuration until I get something that is usable.
 
-Important concepts include window management, buffer management, finding files [fn:dired-where] as well as automatic grouping and skipping of buffers.
+# TODO: remove this Important concepts include window management, buffer management, finding files [fn:dired-where] as well as automatic grouping and skipping of buffers.
+
+**** Popups/Shackle
+One annoying property of Emacs is that it does not distinguish between buffer types. (with exception of the minibuffer) This means that a text buffer, a help buffer and even a helm popup buffer are treated essentially the same way.
+
+Shackle helps me with mitigating one part of this problem by allowing me to easily define special display rules for buffers based on their title or major mode.
+
+It does this by changing =display-buffer-alist=. This means that only buffers displayed using the =display-buffer= function or one of its siblings will be affected.
+
+#+begin_src elisp
+(use-package shackle
+  :straight t)
+#+end_src
+
+I set most shackle rules for builtin Emacs buffer types here. Extensions that provide additional buffers might need additional rules. They should be added in their respective subtrees.
+
+I also set =help-window-select= here because that is something that my shackle setup relies on and it doesn't fit anywhere else.
+
+#+begin_src elisp
+
+(setq shackle-default-rule '()
+      shackle-rules '())
+
+;; TODO: add shackle rules
+
+(setq help-window-select t)
+
+#+end_src
+
+**** Buffer list
+Another consequence of the aforementioned property is that it makes using =previous-buffer=, =next-buffer=, =quit-window= or any function that works with the raw buffer list very unpleasant to use.
+
+I again try to mitigate this problem by creating a function that automatically goes to the next/previous sensible buffer based on context.
+
+These are the library functions I define:
+
+#+begin_src elisp
+
+(defun my/prev-buffer-filtered (include-current blacklist)
+  (let ((this-buffer (current-buffer)))
+    (when (not include-current) (previous-buffer))
+    (setq count 0)
+    (while
+        (not (or (--all? (not (eval it)) blacklist)
+                 (and
+                  (eq this-buffer (current-buffer))
+                  (> count 0))))
+      ;; (message (format "%s" count))
+      (previous-buffer)
+      (setq count (1+ count)))))
+
+(defun my/next-buffer-filtered (include-current blacklist)
+  (let ((this-buffer (current-buffer)))
+    (when (not include-current) (next-buffer))
+    (setq count 0)
+    (while
+        (not (or (--all? (not (eval it)) blacklist)
+                 (and
+                  (eq this-buffer (current-buffer))
+                  (> count 0))))
+      ;; (message (format "%s" count))
+      (next-buffer)
+      (setq count (1+ count)))))
+
+#+end_src
+
+I then create some end-user functions based on them and bind them to the right keys.
+
+#+begin_src elisp
+
+(defun my/prev-buffer (&optional include-current)
+  (interactive)
+  (my/prev-buffer-filtered include-current
+                           my/default-buffer-blacklist))
+
+(defun my/next-buffer (&optional include-current)
+  (interactive)
+  (my/next-buffer-filtered include-current
+                           my/default-buffer-blacklist))
+
+(defun my/quit-window-kill-buffer ()
+  (interactive)
+  (quit-window t)
+  (my/prev-buffer t))
+
+(defconst my/default-buffer-blacklist
+  '((string-match-p "\\*helm.*?\\*" (buffer-name))
+    (string-match-p "\\*Completions\\*" (buffer-name))
+    (string-match-p "\\*Calculator\\*" (buffer-name))
+    (string-match-p "\\*Calc Trail\\*" (buffer-name))
+    (string-match-p "\\*info\\*" (buffer-name))
+    (string-match-p "\\*straight-process\\*" (buffer-name))
+    (string-match-p "\\*Help\\*" (buffer-name))
+    (string-match-p "\\*mpd\\*" (buffer-name))
+    (string-match-p "\\*MPDEL.*?\\*" (buffer-name))
+    (string-match-p "\\*Backtrace\\*" (buffer-name))))
+
+(general-define-key
+ :states '(insert normal visual motion emacs)
+ "<XF86Back>" 'my/prev-buffer
+ "<XF86Forward>" 'my/next-buffer
+ "C-q" 'my/quit-window-kill-buffer)
+
+#+end_src
+
+**** Tabs/Eyebrowse
+Eyebrowse is an extension that offers basic tab functionality in Emacs. It works by simply saving a list of all the window configurations.
+
+#+begin_src elisp
+
+(use-package eyebrowse
+  :straight t
+  :config
+  (eyebrowse-mode 1))
+
+(use-config eyebrowse
+  (setq eyebrowse-wrap-around t))
+
+#+end_src
+
+**** Keys
+For buffer and window management I bind quite a lot of keys, most of them under the =C-a= prefix.
+
+These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
+
+#+begin_src elisp
+
+(general-define-key
+  :keymaps 'override
+  :states '(normal insert visual motion emacs)
+  :prefix "C-a"
+  "s" 'ace-window
+  "o" 'other-window
+  "O" (key-fn other-window -1)
+
+  "d" (key-fn switch-to-buffer "*dashboard*")
+  "c" 'my/eyebrowse-projectile-project
+  
+  "n" 'eyebrowse-next-window-config
+  "p" 'eyebrowse-prev-window-config
+  "a" 'delete-other-windows
+  "x" 'my/close-window-or-eyebrowse
+  "X" 'eyebrowse-close-window-config
+
+  "w" 'split-window-vertically
+  "q" 'split-window-horizontally
+  
+  "h" 'evil-window-left
+  "j" 'evil-window-down
+  "k" 'evil-window-up
+  "l" 'evil-window-right
+  "C-k" (key-fn evil-window-move-very-top)
+  "C-j" (key-fn evil-window-move-very-bottom)
+  "C-h" (key-fn evil-window-move-far-left)
+  "C-l" (key-fn evil-window-move-far-right))
+
+;; [TODO: define functions]
+
+(defun my/eyebrowse-projectile-project ()
+  (interactive)
+  (let ((projectile-switch-project-action
+         (lambda ()
+           (eyebrowse-create-window-config)
+           (delete-other-windows)
+           (projectile-find-file))))
+    (projectile-switch-project)))
+
+(defun my/close-window-or-eyebrowse ()
+  (interactive)
+  (when (condition-case nil (evil-window-delete) (error t))
+    (eyebrowse-close-window-config)))
+
+#+end_src
+
+I also bind some other commands for finding buffers and files. These are primarily useful when not in an projectile project.
+
+#+begin_src elisp
+
+(general-define-key
+ :prefix "C-x"
+ :keymaps 'override
+ "b" 'ivy-switch-buffer
+ "k" 'kill-buffer
+
+ "f" 'counsel-find-file
+ "C-f" 'counsel-locate
+ "F" 'counsel-fzf)
+
+#+end_src
 
 *** OS Integration
 While living in Emacs is /of course/ the ultimate goal, I would also like to enjoy some of the benefits the last +40 years have brought us.
@@ -527,17 +862,137 @@ Being able to actually browse modern webpages is OFC also a plus.
 
 #+end_src
 
-*** Extensible Interfaces
+*** Interface Extensions
 Because Emacs is so very extensible, it is also possible to add entirely new interfaces to its core functionality. Many of these "interface extensions" are some of the most widely used Emacs packages.
 Packages that fall into this category might include the builtin IDO, helm and ivy. They are often referred to as "narrowing completion frameworks".
 Other than that there is also hydra, a package for defining colorful keyboard-centric pop-up menus and evil, the extensible vi layer. [fn:evil-where]
 
-**** ivy
-Ivy is the best available narrowing completion framework. It, unlike helm, makes use of the minibuffer as its main interface.
-The ivy repo also includes swiper, an isearch replacement with an overview and the counsel utilities, which are wrappers arround existing commands with added ivy completion.
-Moreover by enabling =ivy-mode= you may allow ivy to automatically hijack well known completion functions.
+**** Evil
+Evil is the extensible vi(m) layer for Emacs. It provides WORD vim emulation for Emacs, including motions, text objects visual, visual block and line selection, the vim command line, improved isearch [TODO fix ugly artefacts], interactive search and replace as well as ports of many popular vim extensions.
+Evil is activated through the global-only =evil-mode= and changes a huge amount of mappings. It also introduces the concept of states and intercept keymaps [TODO: understand this and then fix issues] which are fortunately handled relatively well by general.
 
-Keys for binding different types of dispatch MAYBE bound in the future.
+#+begin_src elisp
+
+(use-package evil
+  :straight t
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-minibuffer t)
+  :config
+  (evil-mode 1))
+
+(use-config evil
+  (evil-select-search-module 'evil-search-module 'evil-search)
+  (setq evil-ex-complete-emacs-commands t)
+  
+  (setq evil-cross-lines nil
+        evil-move-beyond-eol nil
+        evil-want-fine-undo t
+        evil-symbol-word-search nil)
+  
+  (setq evil-motion-state-cursor 'box   ; █
+        evil-visual-state-cursor 'box   ; █
+        evil-normal-state-cursor 'box   ; █
+        evil-insert-state-cursor 'bar   ; ⎸
+        evil-emacs-state-cursor 'hbar)) ; _
+        
+#+end_src
+
+Evil-collection aims to bring the advantages of the vim modal editing model to many popular Emacs modes. It can sometimes be problematic, as it may override user-defined bindings.
+
+#+begin_src elisp
+
+(use-package evil-collection
+  :straight t
+  :init
+  (setq evil-collection-setup-minibuffer t))
+
+#+end_src
+
+Integration may be activated for a specific mode in the following fashion:
+
+#+begin_src elisp :tangle no
+(evil-collection-MODE-setup)
+#+end_src
+
+Where MODE is the mode to which you want to add the evil integration.
+I usually do this in the =:init= part of any particular use-package declaration.
+
+As previously mentioned there exists a huge number of additional packages improving on evil-mode. I personally load quite a few of them.
+
+Evil surround and commentary emulate the popular vim plugins of the same name. They automatically bind their keys through =evil-surround-mode= and =evil-commentary-mode=.
+
+#+begin_src elisp
+
+(use-package evil-surround
+  :straight t
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package evil-commentary
+  :straight t
+  :after evil
+  :config
+  (evil-commentary-mode 1))
+
+#+end_src
+
+[TODO: Evil multiedit or mc]
+[TODO: Evil terminal cursor]
+
+Also bind =j+k= to go from insert to normal state through key-chord. [TODO: test this]
+
+#+begin_src elisp
+
+(general-define-key
+  :states '(insert)
+  (general-chord "jk") 'evil-normal-state
+  (general-chord "kj") 'evil-normal-state)
+
+#+end_src
+
+One problem with evil I have is that, when it is enabled for the minibuffer, it binds the =<escape>= key to normal mode overriding the default exit function.
+This works well for =eval-expression= and maybe others, but not for things like ivy, helm, or even the evil command line.
+For this reason I rebind the =<escape>= keys for the evil command line here. The other interfaces are managed in ther respective subtrees.
+For when I really want to utilize normal mode I also rebind =C-o= to =evil-ex-normal=.
+The hook is needed so that evil immediately recognizes we are in insert state in the minibuffer.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps '(evil-ex-completion-map evil-ex-search-keymap)
+ :states 'insert
+ "C-o" 'evil-normal-state
+ "<escape>" 'keyboard-escape-quit)
+
+(add-hook 'minibuffer-setup-hook 'evil-insert-state)
+
+#+end_src
+
+As previously mentioned, I want =<escape>= to bring me to normal mode for =eval-expression=.
+However an =<escape>= press when already in normal mode should always allow me to exit the minibuffer.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'minibuffer-local-map
+ :states 'normal
+ "<escape>" 'keyboard-escape-quit)
+#+end_src
+
+To perfectly emulate vim, evil also rebinds certain mouse clicks/actions. I find most of these annoying as they sometimes interfere with other Emacs functionality (eg. buttons), so I try to rebind them. [TODO: rebind all]
+
+#+begin_src elisp
+(general-define-key
+  :keymaps 'evil-motion-state-map
+  [down-mouse-1] nil)
+#+end_src
+
+**** Ivy
+Ivy is the best available narrowing completion framework. It, unlike helm, makes use of the minibuffer for its main interface.
+The ivy repo also includes swiper, an isearch replacement with an overview and the counsel utilities, which are wrappers arround existing commands with added ivy completion.
+Moreover by enabling =ivy-mode= you may allow ivy to automatically hijack well known completion functions. =counsel-mode= does the same but with some of the more opinionated counsel interfaces.
 
 #+begin_src elisp
 
@@ -545,6 +1000,7 @@ Keys for binding different types of dispatch MAYBE bound in the future.
   :straight t
   :init
   (setq ivy-do-completion-in-region nil)
+  (evil-collection-ivy-setup)
   :config
   (ivy-mode 1))
 
@@ -554,40 +1010,57 @@ Keys for binding different types of dispatch MAYBE bound in the future.
 
 (use-package counsel
   :straight t
-  :after ivy)
+  :after (ivy)
+  :config
+  (counsel-mode 1))
 
 #+end_src
+
+Bind =<RET>= to immediately execute the current ivy selection and =<tab>= to first complete it if possible.
+Keys for executing different types of dispatch may be bound in the future.
+
 #+begin_src elisp
 
 (use-config ivy
   (setq ivy-use-selectable-prompt t))
 
-;; (general-define-key
-;; :keymaps 'ivy-minibuffer-map
-;; :states 'insert
-;; "<RET>" 'ivy-done
-;; "<tab>" 'ivy-partial-or-done)
+(general-define-key
+ :keymaps 'ivy-minibuffer-map
+ :states 'insert
+ "<RET>" 'ivy-done
+ "<tab>" 'ivy-partial-or-done)
 
 #+end_src
+
+I bind swiper to =/= in normal or visual mode.
+It thus replaces the default isearch/evil-isearch for me.
+
 #+begin_src elisp
 
-;; swiper
 (general-define-key
- :keymaps 'override
+ ;; TODO test this :keymaps 'override
  :states '(normal visual)
  "/" 'swiper)
  
 #+end_src
 
 A hydra for easier navigation is also provided. Keys for accessing the hydra in ivy-minibuffers are bound.
+I also rebind =<escape>= here to ensure it always closes the hydra.
 
 #+begin_src elisp
 
 (general-define-key
- :keymaps 'ivy-minibuffer-map
- :states '(insert normal)
- "C-o" 'better-ivy/body
- "<escape>" 'better-ivy/keyboard-escape-quit-and-exit)
+  :keymaps 'ivy-minibuffer-map
+  :states '(insert normal)
+  "C-o" 'better-ivy/body
+  "<escape>" 'better-ivy/keyboard-escape-quit-and-exit)
+
+(defun better-ivy/get-ivy-matcher-desc ()
+  "Return description of `ivy--regex-function'."
+  (let ((cell (assq ivy--regex-function ivy-preferred-re-builders)))
+    (if cell
+        (cdr cell)
+      "other")))
 
 (use-config (ivy hydra)
   (defhydra better-ivy (:hint nil :color pink)
@@ -595,7 +1068,7 @@ A hydra for easier navigation is also provided. Keys for accessing the hydra in 
  Move     ^^^^^^^^^^ | Call         ^^^^ | Cancel^^ | Options^^ | Action _w_/_s_/_a_: %s(ivy-action-name)
 ----------^^^^^^^^^^-+--------------^^^^-+-------^^-+--------^^-+---------------------------------
  _g_ ^ ^ _k_ ^ ^ _u_ | _f_orward _o_ccur | _i_nsert | _c_alling: %-7s(if ivy-calling \"on\" \"off\") _C_ase-fold: %-10`ivy-case-fold-search
- ^↨^ _h_ ^+^ _l_ ^↕^ | _RET_ done     ^^ | _q_uit   | _m_atcher: %-7s(ivy--matcher-desc) _t_runcate: %-11`truncate-lines
+ ^↨^ _h_ ^+^ _l_ ^↕^ | _RET_ done     ^^ | _q_uit   | _m_atcher: %-7s(better-ivy/get-ivy-matcher-desc) _t_runcate: %-11`truncate-lines
  _G_ ^ ^ _j_ ^ ^ _d_ | _TAB_ alt-done ^^ | ^ ^      | _<_/_>_: shrink/grow
 "
     ;; arrows
@@ -643,7 +1116,23 @@ Add a sort-by-length ivy sort functions that can later be used by different comp
          (copy-sequence candidates)))
 #+end_src
 
-**** helm
+You can set the sort function by adding it to the =ivy-sort-matches-function-alist= like so:
+
+#+begin_src elisp :tangle no
+(add-to-list 'ivy-sort-matches-functions-alist
+             '(CALLER-FUNCTION . SORT-FUNCTION)
+             t)
+#+end_src
+
+I immediately do this for =find-file=.
+
+#+begin_src elisp
+(add-to-list 'ivy-sort-matches-functions-alist
+             '(counsel-find-file . my/ivy-sort-by-length)
+             t)
+#+end_src
+
+**** Helm
 Helm is the most well known narrowing completion framework for Emacs. It also has the largest amount of completion sources. Unfortunately it is no longer fully maintained, slower than ivy and somewhat intrusive.
 
 I personally load this package for some of it's additional sources, but do NOT enable =helm-mode=.
@@ -661,13 +1150,15 @@ I personally load this package for some of it's additional sources, but do NOT e
 #+end_src
 
 Just like with ivy an, albeit inferior, hydra is provided. Keys for accessing it in the helm buffer are bound.
+I also rebind =<escape>= here to ensure it always closes the helm buffer.
 
 #+begin_src elisp
 
 (general-define-key
- :keymaps 'helm-map
+ :keymaps '(helm-map helm-M-x-map)
  :states '(insert normal emacs visual)
- "C-o" 'hydra-helm/body)
+ "C-o" 'hydra-helm/body
+ "<escape>" 'helm-keyboard-quit)
 
 (use-config (hydra helm)
   (defhydra hydra-helm (:hint nil :color pink)
@@ -706,97 +1197,10 @@ Just like with ivy an, albeit inferior, hydra is provided. Keys for accessing it
     ("y" helm-yank-selection)
     ("w" helm-toggle-resplit-and-swap-windows)
     ("f" helm-follow-mode)))
-    
-#+end_src
-
-**** hydra
-Hydra is a package that allows the end user or library authors to define keyboard-centric menus of arbitrary complexity. They may also define a doc-string which is then displayed as a formatted, visual presentation of the menu.
-
-#+begin_src elisp
-
-(use-package hydra
-  :straight t)
 
 #+end_src
 
-**** evil
-Evil is the extensible vi(m) layer for Emacs. It provides WORD vim emulation for Emacs, including motions, text objects visual, visual block and line selection, the vim command line, improved isearch [TODO fix ugly artefacts], interactive search and replace as well as ports of many popular vim extensions.
-Evil is activated through the global-only =evil-mode= and changes a huge amount of mappings. It also introduces the concept of states and intercept keymaps [TODO: understand this and then fix issues] which are fortunately handled relatively well by general.
-
-#+begin_src elisp
-
-(use-package evil
-  :straight t
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-minibuffer t)
-  :config
-  (evil-mode 1))
-
-(use-config evil
-  (evil-select-search-module 'evil-search-module 'evil-search)
-  (setq evil-ex-complete-emacs-commands t)
-  
-  (setq evil-cross-lines nil
-        evil-move-beyond-eol nil
-        evil-want-fine-undo t
-        evil-symbol-word-search nil)
-  
-  (setq evil-motion-state-cursor 'box   ; █
-        evil-visual-state-cursor 'box   ; █
-        evil-normal-state-cursor 'box   ; █
-        evil-insert-state-cursor 'bar   ; ⎸
-        evil-emacs-state-cursor 'hbar)) ; _
-        
-#+end_src
-
-Evil-collection aims to bring the advantages of the vim modal editing model to many popular Emacs modes. It can sometimes be problematic, as it may override user-defined bindings.
-
-#+begin_src elisp
-
-(use-package evil-collection
-  :straight t
-  :init
-  (setq evil-collection-setup-minibuffer t))
-
-#+end_src
-
-Integration may be activated for a specific mode in the following fashion:
-
-#+begin_src elisp :tangle no
-
-(require 'evil-collection-MODE)
-(evil-collection-MODE-setup)
-
-#+end_src
-
-Where MODE is the mode to which you want to add the evil integration.
-
-As previously mentioned there exists a huge number of additional packages improving on evil-mode. I personally load quite a few of them myself.
-
-Evil surround and commentary emulate the popular vim plugins of the same name. They automatically bind their keys through =evil-surround-mode= and =evil-commentary-mode=.
-
-#+begin_src elisp
-
-(use-package evil-surround
-  :straight t
-  :after evil
-  :config
-  (global-evil-surround-mode 1))
-
-(use-package evil-commentary
-  :straight t
-  :after evil
-  :config
-  (evil-commentary-mode 1))
-
-#+end_src
-
-[TODO: Evil multiedit or mc]
-[TODO: Evil terminal cursor]
-
-**** hippie-expand
+**** Hippie-expand
 Hippie-expand provides expansion based on multiple different simultaneous sources.
 I don't use it often, but it can sometimes be nice to have.
 
@@ -813,7 +1217,157 @@ The default =hippie-expand= gets bound to =<C-y>= in insert and normal mode.
 
 #+end_src
 
+**** Hydra
+Hydra is a package that allows the end user or library authors to define keyboard-centric menus of arbitrary complexity. They may also define a doc-string which is then displayed as a formatted, visual presentation of the menu.
+
+#+begin_src elisp
+
+(use-package hydra
+  :straight t)
+
+#+end_src
+
+**** Smex
+Smex is a smart replacement for the default =M-x= interface using the IDO NCS system.
+=counsel-M-x= automatically detects when smex is loaded and then interfaces with it.
+
+#+begin_src elisp
+(use-package smex
+ :straight t)
+#+end_src
+
+**** Which-key
+Which-key is a package that initially comes from the Spacemacs distribution.
+It shows a grid of valid further key combinations after an initial keypress.
+
+#+begin_src elisp
+
+(use-package which-key
+  :straight t
+  :init
+  :config
+  (setq which-key-allow-evil-operators t)
+  (which-key-mode 1))
+
+#+end_src
+
 *** Saving
+Saving/Preserving state in Emacs is a complicated affair, here are my settings for it:
+
+**** Auto-save
+Periodically save edited buffers. This can be helpful should Emacs/your computer decide to crash during an editing session.
+[TODO: visibly activate global auto save]
+
+#+begin_src elisp
+
+(setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save/files")
+(setq auto-save-file-name-transforms '((".*" "~/.emacs.d/var/auto-save/files" t)))
+#+end_src
+
+**** Backup
+Backup all saved files as well as auto-save files. This can be helpful if you accidentally override a file that isn't in version control/hasn't been commited for a while.
+
+#+begin_src elisp
+(setq make-backup-files t
+      version-control t
+      kept-new-versions 10
+      kept-old-versions 0
+      delete-old-versions t
+      backup-by-copying t)
+
+(setq backup-directory-alist `(("." . "~/.emacs.d/var/backup")))
+#+end_src
+
+**** Desktop
+Desktop-save-mode is a global minor mode that allows storing information about the current Emacs session to restore at a later date.
+
+It is mostly useful for preserving opened buffers and edits made to them, but additional variables can be preserved by adding them to =desktop-globals-to-save=.
+
+#+begin_src elisp
+
+(setq desktop-dirname             "~/.emacs.d/var/desktop/"
+      desktop-base-file-name      "emacs.desktop"
+      desktop-base-lock-name      "lock"
+      desktop-path                (list desktop-dirname)
+      desktop-save                t
+      desktop-files-not-to-save   "^$"  ;reload tramp paths
+      desktop-load-locked-desktop t
+      desktop-auto-save-timeout   0
+      desktop-restore-frames      nil
+      desktop-restore-eager       20
+      
+      desktop-restore-in-current-display nil)
+
+#+end_src
+
+Multiple running Emacsen confuse desktop-save, causing it to uslessly prompt the user. Only enable desktop-save-mode in the first Emacs instance that is spawned.
+
+#+begin_src elisp
+
+;; append to make sure this gets run after modeline setup
+(add-hook 'after-init-hook 'my/maybe-enable-desktop t)
+
+(defun my/maybe-enable-desktop ()
+  (if (f-exists?
+       (f-join desktop-dirname desktop-base-lock-name))
+      (message "Desktop save is off!")
+    (progn
+      (require 'desktop)
+      (desktop-save-mode 1)
+      (if (not (ignore-errors (desktop-read)))
+          (message "Desktop save failed loading. There are probably some unset protected variables.")
+        (message "Desktop save is on!")))))
+
+#+end_src
+
+**** Recentf
+Recentf is Emacs' default library for storing the last visited files.
+
+I simply raise the saved items to a relatively high value and exclude some directories that would otherwise fill up the cache.
+I also bind =C-x l= to =counsel-recentf= for convenient access.
+
+#+begin_src elisp
+
+(use-package recentf
+  :straight nil
+  :config
+  (recentf-mode 1))
+
+(use-config recentf
+  (setq recentf-max-menu-items 20)
+  (setq recentf-max-saved-items 50)
+  (add-to-list 'recentf-exclude "/\\.emacs\\.d/elpa")
+  (add-to-list 'recentf-exclude "/nix/store")
+  (add-to-list 'recentf-exclude "\\.orhc-bibtex-cache"))
+
+(general-define-key
+ "C-x l" 'counsel-recentf)
+
+#+end_src
+
+**** Savehist
+Savehist seems to be the default Emacs mechanism to save minibuffer history. I of course want that to always be enabled.
+
+#+begin_src elisp
+(savehist-mode 1)
+#+end_src
+
+**** Undo-tree
+Undo-tree is an Emacs package that tries to improve Emacs' undo and redo functionality by offering a tree-style undo action viewer, as well as undo persistence. It is depended on by evil.
+
+Unfortunately the original author of the package seems to have lost interest in updating it. For this reason it is plagued by bugs. [TODO: find alternative]
+
+#+begin_src elisp
+
+(use-package undo-tree
+  :straight t
+  :config
+  (setq undo-tree-auto-save-history t)
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/var/undo")))
+  (global-undo-tree-mode 1))
+
+#+end_src
+
 ** Editing
 *** Prelude-esque
 The [[https://github.com/bbatsov/prelude#helm][Emacs Prelude]] project, among other things, provides a set of helpful and generic keybindings for editing text.
@@ -826,19 +1380,24 @@ There are bindings for operating on numbers, bound to the =C-c .= prefix.
 (use-package operate-on-number
   :straight t)
 
+(general-unbind
+ :states '(normal visual insert emacs)
+ "C-.")
+
 (general-define-key
- :prefix "C-c ."
- "+" apply-operation-to-number-at-point
- "-" apply-operation-to-number-at-point
- "*" apply-operation-to-number-at-point
- "/" apply-operation-to-number-at-point
- "\\" apply-operation-to-number-at-point
- "^" apply-operation-to-number-at-point
- "<" apply-operation-to-number-at-point
- ">" apply-operation-to-number-at-point
- "#" apply-operation-to-number-at-point
- "%" apply-operation-to-number-at-point
- "'" operate-on-number-at-point)
+ :states '(normal visual insert emacs)
+ :prefix "C-."
+ "+"  'apply-operation-to-number-at-point
+ "-"  'apply-operation-to-number-at-point
+ "*"  'apply-operation-to-number-at-point
+ "/"  'apply-operation-to-number-at-point
+ "\\" 'apply-operation-to-number-at-point
+ "^"  'apply-operation-to-number-at-point
+ "<"  'apply-operation-to-number-at-point
+ ">"  'apply-operation-to-number-at-point
+ "#"  'apply-operation-to-number-at-point
+ "%"  'apply-operation-to-number-at-point
+ "'"  'operate-on-number-at-point)
 
 #+end_src
 
@@ -854,12 +1413,14 @@ Note that motions that operate on lines such as for example "dd" still operate o
   (evil-first-non-blank-of-visual-line)
   (evil-insert 1))
 
+;; [MAYBE TODO: make sure this properly finds the last char]
 (defun my/evil-visual-line-A ()
   (interactive)
   (evil-end-of-visual-line)
   (evil-insert 1))
 
 #+end_src
+
 #+begin_src elisp
 
 (general-define-key
@@ -869,8 +1430,8 @@ Note that motions that operate on lines such as for example "dd" still operate o
  "k" 'evil-previous-visual-line
  "^" 'evil-first-non-blank-of-visual-line
  "$" 'evil-end-of-visual-line
- "I" 'evil-visual-line-I
- "A" "$a"
+ "I" 'my/evil-visual-line-I
+ "A" 'my/evil-visual-line-A
  "D" "d$"
  "C" "c$"
  "<down>" "j"
@@ -889,7 +1450,91 @@ Visual-fill-column provides a =fill-column=-like experience for buffers using =v
 #+begin_src elisp
 (use-package visual-fill-column
   :straight t
-  :hook (visual-line-mode . visual-fill-column-mode))
+  ;; :hook (visual-line-mode . visual-fill-column-mode)
+  )
+#+end_src
+
+*** Smart backspace
+Most IDEs by default have some sort of "smart-backspace" functionality that allows for easier navigation of indented text.
+What that mostly boils down to is that when on an empty line indented, pressing =<backspace>= deletes the whole line and goes to the previous lines indentation.
+
+I like this behavior, so I implement and bind it here.
+[TODO: find out how/if this conflicts with special lispy bindings or others]
+
+#+begin_src elisp
+
+(defun my/smart-backspace ()
+  (interactive)
+  (cond
+   ((looking-back "^[[:space:]]+")
+    (my/sb-delete-to-previous-line))
+   (t
+    ;; delete char normally 
+    (delete-char -1))))
+
+(defun my/smart-backspace-word ()
+  (interactive)
+  (cond
+   ((looking-back "^[[:space:]]+")
+    (my/sb-delete-to-previous-line))
+   (t
+    ;; delete word normally
+    (backward-kill-word 1))))
+
+(defun my/sb-delete-to-previous-line ()
+  ;; delete all spaces
+  (while (not (looking-back "[\n]"))
+    (delete-char -1))
+  ;; delete final newline
+  (delete-char -1)
+  ;; go to indentation
+  (when (looking-back "[\n]")
+    (indent-according-to-mode)))
+
+(general-define-key
+  :states 'insert
+  "<backspace>" 'my/smart-backspace
+  "<C-backspace>" 'my/smart-backspace-word)
+
+#+end_src
+
+*** Narrowing
+The endlessparens website shows a DWIM-style command that can replace most of the complicated narrowing bindings.
+I adapt it to my liking and then bind it to normal =zn=. 
+I additionally bind my personal DWIM widen command to normal =zw=.
+
+#+begin_src elisp
+
+(defun my/narrow-dwim (p)
+  (interactive "P")
+  (cond
+   ((region-active-p)
+    (narrow-to-region (region-beginning)
+                      (region-end)))
+   ((derived-mode-p 'org-mode)
+    ;; `org-edit-src-code' is not a real narrowing
+    ;; command. Remove this first conditional if
+    ;; you don't want it.
+    (cond
+     ((ignore-errors (org-edit-src-code) t))
+     ((ignore-errors (org-narrow-to-block) t))
+     (t (org-narrow-to-subtree))))
+   ((derived-mode-p 'latex-mode)
+    (LaTeX-narrow-to-environment))
+   (t (narrow-to-defun))))
+
+(defun my/widen-dwim ()
+  (interactive)
+  (cond
+   ((bound-and-true-p org-src-mode)
+    (org-edit-src-exit))
+   (t (widen))))
+
+(general-define-key
+  :states '(normal visual)
+  "zn" 'my/narrow-dwim
+  "zw" 'my/widen-dwim)
+
 #+end_src
 
 *** Pairs
@@ -900,9 +1545,9 @@ Smartparens has automatic detection for most programming and markup languages, a
 
 (use-package smartparens
   :straight t
-  :requires smartparens-config
   :config
-  (smartparens-global-mode))
+  (require 'smartparens-config)
+  (smartparens-global-mode 1))
 
 #+end_src
 
@@ -929,8 +1574,9 @@ For c-style languages, I would like to be able to automatically have braces inde
   (forward-line -1)
   (indent-according-to-mode))
 
-(sp-local-pair 'prog-mode "{" nil
-               :post-handlers '((my/indent-between-braces "RET")))
+(use-config smartparens
+  (sp-local-pair 'prog-mode "{" nil
+                 :post-handlers '((my/indent-between-braces "RET"))))
 
 #+end_src
 
@@ -945,7 +1591,77 @@ Automatically highlight the pair opposite to the one at point.
 #+end_src
 
 *** Snippets
+Snippets are reusable fragments of text that can be saved and later inserted into files or buffers. They serve to aviod having to retype commonly used structures.
+
+I use yasnippet which works by expanding abbreviations to predefined templates. These abbreviations are most commonly expanded by pressing the =<TAB>= key when the point is situated behind them, but can also be triggered through other means. (eg. an NCS search)
+
+Templates may also be automatically created by other extensions, such as company-lsp which uses yasnippet templates for parameter expansion.
+
+#+begin_src elisp
+
+(use-package yasnippet
+  :straight t
+  :defer t)
+
+(use-package ivy-yasnippet
+  :straight t
+  :after yasnippet)
+
+#+end_src
+
+Yasnippet comes with a set of snippets preinstalled. I additionaly define my own snippets in the [[file:snippets.org]] file, which is automatically tangled by org-babel. [TODO]
+
+#+begin_src elisp
+;; [TODO: manage snippets]
+(org-babel-tangle-file (f-join user-emacs-directory "snippets.org"))
+(load-file (f-join user-emacs-directory "snippets.el"))
+#+end_src
+
 *** Jumping
+I use avy for jumping to arbitrary characters.
+Avy also offers some integration with other constructs and modes (notably lispy).
+Evil additionally provides motions for all default avy commands.
+
+I bind =s= to =evil-avy-goto-char= and =SPC= to =evil-avy-goto-word-or-subword-1=.
+
+#+begin_src elisp
+
+(use-package avy
+  :straight t
+  :config
+  (setq avy-case-fold-search nil))
+
+(general-define-key
+  :states '(normal visual)
+  "s" 'evil-avy-goto-char
+  "S" nil
+  "SPC" 'evil-avy-goto-word-or-subword-1)
+
+#+end_src
+
+*** Expand-region
+Expand-region is an Emacs package that exports one central command =er/expand-region=. It intelligently expands your current region to the next semantic construct.
+
+While it has some integration with specific major modes (eg. org-mode) most of its power comes from the fact that it works well with generic constructs used in most buffers.
+
+I globally bind it to =C-0= and =+= in normal mode for easy access.
+I also bind normal =-= to =er/cotract-region=, but that does not work with manually set regions and thus is pretty useless.
+#+begin_src elisp
+
+(use-package expand-region
+  :straight t)
+
+(general-define-key
+ "C-0" 'er/expand-region)
+
+(general-define-key
+ :states '(normal visual)
+ "+" 'er/expand-region
+ "-" 'er/contract-region)
+
+
+#+end_src
+
 ** Programming
 *** Defaults
 This subtree contains sensible defaults for coding/writing.
@@ -979,7 +1695,13 @@ Some languages may need additional packages for LSP support. These are managed i
 
 (use-package lsp-ui
   :straight t
-  :after lsp-mode)
+  :after lsp-mode
+  :init
+  ;; disable all frontends by default
+  (setq lsp-ui-doc-enable nil)
+  (setq lsp-ui-imenu-enable nil)
+  (setq lsp-ui-peek-enable nil)
+  (setq lsp-ui-sideline-enable nil))
 
 (use-package company-lsp
   :straight t
@@ -1041,6 +1763,27 @@ Therefore I configure projectile to
 
 #+end_src
 
+Bind the default projectile map to the =C-x p= prefix.
+
+#+begin_src elisp
+(use-config projectile
+  (general-define-key
+    "C-x p" projectile-command-map))
+#+end_src
+
+*** Direnv
+Direnv is a tool for managing directory-local environment variables through =.envrc= files that are automatically detected by the tool.
+Allthough initially a shell-oriented tool, there is a third-party package that brings its functionality to Emacs.
+
+It also has great support for =nix= through use of the =use_nix= statement.
+
+#+begin_src elisp
+(use-package direnv
+  :straight t
+  :config
+  (direnv-mode 1))
+#+end_src
+
 *** Company
 Company is the most popular replacement for Emacs' built in auto-complete library and the de-facto default solution for autocompletion in Emacs.
 Its main selling points include the ability to perform asynchronous completion and its separation into completion front- and backends.
@@ -1073,6 +1816,14 @@ Misc company setting, mostly related to frontend display. [TODO: set best fronte
                             company-pseudo-tooltip-frontend
                             company-echo-metadata-frontend)))
 
+(general-define-key
+  :keymaps 'company-active-map
+  :states nil
+  "<return>" 'newline-and-indent
+  "<tab>" 'company-select-next
+  "<backtab>" 'company-select-previous
+  "<C-y>" 'company-complete)
+
 #+end_src
 
 *** Outline/shine
@@ -1086,7 +1837,7 @@ I personally only use it for Elisp and would like to remove it as soon as possib
 (use-package outshine
   :straight t
   :after org
-  :add-hook (emacs-lisp-mode . outshine-mode))
+  :hook (emacs-lisp-mode . outshine-mode))
 #+end_src
 
 #+begin_src elisp
@@ -1108,9 +1859,9 @@ I personally only use it for Elisp and would like to remove it as soon as possib
 
 ;; use same colors as org-mode
 (use-config outshine
-  (set-face-attribute 'outshine-level-1 nil :inherit 'org-level-1 :height 100)
-  (set-face-attribute 'outshine-level-2 nil :inherit 'org-level-2 :height 100)
-  (set-face-attribute 'outshine-level-3 nil :inherit 'org-level-3 :height 100)
+  (set-face-attribute 'outshine-level-1 nil :inherit 'org-level-1)
+  (set-face-attribute 'outshine-level-2 nil :inherit 'org-level-2)
+  (set-face-attribute 'outshine-level-3 nil :inherit 'org-level-3)
   (set-face-attribute 'outshine-level-4 nil :inherit 'org-level-4)
   (set-face-attribute 'outshine-level-5 nil :inherit 'org-level-5)
   (set-face-attribute 'outshine-level-6 nil :inherit 'org-level-6)
@@ -1120,7 +1871,17 @@ I personally only use it for Elisp and would like to remove it as soon as possib
 #+end_src
 
 *** Flycheck
-*** Fly/ispell
+Flycheck is an alternative to the builtin flymake. It offers asyncronous buffer syntax checking with good support for external tools.
+
+Languages or extensions may need their own additions to flycheck. These are managed in their respective subtrees.
+
+#+begin_src elisp
+(use-package flycheck
+  :straight t
+  :defer t)
+#+end_src
+
+*** Fly/Ispell
 Ispell is the most common spell checking utility on unix-like systems.
 Emacs ispell offers integration with the program by calling it on some, usually a buffers, text and then walking through all reported errors.
 
@@ -1143,6 +1904,16 @@ The command used for spell checking can be changed. I personally use hunspell, w
 (setq ispell-program-name "hunspell")
 #+end_src
 
+Flyspell can be very slow at times. These settings supposedly improve its performance at times.
+
+#+begin_src elisp
+(use-config flyspell
+  (setq flyspell-duplicate-distance 0)
+  (setq flyspell-issue-message-flag nil))
+#+end_src
+
+Currently for me running an ispell/flyspell command for the first time in a session results in an inexplicable type error. [TODO: find a fix for this]
+
 **** Dictionaries
 The language to spell-check for will usually be set as a file-local variable.
 If not, default to "en_US".
@@ -1156,13 +1927,17 @@ Using ispell with hunspell requires some additional setup to correctly handle di
 
 #+begin_src elisp
 
-(setq ispell-dictionary-alist
-      `(("en_US")
-        ("de_AT")
-        ("en_US,de_AT")))
+;; [TODO: fix dictionaries]
+(setq my/ispell-wanted-dictionary-list
+      '("en_US" "de_AT"
+        "en_US,de_AT"))
 
-(dolist (dict ispell-dictionary-alist)
-  (ispell-hunspell-fill-dictionary-entry (car dict)))
+(setq ispell-dictionary-alist
+      (-map (lambda (dict) `(,dict
+	                          "[[:alpha:]]" "[^[:alpha:]]" "[']"
+	                          nil ("-d" ,dict)
+	                          nil utf-8))
+            my/ispell-wanted-dictionary-list))
 
 #+end_src
 
@@ -1214,12 +1989,13 @@ The Nix project also provides an Emacs major mode for working with the Nix langu
 TeX is a typesetting system developed mainly by Donald Knuth.
 LaTeX is the most popular macro collection for TeX. It can be customized further through additional packages.
 
-AucTeX is a popular Emacs extension that majorly improves the editing of TeX files and also provides various other TeX related utilities.
+AucTeX is a popular Emacs extension that majorly improves the editing of TeX files and also provides various other TeX related utilities. I override its package because of the following [[https://github.com/raxod502/straight.el/issues/240][issue]] that affects non-standard GNU Elpa packages.
 
 #+begin_src elisp
 
 (use-package tex
-  :straight auctex
+  :straight (auctex :type git :host github 
+                    :repo "emacs-straight/auctex")
   :defer t
   :hook
   (TeX-mode . visual-line-mode)
@@ -1230,20 +2006,21 @@ AucTeX is a popular Emacs extension that majorly improves the editing of TeX fil
 
 #+end_src
 
-Set Zathura as the default pdf viewer for tex. This also allows using source-correlate through SyncTeX.
+Set Zathura as the default pdf viewer for TeX. This also allows using source-correlate through SyncTeX.
 
 #+begin_src elisp
-(add-to-list 'TeX-view-program-selection
-             '(output-pdf "Zathura"))
-
-(add-to-list 'TeX-expand-list
-             '("%sn" (lambda () server-name)))
-
-(add-to-list 'TeX-view-program-list
-             '("Zathura"
-               ("zathura %o"
-                (mode-io-correlate " --synctex-forward %n:0:%b -x \"emacsclient --socket-name=%sn --no-wait +%{line} %{input}\""))
-               "zathura")))
+(use-config tex
+  (add-to-list 'TeX-view-program-selection
+               '(output-pdf "Zathura"))
+  
+  (add-to-list 'TeX-expand-list
+               '("%sn" (lambda () server-name)))
+  
+  (add-to-list 'TeX-view-program-list
+               '("Zathura"
+                 ("zathura %o"
+                  (mode-io-correlate " --synctex-forward %n:0:%b -x \"emacsclient --socket-name=%sn --no-wait +%{line} %{input}\""))
+                 "zathura")))
 #+end_src
 
 *** Markdown
@@ -1270,7 +2047,7 @@ I just use it for basic scripting, so the builtin python-mode is sufficient for 
 *** Rust
 Rust is a modern statically typed systems programming language with support for many high-level concepts currently backed by Mozilla.
 
-The Rust major mode adds basic highlighting and indentation support for the Rust language, flycheck-rust offers Flycheck integration for =cargo check= rls and clippy.
+The Rust major mode adds basic highlighting and indentation support for the Rust language, while cargo adds integration with the Cargo build-tool.
 
 #+begin_src elisp
 
@@ -1278,10 +2055,11 @@ The Rust major mode adds basic highlighting and indentation support for the Rust
   :straight t
   :mode "\\.rs\\'") ;; this is already done by rust-mode
 
-(use-package flycheck-rust
-  :straight t
-  :after rust-mode
-  :hook (rust-mode . flycheck-rust-setup))
+;; [TODO: document removal]
+;; (use-package flycheck-rust
+;;   :straight t
+;;   :after rust-mode
+;;   :hook (rust-mode . flycheck-rust-setup))
 
 (use-package cargo
   :straight t
@@ -1295,6 +2073,7 @@ Set them after the first call to =rust-mode-hook=.
 
 #+begin_src elisp
 
+;; [TODO: replace this with managed direnv setup]
 (defun my/setup-rust-env ()
   "RLS requires some environment variables to be setup. We use rustup to get the values."
   (when (executable-find "rustup")
@@ -1319,10 +2098,218 @@ Set them after the first call to =rust-mode-hook=.
 
 *** Shell
 ** Misc
+*** Calculator/Calc
+I don't really know how to use Emacs' builtin calc calculator yet.
+[[https://github.com/ahyatt/emacs-calc-tutorials][Here]] is a set of seemingly very competent tutorials for it.
+
+For now, bind the main =calc= command to =C-x c=.
+Also enable evil-integration.
+
+#+begin_src elisp
+(general-define-key
+  "C-x c" 'calc)
+
+(use-config (calc evil-collection)
+  (evil-collection-calc-setup))
+#+end_src
+
 *** Files/Dired
 Dired is an Emacs mode for editing directories. It shows the output of =ls -l= which can then be acted upon.
 
-Dired is also very extensible through custom keybindings and extensions, I use a lot of them.
+Dired is also very extensible through custom keybindings and extensions, which I use quite a lot of.
+
+#+begin_src elisp
+
+(use-package dired
+  :defer t
+  :init
+  ;; most of these bindings are overriden later
+  (evil-collection-dired-setup))
+
+(use-config dired
+  (setq dired-listing-switches "-alhv")
+  (setq dired-recursive-copies 'always)
+  (setq dired-dwim-target t))
+
+#+end_src
+
+#+begin_src elisp
+
+;; use evil even without evil-collection
+(add-hook 'dired-mode-hook 'evil-normal-state)
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "h" 'backward-char
+ "j" 'next-line
+ "k" 'previous-line
+ "l" 'forward-char
+ "f" 'dired-find-file
+ "v" 'evil-visual-line
+
+ "n" 'dired-next-marked-file
+ "N" 'dired-prev-marked-file
+
+ "H" 'dired-hide-details-mode
+ "W" (lambda ()
+       (interactive)
+       (wdired-change-to-wdired-mode)
+       (evil-normal-state) (forward-char))
+
+ "<backspace>" 'dired-up-directory
+ "<RET>" 'dired-find-file
+
+ "q" 'quit-window)
+
+#+end_src
+
+**** Extensions
+
+Dired+ is an collection of different dired extensions, some of which are more useful (and less completely broken) than others.
+
+Dired+ automatically activates most of its keybindings when first loaded.
+Additionally, I bind the =image-dired= command to =C-t C-r=
+
+#+begin_src elisp
+
+(use-package dired+
+  :straight (dired+
+             :type git :host github
+             :repo "emacsmirror/emacswiki.org"
+             :files ("dired+.el"))
+  :after dired
+  :hook (dired-mode . image-dired-minor-mode)
+  :init
+  ;; setup evil and add missing lazy binds
+  (evil-collection-image-dired-setup)
+  (general-define-key
+    :keymaps 'image-dired-thumbnail-mode-map
+    :states 'normal
+    "<left>" 'image-dired-backward-image
+    "<right>" 'image-dired-forward-image
+    "<up>" 'image-dired-previous-line
+    "<down>" 'image-dired-next-line))
+
+#+end_src
+
+Image-dired is an additional mode provided by dired+ which allows for viewing image thumbnails in a separate buffer.
+It als offers in-dired thumbmail display bound to =C-t C-t=.
+
+#+begin_src elisp
+
+(general-define-key
+  :states '(normal visual insert emacs)
+  :keymaps 'dired-mode-map
+  "C-t" (cdr (assoc 20 image-dired-minor-mode-map))
+  "C-t C-r" 'image-dired)
+
+(evil-set-initial-state 'image-dired-minor-mode 'emacs)
+
+#+end_src
+
+Diredfl is a package that extracts the improved highlighting offered by dired+ and presents it in a more modern (and more importantly, not completely broken) way.
+
+#+begin_src elisp
+
+(use-package diredfl
+  :straight t
+  :after dired
+  :config
+  (diredfl-global-mode))
+
+#+end_src
+
+Dired-filter is a practical extension to dired which allows for either marking or hiding files that match a set of combineable criteria.
+It also offers creating groups based on these criteria, which I do not use.
+
+#+begin_src elisp
+
+(use-package dired-filter
+  :straight t
+  :after dired
+  :hook (dired-mode . dired-filter-mode))
+
+#+end_src
+
+Dired filter provides some convenient maps for marking and filtering, I bind them to =M= and =F= respectivly.
+
+#+begin_src elisp
+
+(general-define-key
+  :keymaps 'dired-mode-map
+  :states '(normal visual)
+  "F" dired-filter-map
+  "M" dired-filter-mark-map)
+
+#+end_src
+
+Dired-ranger is an extension offers some improvements to make dired feel more like the ranger terminal file manager.
+I mainly use its copy and paste functionality.
+
+#+begin_src elisp
+
+(use-package dired-ranger
+  :straight t
+  :after dired)
+
+#+end_src
+
+Dired-ranger does not provide any keybindings itself, so I bind the most important functionality here.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "y" 'dired-ranger-copy
+ "a" (key-fn dired-ranger-copy t)
+ "pc" 'dired-ranger-paste
+ "pm" 'dired-ranger-move
+
+ "U" (lambda ()
+       (interactive)
+       (dired-unmark-all-marks)
+       (ring-remove dired-ranger-copy-ring 0)))
+
+(general-define-key
+ :keymaps 'dired-mode-map
+ :states 'visual
+ "u" 'diredp-unmark-region-files
+ "y" (lambda ()
+       (interactive)
+       (call-interactively 'dired-mark)
+       (dired-ranger-copy nil))
+ "a" (lambda ()
+       (interactive)
+       (call-interactively 'dired-mark)
+       (dired-ranger-copy t)))
+
+#+end_src
+
+Both dired-filter and dired-ranger are maintained by the dired-hacks project.
+
+
+Dired-quick-sort is another package that aims to improve the process of easily finding the files you need by offering a hydra menu that gives access to most relevant ways of sorting files.
+
+#+begin_src elisp
+
+(use-package dired-quick-sort
+  :straight t
+  :after dired)
+
+#+end_src
+
+I bind the menu to =o=.
+
+#+begin_src elisp
+
+(general-define-key
+  :keymaps 'dired-mode-map
+  :states '(normal visual)
+  "o" 'hydra-dired-quick-sort/body)
+
+#+end_src
 
 *** Git/Magit
 Git is the most common VC system today.
@@ -1331,10 +2318,24 @@ Most open-source project use it, partly because of its great hosting support wit
 Magit is an intuitive and comprehensive graphical interface to the git CLI.
 It is widely considered the best currently existing git client.
 
+I bind the main interface to =C-x g= for easy access.
+
 #+begin_src elisp
+
 (use-package magit
   :straight t
   :defer t)
+
+(use-package evil-magit
+  :straight t
+  :after (magit)
+  :config
+  (evil-magit-init))
+
+(general-define-key
+ :prefix "C-x"
+ "g" 'magit-status)
+
 #+end_src
 
 More recently Magit also gained support for working with git forges through the additional "forge" package.
@@ -1346,6 +2347,15 @@ In order to correctly install and use magit-forge, you will need to have a C com
   :after magit)
 #+end_src
 
+*** Help
+Simply enable evil integration for help-mode.
+
+#+begin_src elisp
+(use-config evil-collection
+  (evil-collection-help-setup))
+#+end_src
+
+*** Images/Image
 *** Music/MPD
 MPD is an daemon for playing music.
 Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel for Emacs. There's also ivy-mpdel which allows for using the ivy NCS to select songs.
@@ -1465,7 +2475,7 @@ Even if you want to copy some of my settings, you will almost definitely want to
 (setq org-default-notes-file "~/Projects/notes.org")
 (setq org-todo-keywords
       '((sequence "TODO" "DOING" "|" "DONE BUT" "DONE")
-        (sequence "MAYBE" "CANCELED" "|")
+        (sequence "MAYBE" "CANCELED" "|")))
 #+end_src
 
 ***** Link types
@@ -1519,10 +2529,17 @@ Load it here.
 Navigating huge Org buffers can be difficult. org-pretty-jump tries to make that task easier by providing a good-looking ivy-based menu that can be used to jump to any headline.
 It also provides some additional functions for common Org task such as refiling as well as an easy to understand API for creating custom actions using the central menu.
 #+begin_src elisp
+
 (use-package org-pretty-jump
   :straight (org-pretty-jump :type git :host github
                              :repo "LeOtaku/org-pretty-jump")
   :after org)
+
+(general-define-key
+  :states '(normal visual)
+  "gh" 'opj-contrib/jump
+  "gH" (key-fn opj-contrib/jump 1))
+
 #+end_src
 
 Worf also makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting. [TODO: with evil,hook,"]"]
@@ -1567,8 +2584,8 @@ Moreover, I would like highlighting for some additional TODO states.
 #+begin_src elisp
 
 ;; [TODO: ensure this works]
-(defface org-canceled '(:color red) "")
-(defface org-maybe    '(:color magenta) "")
+; (defface org-canceled '(:color red) "")
+; (defface org-maybe    '(:color magenta) "")
 
 (setq org-todo-keyword-faces
       '(("TODO"      . 'org-todo)
@@ -1746,7 +2763,57 @@ Manually add support for it here.
     t))
 #+end_src
 
+**** Tangle
+Babel-tangle is org-babels builtin way of exporting source blocks to actual code.
+It provides a rich syntax for specifing how any specific source block should be tangled.
+
+Unfortunately it is sinfully slow as well as syncronous/blocking, making working with it a chore.
+I mitigate this problem by using the great [[https://github.com/OrgTangle/ntangle][ntangle]], which is a near-complete org-tangle replacement written in the Nim language.
+
+As of right now Nim integration is lacking in Nix/Nixpkgs, so I have ntangle installed in my home directory under =~/.nimble/bin/ntangle=. [TODO: make proper nix pkg description]
+For now add a =:before-while= advice to =org-babel-tangle= that tests for the existence of the binary and runs it instead of the default elisp tangle.
+This currently does NOT respect any of the arguments passed to =org-babel-tangle=.
+
+Using the same mechanism, I also define the =reload-org= command, which acts like my default =reload= command, but tries to retangle the current init file before performing the reload.
+
+#+begin_src elisp
+(defun my/org-ntangle-maybe-tangle-file (file)
+  (let ((bin (f-join (getenv "HOME") ".nimble/bin/ntangle")))
+    (if (f-exists-p bin)
+        (start-process
+         ;; name + buffer + cmd
+         "org-async-tangle" "*org-ntangle-process*" bin
+         ;; arguments
+         file)
+      nil)))
+
+(advice-add 'org-babel-tangle :before-while 'my/advice-org-babel-tangle)
+(defun my/advice-org-babel-tangle (&optional arg target-file lang)
+  (if (derived-mode-p 'org-mode)
+      (progn
+        (if (my/org-ntangle-maybe-tangle-file buffer-file-name)
+            (message "org-ntangle-tangle: tried to tangle file"))
+        nil)
+    t))
+
+(defun reload-org ()
+  "Reload init.org with optional straight integration"
+  (interactive)
+  (if (my/org-ntangle-maybe-tangle-file
+       (f-swap-ext user-init-file "org"))
+      (progn
+        (reload)
+        (message (format "org-ntangle-tangle: tried to tangle file + performed reload")))
+    (message "org-ntangle-tangle: missing binary")))
+#+end_src
+
+*** Reading
+**** PDF/pdf-tools
+**** EPUB/nov.el
 *** RSS/Elfeed
+*** IRC/?
+*** Tramp
+
 * End
 
 I'm pretty sure putting this here actually makes any difference for my setup but it seem to be tradition to have it. 
