@@ -1613,8 +1613,10 @@ Yasnippet comes with a set of snippets preinstalled. I additionaly define my own
 
 #+begin_src elisp
 ;; [TODO: manage snippets]
-(org-babel-tangle-file (f-join user-emacs-directory "snippets.org"))
-(load-file (f-join user-emacs-directory "snippets.el"))
+(use-config org
+  (org-babel-tangle-file (f-join user-emacs-directory "snippets.org"))
+  (load-file (f-join user-emacs-directory "snippets.el")))
+
 #+end_src
 
 *** Jumping
@@ -2562,20 +2564,18 @@ Add the required entries here.
 
 #+begin_src elisp
 
-(use-config org-mode
-  (setq my/org-list-font-locks
-        '(("^ *\\([0-9]+\\.\\)" (1 'bold))
-          ("^ *\\([0-9]+)\\)" (1 'bold))
-          ("^ *\\([+-]\\)" (1 'bold))
-          ("^ +\\([*]\\)" (1 'bold))))
-  
-  (setq my/org-misc-font-locks
-        '(("\\(->\\)" (1 'bold))
-          ("\\(@\\)" (1 'org-meta-line))))
+(setq my/org-list-font-locks
+      '(("^ *\\([0-9]+\\.\\)" 1 'bold)
+        ("^ *\\([0-9]+)\\)" 1 'bold)
+        ("^ *\\([+-]\\)" 1 'bold)
+        ("^ +\\([*]\\)" 1 'bold)))
 
-  (font-lock-add-keywords 'org-mode (concat
-                                     my/org-misc-font-locks
-                                     my/org-list-font-locks)))
+(setq my/org-misc-font-locks
+      '(("\\(->\\)" 1 'bold)
+        ("\\(@\\)" 1 'org-meta-line)))
+
+(font-lock-add-keywords 'org-mode my/org-list-font-locks)
+(font-lock-add-keywords 'org-mode my/org-misc-font-locks)
 
 #+end_src
 
