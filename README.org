@@ -1,13 +1,19 @@
 #+TITLE: =~/.emacs.d=
 
-My non-literate configuration for the GNU Emacs text editor/operating system.
+My literate configuration for the GNU Emacs system, managed using org-mode.
 
-Currently, among other things, contains a customized theme 
-and dashboard based on [[http://emacs.sexy/][emacs.sexy]].
+This repository contains several important files:
+- init.org :: the main configuration file. tangled to init.el via org/ntangle
+- snippets.org :: the file where my yasnippet snippets are stored. 
+- unmanaged :: lisp code or other resources that are not substantial enough to be packaged
+  - themes :: my personal emacs theme(s)
+  - icons :: png icons taken from [[https:emacs.sexy][emacs.sexy]]
+- straight :: directory where straight.el stores its files.
+  - versions/defaut.el :: lockfile for straight.el
+- var :: managed by no-littering.el
+- etc :: managed by no-littering.el
 
-This configuration makes heavy use of the great
-[[https://github.com/raxod502/straight.el][straight.el]] and [[https://github.com/jwiegley/use-package][use-package]] for configuration management,
-and also defines a new =use-config= macro.
+In the future this repo will also contain a valid nix expression for the ntangle tool, which I use to tangle my org-mode configuration files.
 
 ** Current look
-[[./resources/scrot/default.png]]
+[[file:scrot.png]]

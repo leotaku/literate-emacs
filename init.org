@@ -464,7 +464,7 @@ I personally happen to enjoy the doom, sanityinc and poet families of themes.
 I have also created my own theme
 
 #+begin_src elisp
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes")
+(add-to-list 'custom-theme-load-path (f-join user-emacs-directory "unmanaged/themes"))
 #+end_src
 
 By default Emacs seems to assume that all themes are in fact malware. Disable this behavior.
@@ -587,7 +587,7 @@ Some keys for easier dashboard navigation are bound.
   :after (evil projectile))
 
 (use-config dashboard
-  (setq dashboard-startup-banner "~/.emacs.d/resources/icon.png")
+  (setq dashboard-startup-banner (f-join user-emacs-directory "unmanaged/icons/icon.png"))
   (setq dashboard-banner-logo-title "Emacs is sexy!")
   (setq dashboard-items '((recents  . 5)
                           (projects . 5)
@@ -595,11 +595,11 @@ Some keys for easier dashboard navigation are bound.
                           (agenda . 5))))
 
 (general-define-key
- :keymaps 'dashboard-mode-map
- :states 'normal
- "SPC" 'dashboard-next-section
- "S-SPC" 'dashboard-previous-section
- "r" 'dashboard-refresh-buffer)
+  :keymaps 'dashboard-mode-map
+  :states 'normal
+  "SPC" 'dashboard-next-section
+  "S-SPC" 'dashboard-previous-section
+  "r" 'dashboard-refresh-buffer)
 
 #+end_src
 
