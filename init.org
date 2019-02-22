@@ -245,9 +245,6 @@ General allows for easy mapping of keys to commands by adding an abstraction ove
   :straight t
   :defer t)
 
-;; TODO: test this
-(put 'general-define-key 'lisp-indent-function 'defun)
-
 #+end_src
 
 **** general key-fn
@@ -582,6 +579,7 @@ It, like the name suggests, provides a dashboard that can display all different 
 Some keys for easier dashboard navigation are bound.
 
 #+begin_src elisp
+
 (use-package dashboard
   :straight t
   :after (evil projectile))
@@ -595,11 +593,11 @@ Some keys for easier dashboard navigation are bound.
                           (agenda . 5))))
 
 (general-define-key
-  :keymaps 'dashboard-mode-map
-  :states 'normal
-  "SPC" 'dashboard-next-section
-  "S-SPC" 'dashboard-previous-section
-  "r" 'dashboard-refresh-buffer)
+ :keymaps 'dashboard-mode-map
+ :states 'normal
+ "SPC" 'dashboard-next-section
+ "S-SPC" 'dashboard-previous-section
+ "r" 'dashboard-refresh-buffer)
 
 #+end_src
 
@@ -780,33 +778,33 @@ These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
 #+begin_src elisp
 
 (general-define-key
-  :keymaps 'override
-  :states '(normal insert visual motion emacs)
-  :prefix "C-a"
-  "s" 'ace-window
-  "o" 'other-window
-  "O" (key-fn other-window -1)
+ :keymaps 'override
+ :states '(normal insert visual motion emacs)
+ :prefix "C-a"
+ "s" 'ace-window
+ "o" 'other-window
+ "O" (key-fn other-window -1)
 
-  "d" (key-fn switch-to-buffer "*dashboard*")
-  "c" 'my/eyebrowse-projectile-project
-  
-  "n" 'eyebrowse-next-window-config
-  "p" 'eyebrowse-prev-window-config
-  "a" 'delete-other-windows
-  "x" 'my/close-window-or-eyebrowse
-  "X" 'eyebrowse-close-window-config
+ "d" (key-fn switch-to-buffer "*dashboard*")
+ "c" 'my/eyebrowse-projectile-project
+ 
+ "n" 'eyebrowse-next-window-config
+ "p" 'eyebrowse-prev-window-config
+ "a" 'delete-other-windows
+ "x" 'my/close-window-or-eyebrowse
+ "X" 'eyebrowse-close-window-config
 
-  "w" 'split-window-vertically
-  "q" 'split-window-horizontally
-  
-  "h" 'evil-window-left
-  "j" 'evil-window-down
-  "k" 'evil-window-up
-  "l" 'evil-window-right
-  "C-k" (key-fn evil-window-move-very-top)
-  "C-j" (key-fn evil-window-move-very-bottom)
-  "C-h" (key-fn evil-window-move-far-left)
-  "C-l" (key-fn evil-window-move-far-right))
+ "w" 'split-window-vertically
+ "q" 'split-window-horizontally
+ 
+ "h" 'evil-window-left
+ "j" 'evil-window-down
+ "k" 'evil-window-up
+ "l" 'evil-window-right
+ "C-k" (key-fn evil-window-move-very-top)
+ "C-j" (key-fn evil-window-move-very-bottom)
+ "C-h" (key-fn evil-window-move-far-left)
+ "C-l" (key-fn evil-window-move-far-right))
 
 ;; [TODO: define functions]
 
@@ -947,9 +945,9 @@ Also bind =j+k= to go from insert to normal state through key-chord. [TODO: test
 #+begin_src elisp
 
 (general-define-key
-  :states '(insert)
-  (general-chord "jk") 'evil-normal-state
-  (general-chord "kj") 'evil-normal-state)
+ :states '(insert)
+ (general-chord "jk") 'evil-normal-state
+ (general-chord "kj") 'evil-normal-state)
 
 #+end_src
 
@@ -985,8 +983,8 @@ To perfectly emulate vim, evil also rebinds certain mouse clicks/actions. I find
 
 #+begin_src elisp
 (general-define-key
-  :keymaps 'evil-motion-state-map
-  [down-mouse-1] nil)
+ :keymaps 'evil-motion-state-map
+ [down-mouse-1] nil)
 #+end_src
 
 **** Ivy
@@ -1050,10 +1048,10 @@ I also rebind =<escape>= here to ensure it always closes the hydra.
 #+begin_src elisp
 
 (general-define-key
-  :keymaps 'ivy-minibuffer-map
-  :states '(insert normal)
-  "C-o" 'better-ivy/body
-  "<escape>" 'better-ivy/keyboard-escape-quit-and-exit)
+ :keymaps 'ivy-minibuffer-map
+ :states '(insert normal)
+ "C-o" 'better-ivy/body
+ "<escape>" 'better-ivy/keyboard-escape-quit-and-exit)
 
 (defun better-ivy/get-ivy-matcher-desc ()
   "Return description of `ivy--regex-function'."
@@ -1413,11 +1411,28 @@ Note that motions that operate on lines such as for example "dd" still operate o
   (evil-first-non-blank-of-visual-line)
   (evil-insert 1))
 
-;; [MAYBE TODO: make sure this properly finds the last char]
+;; [MAYBE TODO: make sure these properly finds the last char]
 (defun my/evil-visual-line-A ()
   (interactive)
   (evil-end-of-visual-line)
   (evil-insert 1))
+
+(defun my/evil-visual-line-C ()
+  (interactive)
+  (evil-end-of-visual-line)
+  (evil-delete (point)
+               (progn
+                 (evil-end-of-visual-line)
+                 (point)))
+  (evil-insert))
+
+(defun my/evil-visual-line-D ()
+  (interactive)
+  (evil-end-of-visual-line)
+  (evil-delete (point)
+               (progn
+                 (evil-end-of-visual-line)
+                 (point))))
 
 #+end_src
 
@@ -1432,10 +1447,10 @@ Note that motions that operate on lines such as for example "dd" still operate o
  "$" 'evil-end-of-visual-line
  "I" 'my/evil-visual-line-I
  "A" 'my/evil-visual-line-A
- "D" "d$"
- "C" "c$"
- "<down>" "j"
- "<up>" "k")
+ "D" 'my/evil-visual-line-D
+ "C" 'my/evil-visual-line-C
+ "<down>" 'evil-next-visual-line
+ "<up>" 'evil-previous-visual-line)
 
 (general-define-key
  :states '(normal insert)
@@ -1492,9 +1507,9 @@ I like this behavior, so I implement and bind it here.
     (indent-according-to-mode)))
 
 (general-define-key
-  :states 'insert
-  "<backspace>" 'my/smart-backspace
-  "<C-backspace>" 'my/smart-backspace-word)
+ :states 'insert
+ "<backspace>" 'my/smart-backspace
+ "<C-backspace>" 'my/smart-backspace-word)
 
 #+end_src
 
@@ -1531,9 +1546,9 @@ I additionally bind my personal DWIM widen command to normal =zw=.
    (t (widen))))
 
 (general-define-key
-  :states '(normal visual)
-  "zn" 'my/narrow-dwim
-  "zw" 'my/widen-dwim)
+ :states '(normal visual)
+ "zn" 'my/narrow-dwim
+ "zw" 'my/widen-dwim)
 
 #+end_src
 
@@ -1634,10 +1649,10 @@ I bind =s= to =evil-avy-goto-char= and =SPC= to =evil-avy-goto-word-or-subword-1
   (setq avy-case-fold-search nil))
 
 (general-define-key
-  :states '(normal visual)
-  "s" 'evil-avy-goto-char
-  "S" nil
-  "SPC" 'evil-avy-goto-word-or-subword-1)
+ :states '(normal visual)
+ "s" 'evil-avy-goto-char
+ "S" nil
+ "SPC" 'evil-avy-goto-word-or-subword-1)
 
 #+end_src
 
@@ -1818,13 +1833,17 @@ Misc company setting, mostly related to frontend display. [TODO: set best fronte
                             company-pseudo-tooltip-frontend
                             company-echo-metadata-frontend)))
 
-(general-define-key
+(general-unbind
   :keymaps 'company-active-map
   :states nil
-  "<return>" 'newline-and-indent
-  "<tab>" 'company-select-next
-  "<backtab>" 'company-select-previous
-  "<C-y>" 'company-complete)
+  "<return>")
+
+(general-define-key
+ :keymaps 'company-active-map
+ :states nil
+ "<tab>" 'company-select-next
+ "<backtab>" 'company-select-previous
+ "<C-y>" 'company-complete)
 
 #+end_src
 
@@ -2184,14 +2203,15 @@ Additionally, I bind the =image-dired= command to =C-t C-r=
   :hook (dired-mode . image-dired-minor-mode)
   :init
   ;; setup evil and add missing lazy binds
-  (evil-collection-image-dired-setup)
-  (general-define-key
-    :keymaps 'image-dired-thumbnail-mode-map
-    :states 'normal
-    "<left>" 'image-dired-backward-image
-    "<right>" 'image-dired-forward-image
-    "<up>" 'image-dired-previous-line
-    "<down>" 'image-dired-next-line))
+  (evil-collection-image-dired-setup))
+
+(general-define-key
+   :keymaps 'image-dired-thumbnail-mode-map
+   :states 'normal
+   "<left>" 'image-dired-backward-image
+   "<right>" 'image-dired-forward-image
+   "<up>" 'image-dired-previous-line
+   "<down>" 'image-dired-next-line)
 
 #+end_src
 
@@ -2201,10 +2221,10 @@ It als offers in-dired thumbmail display bound to =C-t C-t=.
 #+begin_src elisp
 
 (general-define-key
-  :states '(normal visual insert emacs)
-  :keymaps 'dired-mode-map
-  "C-t" (cdr (assoc 20 image-dired-minor-mode-map))
-  "C-t C-r" 'image-dired)
+ :states '(normal visual insert emacs)
+ :keymaps 'dired-mode-map
+ "C-t" (cdr (assoc 20 image-dired-minor-mode-map))
+ "C-t C-r" 'image-dired)
 
 (evil-set-initial-state 'image-dired-minor-mode 'emacs)
 
@@ -2239,10 +2259,10 @@ Dired filter provides some convenient maps for marking and filtering, I bind the
 #+begin_src elisp
 
 (general-define-key
-  :keymaps 'dired-mode-map
-  :states '(normal visual)
-  "F" dired-filter-map
-  "M" dired-filter-mark-map)
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "F" dired-filter-map
+ "M" dired-filter-mark-map)
 
 #+end_src
 
@@ -2307,9 +2327,9 @@ I bind the menu to =o=.
 #+begin_src elisp
 
 (general-define-key
-  :keymaps 'dired-mode-map
-  :states '(normal visual)
-  "o" 'hydra-dired-quick-sort/body)
+ :keymaps 'dired-mode-map
+ :states '(normal visual)
+ "o" 'hydra-dired-quick-sort/body)
 
 #+end_src
 
@@ -2538,9 +2558,9 @@ It also provides some additional functions for common Org task such as refiling 
   :after org)
 
 (general-define-key
-  :states '(normal visual)
-  "gh" 'opj-contrib/jump
-  "gH" (key-fn opj-contrib/jump 1))
+ :states '(normal visual)
+ "gh" 'opj-contrib/jump
+ "gH" (key-fn opj-contrib/jump 1))
 
 #+end_src
 
