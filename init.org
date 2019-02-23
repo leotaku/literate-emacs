@@ -2377,7 +2377,8 @@ In order to correctly install and use magit-forge, you will need to have a C com
 
 #+begin_src elisp
 (use-package forge
-  :straight (forge :host github :repo "magit/forge")
+  :straight (forge :type git :host github
+                   :repo "magit/forge")
   :after magit)
 #+end_src
 
