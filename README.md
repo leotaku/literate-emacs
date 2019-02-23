@@ -1,12 +1,11 @@
 <div align="center">
     <h1><i>Literate Emacs</i></h1>
-    a literate Emacs configuration using <a href="https://orgmode.org/">org</a>/<a href="https://github.com/OrgTangle/ntangle">ntangle</a>
-    <div></div>
+    a literate Emacs configuration using modern tooling
 </div>
 <h3></h3>
 
 This repository contains several important files:
-- init.org :: the main configuration file. tangled to init.el via org/ntangle
+- init.org :: the main configuration file. tangled to init.el via [org](https://orgmode.org/)/[ntangle](https://github.com/OrgTangle/ntangle)
 - snippets.org :: the file where my [yasnippet](https://github.com/joaotavora/yasnippet) snippets are stored. 
 - unmanaged :: lisp code or other resources that are not substantial enough to be packaged
   - themes :: my personal emacs theme(s)
