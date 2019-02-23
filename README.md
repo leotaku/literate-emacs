@@ -13,7 +13,7 @@ This repository contains several important files:
   - icons :: png icons taken from [emacs.sexy](http://emacs.sexy)
 - straight :: directory where [straight.el](https://github.com/raxod502/straight.el) stores its files.
   - versions/defaut.el :: lockfile for straight.el
-- var :: managed by [https://github.com/emacscollective/no-littering](no-littering.el)
+- var :: managed by [no-littering.el](https://github.com/emacscollective/no-littering)
 - etc :: managed by no-littering.el
 
 In the future this repo will also contain a valid [nix](https://nixos.org/nix/) expression for the ntangle tool, which I use to tangle my org-mode configuration files.
