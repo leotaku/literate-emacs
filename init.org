@@ -287,6 +287,18 @@ Key-chord strangely sends a message when it is enabled. Mitigate this by checkin
    (key-chord-mode 1)))
 #+end_src
 
+*** unpackaged.el
+Unpackaged.el is a collection of miscellaneous lisp snippets that are useful, but are not substantial enough to be packaged.
+I use some of its functionality in my configuration.
+
+[MAYBE: remove this and copy all used snippets for easier editing]
+
+#+begin_src elisp
+(use-package unpackaged
+  :straight (unpackaged :type git :host github
+                        :repo "alphapapa/unpackaged.el"))
+#+end_src
+
 *** lib
 **** async
 Async is an emacs-lisp library which offers primitive async/multithreading support through additional processes.
@@ -2540,6 +2552,17 @@ Some of these I have created myself, some are provided by Org.
 I enjoy writing prose in visual line mode. Add the required hook here.
 #+begin_src elisp
 (add-hook 'org-mode-hook 'visual-line-mode)
+#+end_src
+
+The default keybindings for =<return>= and =<C-return>= only really work for outline headings. I bind the indentation-aware return to =<return>= and =unpackaged/org-return-dwim= for better list support.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps 'org-mode-map
+ "<return>" 'org-return-indent
+ "<C-return>" 'unpackaged/org-return-dwim)
+
 #+end_src
 
 As of Org 9.2 "org-tempo" is no longer loaded by default. It allows for easy insertion of code blocks through contextual binding like =<s|<TAB>=.
