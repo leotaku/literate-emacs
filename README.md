@@ -1,7 +1,7 @@
-<p align="center">
+<div align="center">
     <h1><i>Literate Emacs</i></h1>
     a literate Emacs configuration using <a href="https://orgmode.org/">org</a>/<a href="https://github.com/OrgTangle/ntangle">ntangle</a>
-</p>
+</div>
 
 This repository contains several important files:
 - init.org :: the main configuration file. tangled to init.el via org/ntangle
