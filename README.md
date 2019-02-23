@@ -3,6 +3,7 @@
     a literate Emacs configuration using <a href="https://orgmode.org/">org</a>/<a href="https://github.com/OrgTangle/ntangle">ntangle</a>
     <div></div>
 </div>
+<h3></h3>
 
 This repository contains several important files:
 - init.org :: the main configuration file. tangled to init.el via org/ntangle
