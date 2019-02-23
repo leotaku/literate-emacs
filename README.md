@@ -1,6 +1,7 @@
-<div align="center" style="margin-bottom: 20px;">
+<div align="center">
     <h1><i>Literate Emacs</i></h1>
     a literate Emacs configuration using <a href="https://orgmode.org/">org</a>/<a href="https://github.com/OrgTangle/ntangle">ntangle</a>
+    </div>
 </div>
 
 This repository contains several important files:
