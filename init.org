@@ -381,6 +381,12 @@ Disable Emacs from following symlinks as it can lead to unexpected behavior.
 (setq find-file-visit-truename nil)
 #+end_src
 
+Set =recenter-positions= to =top= only, so that =C-l= always behaves like it would in terminal.
+
+#+begin_src elisp
+(setq recenter-positions '(top))
+#+end_src
+
 *** Commands
 This subtree contains miscellaneous user-facing commands that I use to manage my Emacs sessions.
 They are not prefixed with =my/=.
