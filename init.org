@@ -2856,6 +2856,53 @@ Using the same mechanism, I also define the =reload-org= command, which acts lik
 **** EPUB/nov.el
 *** RSS/Elfeed
 *** IRC/?
+*** Shell-pop
+Shell-pop is an Emacs package that allows you to quickly pop up a unix shell in the current directory.
+I use it to quickly open up an =ansi-term= terminal when I need one.
+
+#+begin_src elisp
+
+(use-package shell-pop
+  :straight t)
+
+(use-config shell-pop
+  ;; taken from the Pragmatic Emacs blog
+  (setq shell-pop-shell-type (quote ("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))))
+  (setq shell-pop-term-shell (getenv "SHELL"))
+  ;; need to do this manually or not picked up by `shell-pop'
+  (shell-pop--set-shell-type 'shell-pop-shell-type shell-pop-shell-type))
+
+(general-define-key
+ ;; override is needed for adding to "C-a" prefix
+ :keymaps 'override
+ "C-x t" 'shell-pop
+ "C-a t" 'shell-pop)
+
+#+end_src
+
+*** Terminal/Term
+Term and ansi-term are compelling alternatives to the classical Emacs shell or eshell functionality.
+
+I bind some keys to emulate the "typical" UNIX-terminal.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps '(term-raw-map term-mode-map)
+ :states '(insert normal visual emacs)
+ ;; dirty shell-pop intergration
+ "C-d" (lambda ()
+         (interactive)
+         (if (string= (buffer-name) shell-pop-last-shell-buffer-name)
+             (call-interactively 'shell-pop)
+           (my/quit-window-kill-buffer)))
+ "C-a t" 'shell-pop
+ "C-c" 'term-interrupt-subjob
+ "C-h" help-map
+ "M-x" 'counsel-M-x)
+
+#+end_src
+
 *** Tramp
 
 * End
