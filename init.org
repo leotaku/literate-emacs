@@ -2129,6 +2129,25 @@ Set them after the first call to =rust-mode-hook=.
 
 #+end_src
 
+*** Scheme
+Geiser is an interaction mode similar to SLIME but for Scheme-like languages.
+General highlighting/indentation support is provided by Emacs.
+
+#+begin_src elisp
+
+(use-package geiser
+  :straight t
+  :defer t
+  :config
+  (setq geiser-repl-save-debugging-history-p t))
+
+
+(general-define-key
+ :keymaps 'geiser-repl-mode-map
+ "C-d" 'my/quit-window-kill-buffer)
+
+#+end_src
+
 *** Shell
 ** Misc
 *** Calculator/Calc
@@ -2144,6 +2163,33 @@ Also enable evil-integration.
 
 (use-config (calc evil-collection)
   (evil-collection-calc-setup))
+#+end_src
+
+*** REPL/Comint
+Comint is an Emacs library/mode that is used by other packages that want to define REPL-style interfaces. For example, SLIME, geiser and SQL-mode are all based on comint.
+By correctly configuring comint I ensure that all of these interfaces operate the way I like.
+
+I want all my REPLs to use readline-like bindings for most common operations so I don't get confused when switching between Emacs and Bash/Zsh.
+
+Some of these might be overriden by specific comint-derived modes, this is then managed in their respective buffers.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps '(comint-mode-map)
+ "C-l" 'comint-clear-buffer
+ "<up>" 'comint-previous-input
+ "<down>" 'comint-next-input
+ "C-r" 'comint-history-isearch-backward
+ "C-d" 'my/quit-window-kill-buffer
+ "C-c" 'comint-interrupt-subjob)
+
+#+end_src
+
+Smartparens messes with the editing model of lisp repls (geiser, SLIME) which expect you to manually insert parentheses, so I disable it for all comint-derived modes.
+
+#+begin_src elisp
+(add-hook 'comint-mode-hook (lambda () (smartparens-mode -1)))
 #+end_src
 
 *** Files/Dired
