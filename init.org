@@ -1674,7 +1674,7 @@ Expand-region is an Emacs package that exports one central command =er/expand-re
 While it has some integration with specific major modes (eg. org-mode) most of its power comes from the fact that it works well with generic constructs used in most buffers.
 
 I globally bind it to =C-0= and =+= in normal mode for easy access.
-I also bind normal =-= to =er/cotract-region=, but that does not work with manually set regions and thus is pretty useless.
+I also used to bind normal =-= to =er/cotract-region=, but that does not work with manually set regions and thus is pretty useless.
 #+begin_src elisp
 
 (use-package expand-region
@@ -1686,7 +1686,8 @@ I also bind normal =-= to =er/cotract-region=, but that does not work with manua
 (general-define-key
  :states '(normal visual)
  "+" 'er/expand-region
- "-" 'er/contract-region)
+ ;;"-" 'er/contract-region
+ )
 
 
 #+end_src
