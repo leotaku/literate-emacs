@@ -1437,16 +1437,14 @@ Note that motions that operate on lines such as for example "dd" still operate o
 
 (defun my/evil-visual-line-C ()
   (interactive)
-  (evil-end-of-visual-line)
   (evil-delete (point)
                (progn
                  (evil-end-of-visual-line)
                  (point)))
-  (evil-insert))
+  (evil-insert 1))
 
 (defun my/evil-visual-line-D ()
   (interactive)
-  (evil-end-of-visual-line)
   (evil-delete (point)
                (progn
                  (evil-end-of-visual-line)
