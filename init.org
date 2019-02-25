@@ -2935,7 +2935,7 @@ It provides a rich syntax for specifing how any specific source block should be 
 Unfortunately it is sinfully slow as well as syncronous/blocking, making working with it a chore.
 I mitigate this problem by using the great [[https://github.com/OrgTangle/ntangle][ntangle]], which is a near-complete org-tangle replacement written in the Nim language.
 
-As of right now Nim integration is lacking in Nix/Nixpkgs, so I have ntangle installed in my home directory under =~/.nimble/bin/ntangle=. [TODO: make proper nix pkg description]
+As of right now Nim integration is lacking in Nix/Nixpkgs, so I have ntangle installed in my home directory under =~/.nimble/bin/ntangle=. [TODO: create proper nix pkg description]
 For now add a =:before-while= advice to =org-babel-tangle= that tests for the existence of the binary and runs it instead of the default elisp tangle.
 This currently does NOT respect any of the arguments passed to =org-babel-tangle=.
 
@@ -2947,7 +2947,7 @@ Using the same mechanism, I also define the =reload-org= command, which acts lik
     (if (f-exists-p bin)
         (start-process
          ;; name + buffer + cmd
-         "org-async-tangle" "*org-ntangle-process*" bin
+         "org-ntangle-tangle" "*org-ntangle-process*" bin
          ;; arguments
          file)
       nil)))
