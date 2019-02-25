@@ -1651,7 +1651,7 @@ I use avy for jumping to arbitrary characters.
 Avy also offers some integration with other constructs and modes (notably lispy).
 Evil additionally provides motions for all default avy commands.
 
-I bind =s= to =evil-avy-goto-char= and =SPC= to =evil-avy-goto-word-or-subword-1=.
+I used to bind =s= to =evil-avy-goto-char= and =SPC= to =evil-avy-goto-word-or-subword-1=, but now I just use =evil-avy-goto-word-or-subword-1= on =s=.
 
 #+begin_src elisp
 
@@ -1662,9 +1662,8 @@ I bind =s= to =evil-avy-goto-char= and =SPC= to =evil-avy-goto-word-or-subword-1
 
 (general-define-key
  :states '(normal visual)
- "s" 'evil-avy-goto-char
- "S" nil
- "SPC" 'evil-avy-goto-word-or-subword-1)
+ "s" 'evil-avy-goto-word-or-subword-1
+ "S" nil)
 
 #+end_src
 
