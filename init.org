@@ -1845,14 +1845,11 @@ Misc company setting, mostly related to frontend display. [TODO: set best fronte
                             company-pseudo-tooltip-frontend
                             company-echo-metadata-frontend)))
 
-(general-unbind
-  :keymaps 'company-active-map
-  :states nil
-  "<return>")
-
 (general-define-key
  :keymaps 'company-active-map
  :states nil
+ "RET" nil
+ "<return>" nil
  "<tab>" 'company-select-next
  "<backtab>" 'company-select-previous
  "<C-y>" 'company-complete)
