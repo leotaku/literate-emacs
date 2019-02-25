@@ -1816,7 +1816,77 @@ It also has great support for =nix= through use of the =use_nix= statement.
 (use-package direnv
   :straight t
   :config
-  (direnv-mode 1))
+  (direnv-mode 0))
+#+end_src
+
+**** ad-hoc
+Ad-hoc is a wrapper arround direnv written by me that enables loading of ad-hoc nix environments by writing variables to a default.nix file and then loading the enironment of the directory containing it.
+
+If it becomes more complex, I should probably split it into a separate package.
+
+NOTE: if you want to use this yourself, currently ad-hoc turns off direnv-mode when it is active, as it otherwise tries to reset the variables.
+Run =ad-hoc-env-exit= to resume normal operation (this also reenables direnv-mode if it was enabled when =ad-hoc-env-enter= was run).
+Enabling/disabling direnv-mode while in an ad-hoc environment is currently not supported. Again, please just run =ad-hoc-env-exit= first.
+NOTE:
+
+Using this code requires the following directory structure inside your =user-emacs-directory=:
++ direnv
+  + active
+    .envrc 
+    default.nix
+  + inactive
+
+Contents of .envrc:
+#+begin_src sh :tangle no
+use_nix
+#+end_src
+
+#+begin_src elisp
+
+(defvar ad-hoc-direnv-active-directory
+  (f-join user-emacs-directory "direnv" "active"))
+
+(defvar ad-hoc-direnv-inactive-directory
+  (f-join user-emacs-directory "direnv" "inactive"))
+
+(defun ad-hoc-write (string)
+  (write-region
+   (format "
+with import <nixpkgs> {};
+stdenv.mkDerivation {
+  name = \"env\";
+  buildInputs = [%s];
+}" string)
+   nil
+   (f-join ad-hoc-direnv-active-directory "default.nix")))
+
+;; TODO: rewrite this for async loading
+
+(defun ad-hoc-update (string)
+  (ad-hoc-write string)
+  (message "ad-hoc: Waiting for direnv (C-g to cancel)")
+  (direnv-update-directory-environment ad-hoc-direnv-active-directory t))
+
+;; TODO: rewrite this as a global minor mode
+
+(defun ad-hoc-env-enter ()
+  (interactive)
+  (if (bound-and-true-p direnv-mode)
+      (setq ad-hoc-direnv-was-enabled t)
+    (setq ad-hoc-direnv-was-enabled nil))
+  (setq ad-hoc-in-env t)
+  (direnv--disable)
+  (ad-hoc-update (read-string "packages: ")))
+
+(defun ad-hoc-env-exit ()
+  (interactive)
+  (unless (bound-and-true-p ad-hoc-in-env)
+    (user-error "Not in ad-hoc environment"))
+  (setq ad-hoc-in-env nil)
+  (if ad-hoc-direnv-was-enabled
+      (direnv--enable)
+    (direnv-update-directory-environment ad-hoc-direnv-inactive-directory)))
+
 #+end_src
 
 *** Company
