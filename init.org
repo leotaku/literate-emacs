@@ -2424,11 +2424,13 @@ I bind the main interface to =C-x g= for easy access.
 More recently Magit also gained support for working with git forges through the additional "forge" package.
 In order to correctly install and use magit-forge, you will need to have a C compiler (eg. gcc) when first running any forge command. [TODO: this is suboptimal]
 
+I currently disable this package, as it still is somewhat buggy and I don't really use it.
+
 #+begin_src elisp
-(use-package forge
-  :straight (forge :type git :host github
-                   :repo "magit/forge")
-  :after magit)
+;; (use-package forge
+;;   :straight (forge :type git :host github
+;;                    :repo "magit/forge")
+;;   :after magit)
 #+end_src
 
 *** Help
