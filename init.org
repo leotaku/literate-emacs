@@ -1487,6 +1487,7 @@ What that mostly boils down to is that when on an empty line indented, pressing 
 
 I like this behavior, so I implement and bind it here.
 [TODO: find out how/if this conflicts with special lispy bindings or others]
+[TODO: the keybindings are currently only bound in =prog-mode=, so that other functionality (eg. ansi-term) is not affected. Find out how to fix this]
 
 #+begin_src elisp
 
@@ -1519,6 +1520,7 @@ I like this behavior, so I implement and bind it here.
     (indent-according-to-mode)))
 
 (general-define-key
+ :keymaps 'prog-mode-map
  :states 'insert
  "<backspace>" 'my/smart-backspace
  "<C-backspace>" 'my/smart-backspace-word)
