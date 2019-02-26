@@ -2967,22 +2967,32 @@ It provides a rich syntax for specifing how any specific source block should be 
 Unfortunately it is sinfully slow as well as syncronous/blocking, making working with it a chore.
 I mitigate this problem by using the great [[https://github.com/OrgTangle/ntangle][ntangle]], which is a near-complete org-tangle replacement written in the Nim language.
 
-As of right now Nim integration is lacking in Nix/Nixpkgs, so I have ntangle installed in my home directory under =~/.nimble/bin/ntangle=. [TODO: create proper nix pkg description]
 For now add a =:before-while= advice to =org-babel-tangle= that tests for the existence of the binary and runs it instead of the default elisp tangle.
 This currently does NOT respect any of the arguments passed to =org-babel-tangle=.
+
+A Nix expression for the ntangle tool is provided with this configuration. It lives in the [[file:nix/][nix]] folder in this repository and can easily be installed through =nix-env= in the following fashion:
+
+#+begin_src sh :tangle no
+nix-env -f ~/.emacs.d/nix/easy-install.nix -iA ntangle
+#+end_src
+
+You may also manually set the path to the correct binary yourself through the =my/org-ntangle-bin= variable.
 
 Using the same mechanism, I also define the =reload-org= command, which acts like my default =reload= command, but tries to retangle the current init file before performing the reload.
 
 #+begin_src elisp
+
+(defvar my/org-ntangle-bin
+  (executable-find "ntangle"))
+
 (defun my/org-ntangle-maybe-tangle-file (file)
-  (let ((bin (f-join (getenv "HOME") ".nimble/bin/ntangle")))
-    (if (f-exists-p bin)
-        (start-process
-         ;; name + buffer + cmd
-         "org-ntangle-tangle" "*org-ntangle-process*" bin
-         ;; arguments
-         file)
-      nil)))
+  (if (f-exists-p my/org-ntangle-bin)
+      (start-process
+       ;; name + buffer + cmd
+       "org-ntangle-tangle" "*org-ntangle-process*" my/org-ntangle-bin
+       ;; arguments
+       file)
+    nil))
 
 (advice-add 'org-babel-tangle :before-while 'my/advice-org-babel-tangle)
 (defun my/advice-org-babel-tangle (&optional arg target-file lang)
@@ -3075,6 +3085,11 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE change ntangle to accomodate global install
+<2019-02-27 Wed>
+*** DONE add nix directory
+<2019-02-27 Wed>
+Currently contains ntangle expression
 *** DONE Various ad-hoc-env improvements
 <2019-02-27 Wed>
 The directory structure is now tracked by git
