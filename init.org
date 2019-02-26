@@ -714,10 +714,10 @@ These are the library functions I define:
         (not (or (--all? (not (eval it)) blacklist)
                  (and
                   (eq this-buffer (current-buffer))
-                  (> count 0))))
-      ;; (message (format "%s" count))
-      (previous-buffer)
-      (setq count (1+ count)))))
+                  (> count 0)))
+             ;; (message (format "%s" count))
+             (previous-buffer)
+             (setq count (1+ count))))))
 
 (defun my/next-buffer-filtered (include-current blacklist)
   (let ((this-buffer (current-buffer)))
@@ -727,10 +727,10 @@ These are the library functions I define:
         (not (or (--all? (not (eval it)) blacklist)
                  (and
                   (eq this-buffer (current-buffer))
-                  (> count 0))))
-      ;; (message (format "%s" count))
-      (next-buffer)
-      (setq count (1+ count)))))
+                  (> count 0)))
+             ;; (message (format "%s" count))
+             (next-buffer)
+             (setq count (1+ count))))))
 
 #+end_src
 
@@ -3077,6 +3077,9 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE Fix previous/next-buffer regression
+<2019-02-27 Wed>
+Something or other seems to have broken the structure of said commands
 *** DONE Replace operate-on-number
 <2019-02-27 Wed>
 Operate-on-number is complex and can mess up mathematical formatting (eg. LaTeX), so I have replaced it with my own home-cooked solution
