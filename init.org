@@ -1389,31 +1389,65 @@ Unfortunately the original author of the package seems to have lost interest in 
 The [[https://github.com/bbatsov/prelude#helm][Emacs Prelude]] project, among other things, provides a set of helpful and generic keybindings for editing text.
 I have extracted some of them for my own configuration.
 
-There are bindings for operating on numbers, bound to the =C-c .= prefix.
+**** Number operations
+These are bindings for operating on numbers arround point.
+
+Implementation of =my/operate-on-number=.
 
 #+begin_src elisp
 
-(use-package operate-on-number
-  :straight t)
+(defun my/operate-on-number (fun count)
+  (setq old-point (point))
+  (skip-chars-backward "1-9")
+  (or (looking-at "[0-9]+")
+      (user-error "No number at point"))
+  (let* ((old-string (match-string 0))
+         (result (apply fun `(,(string-to-number old-string) ,count)))
+         (new-string (format "%s" result)))
+    (replace-match new-string)
+    (goto-char old-point)
+    (backward-char (- (length old-string)
+                      (length new-string)))))
+
+(defun my/operate-on-number-key (&optional arg)
+  (interactive "P")
+  (let* ((key-vec (this-command-keys-vector))
+         (key-str (key-description key-vec))
+         (key (car (last (s-slice-at "." key-str)))))
+    (my/operate-on-number (intern-soft key)
+                          (if arg arg 1))))
+
+(defmacro my/operate-on-number-generate-operation (fun default-arg)
+  (let ((operation
+         `(lambda (&optional arg)
+            (interactive "P")
+            (my/operate-on-number ',(eval fun)
+                                  (if arg
+                                      arg
+                                    ,default-arg)))))
+    `(identity ,operation)))
+
+#+end_src
+
+I bind several operations to keys under the =C-.= prefix.
+
+#+begin_src elisp
 
 (general-unbind
- :states '(normal visual insert emacs)
- "C-.")
+  :states '(normal visual insert emacs)
+  "C-.")
 
 (general-define-key
  :states '(normal visual insert emacs)
  :prefix "C-."
- "+"  'apply-operation-to-number-at-point
- "-"  'apply-operation-to-number-at-point
- "*"  'apply-operation-to-number-at-point
- "/"  'apply-operation-to-number-at-point
- "\\" 'apply-operation-to-number-at-point
- "^"  'apply-operation-to-number-at-point
- "<"  'apply-operation-to-number-at-point
- ">"  'apply-operation-to-number-at-point
- "#"  'apply-operation-to-number-at-point
- "%"  'apply-operation-to-number-at-point
- "'"  'operate-on-number-at-point)
+ "+" 'my/operate-on-number-key
+ "-" 'my/operate-on-number-key
+ "*" (my/operate-on-number-generate-operation '* 2)
+ "/" (my/operate-on-number-generate-operation '/ 2)
+ "^" (my/operate-on-number-generate-operation 'exp 2)
+ "<" (my/operate-on-number-generate-operation 'ash 1)
+ ">" (my/operate-on-number-generate-operation (lambda (val arg) (ash val (- arg))) 1)
+ "%" (my/operate-on-number-generate-operation '% 2))
 
 #+end_src
 
@@ -3042,6 +3076,9 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE Replace operate-on-number
+<2019-02-27 Wed>
+Operate-on-number is complex and can mess up mathematical formatting (eg. LaTeX), so I have replaced it with my own home-cooked solution
 *** DONE Init changelog
 <2019-02-26 Tue>
 * End
