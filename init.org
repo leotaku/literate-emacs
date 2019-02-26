@@ -3026,6 +3026,24 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 
 *** Tramp
 
+* Changelog
+An experiment for a changelog of major changes of the configuration file.
+All changes that could potentially affect the end-user (me) should ideally be logged.
+
+Planned changes go into [[Planned]], completed ones into [[Done]]. [TODO: Find out if hierarchical links are possible]
+They should still receive an appropriate org keyword, as well as a timestamp.
+
+While the [[Done]] subheading should be a full log, only larger planned changes are to be put into [[Planned]] as a reminder. This should complement my current system of just using [STATE] or comments containing state keywords. [TODO: write integration layer]
+
+** Planned
+*** MAYBE Switch away from evil-mode
+<2019-02-26 Tue>
+Hydra or transient are compelling, less intrusive alternatives.
+*** TODO Incorporate prescient.el
+<2019-02-26 Tue>
+** Done
+*** DONE Init changelog
+<2019-02-26 Tue>
 * End
 
 I'm pretty sure putting this here actually makes no difference for my setup but it seem to be tradition to have it. 
