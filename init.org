@@ -3075,6 +3075,9 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE Various ad-hoc-env improvements
+<2019-02-27 Wed>
+The directory structure is now tracked by git
 *** DONE Fix previous/next-buffer regression
 <2019-02-27 Wed>
 Something or other seems to have broken the structure of said commands
