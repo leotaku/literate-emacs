@@ -1863,12 +1863,7 @@ Run =ad-hoc-env-exit= to resume normal operation (this also reenables direnv-mod
 Enabling/disabling direnv-mode while in an ad-hoc environment is currently not supported. Again, please just run =ad-hoc-env-exit= first.
 NOTE:
 
-Using this code requires the following directory structure inside your =user-emacs-directory=:
-+ direnv
-  + active
-    .envrc 
-    default.nix
-  + inactive
+Using this code also requires you to manually create all of the directories specified in the =ad-hoc-direnv-*-dir= variables.
 
 Contents of .envrc:
 #+begin_src sh :tangle no
@@ -1877,11 +1872,14 @@ use_nix
 
 #+begin_src elisp
 
+(defvar ad-hoc-direnv-directory
+  (f-join user-emacs-directory ".direnv"))
+
 (defvar ad-hoc-direnv-active-directory
-  (f-join user-emacs-directory "direnv" "active"))
+  (f-join ad-hoc-direnv-directory "active"))
 
 (defvar ad-hoc-direnv-inactive-directory
-  (f-join user-emacs-directory "direnv" "inactive"))
+  (f-join ad-hoc-direnv-directory "inactive"))
 
 (defun ad-hoc-write (string)
   (write-region
