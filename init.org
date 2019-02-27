@@ -887,6 +887,8 @@ Other than that there is also hydra, a package for defining colorful keyboard-ce
 Evil is the extensible vi(m) layer for Emacs. It provides WORD vim emulation for Emacs, including motions, text objects visual, visual block and line selection, the vim command line, improved isearch [TODO fix ugly artefacts], interactive search and replace as well as ports of many popular vim extensions.
 Evil is activated through the global-only =evil-mode= and changes a huge amount of mappings. It also introduces the concept of states and intercept keymaps [TODO: understand this and then fix issues] which are fortunately handled relatively well by general.
 
+Vim also inexplicably has =Y= mapped to yanking the whole line instead of point -> eol like =D= and =C=. Evil has an option to disable this behavior.
+
 #+begin_src elisp
 
 (use-package evil
@@ -895,6 +897,8 @@ Evil is activated through the global-only =evil-mode= and changes a huge amount 
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
   (setq evil-want-minibuffer t)
+  (setq evil-want-Y-yank-to-eol t)
+  (setq evil-want-fine-undo t)
   :config
   (evil-mode 1))
 
@@ -904,7 +908,6 @@ Evil is activated through the global-only =evil-mode= and changes a huge amount 
   
   (setq evil-cross-lines nil
         evil-move-beyond-eol nil
-        evil-want-fine-undo t
         evil-symbol-word-search nil)
   
   (setq evil-motion-state-cursor 'box   ; █
@@ -912,7 +915,7 @@ Evil is activated through the global-only =evil-mode= and changes a huge amount 
         evil-normal-state-cursor 'box   ; █
         evil-insert-state-cursor 'bar   ; ⎸
         evil-emacs-state-cursor 'hbar)) ; _
-        
+
 #+end_src
 
 Evil-collection aims to bring the advantages of the vim modal editing model to many popular Emacs modes. It can sometimes be problematic, as it may override user-defined bindings.
@@ -1484,6 +1487,13 @@ Note that motions that operate on lines such as for example "dd" still operate o
                  (evil-end-of-visual-line)
                  (point))))
 
+(defun my/evil-visual-line-Y ()
+  (interactive)
+  (save-excursion
+    (evil-yank (point)
+               (progn
+                 (evil-end-of-visual-line)
+                 (point)))))
 #+end_src
 
 #+begin_src elisp
@@ -1499,6 +1509,7 @@ Note that motions that operate on lines such as for example "dd" still operate o
  "A" 'my/evil-visual-line-A
  "D" 'my/evil-visual-line-D
  "C" 'my/evil-visual-line-C
+ "Y" 'my/evil-visual-line-Y
  "<down>" 'evil-next-visual-line
  "<up>" 'evil-previous-visual-line)
 
@@ -3085,6 +3096,10 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE misc evil fixes
+<2019-02-27 Wed>
+=evil-want-*= in init
+=Y= to eol
 *** DONE change ntangle to accomodate global install
 <2019-02-27 Wed>
 *** DONE add nix directory
