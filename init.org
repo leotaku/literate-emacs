@@ -3291,16 +3291,16 @@ The snippet from the README only works when loaded from an external file.
 *** DONE add nix directory
 <2019-02-27 Wed>
 Currently contains ntangle expression
-*** DONE Various ad-hoc-env improvements
+*** DONE various ad-hoc-env improvements
 <2019-02-27 Wed>
 The directory structure is now tracked by git
-*** DONE Fix previous/next-buffer regression
+*** DONE fix previous/next-buffer regression
 <2019-02-27 Wed>
 Something or other seems to have broken the structure of said commands
-*** DONE Replace operate-on-number
+*** DONE replace operate-on-number
 <2019-02-27 Wed>
 Operate-on-number is complex and can mess up mathematical formatting (eg. LaTeX), so I have replaced it with my own home-cooked solution
-*** DONE Init changelog
+*** DONE init changelog
 <2019-02-26 Tue>
 * End
 
