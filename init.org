@@ -2730,6 +2730,7 @@ In no particular order, these are some of the things I use:
     + in-buffer evaluation
 
 Officially load the org-plus-contrib package and also require some optional packages.
+[TODO: check if this still works]
 
 #+begin_src elisp
 (use-package org
@@ -3285,11 +3286,35 @@ They should still receive an appropriate org keyword, as well as a timestamp.
 While the [[Done]] subheading should be a full log, only larger planned changes are to be put into [[Planned]] as a reminder. This should complement my current system of just using [STATE] or comments containing state keywords. [TODO: write integration layer]
 
 ** Planned
-*** MAYBE Switch away from evil-mode
+*** TODO better org-mode dwim keys
+<2019-03-03 Sun>
+*** TODO better eyebrowse navigation
+<2019-03-03 Sun>
+dwim keys, =C-a c= without projectile
+*** TODO add key-lambda
+<2019-03-03 Sun>
+Maybe also rename =key-fn= -> =key-fun=.
+*** TODO make use-config more useful
+<2019-03-03 Sun>
+Options:
++ el-patch integration
++ advice
++ error handling (use-package)
+  + use-package-verbose?
++ configuration after hooks
+*** TODO improve undo situation
+<2019-02-28 Thu>
+*** TODO fix ispell error
+<2019-02-28 Thu>
+*** TODO configure shackle
+<2019-02-28 Thu>
+*** DONE add help support to counsel-M-x
+<2019-02-28 Thu>
+*** TODO incorporate prescient.el
+<2019-02-26 Tue>
+*** MAYBE switch away from evil-mode
 <2019-02-26 Tue>
 Hydra or transient are compelling, less intrusive alternatives.
-*** TODO Incorporate prescient.el
-<2019-02-26 Tue>
 ** Done
 *** DONE fix org-return keybindings
 <2019-03-03 Sun>
