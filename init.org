@@ -90,38 +90,38 @@ Without this snippet Emacs would load the outdated version of org-mode distribut
 
 #+begin_src elisp
 
+;; immediately load the correct org package
+(straight-use-package 'org-plus-contrib)
+
 (require 'subr-x)
 (straight-use-package 'git)
 
-(defun org-git-version ()
-  "The Git version of org-mode.
+(with-eval-after-load 'org
+  (defun org-git-version ()
+    "The Git version of org-mode.
 Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (git-run "describe"
-              "--match=release\*"
-              "--abbrev=6"
-              "HEAD"))))
+    (require 'git)
+    (let ((git-repo (expand-file-name
+                     "straight/repos/org/" user-emacs-directory)))
+      (string-trim
+       (git-run "describe"
+                "--match=release\*"
+                "--abbrev=6"
+                "HEAD"))))
 
-(defun org-release ()
-  "The release version of org-mode.
+  (defun org-release ()
+    "The release version of org-mode.
 Inserted by installing org-mode or when a release is made."
-  (require 'git)
-  (let ((git-repo (expand-file-name
-                   "straight/repos/org/" user-emacs-directory)))
-    (string-trim
-     (string-remove-prefix
-      "release_"
-      (git-run "describe"
-               "--match=release\*"
-               "--abbrev=0"
-               "HEAD")))))
-
-
-;; immediately load the correct org package
-(straight-use-package 'org-plus-contrib)
+    (require 'git)
+    (let ((git-repo (expand-file-name
+                     "straight/repos/org/" user-emacs-directory)))
+      (string-trim
+       (string-remove-prefix
+        "release_"
+        (git-run "describe"
+                 "--match=release\*"
+                 "--abbrev=0"
+                 "HEAD"))))))
 
 #+end_src
 
@@ -3096,6 +3096,10 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE fix straight org mode
+<2019-03-03 Sun>
+The snippet from the README only works when loaded from an external file.
+*** DOING improve lispy + evil
 *** DONE misc evil fixes
 <2019-02-27 Wed>
 =evil-want-*= in init
