@@ -2359,7 +2359,7 @@ Dired is also very extensible through custom keybindings and extensions, which I
  "j" 'next-line
  "k" 'previous-line
  "l" 'forward-char
- "f" 'dired-find-file
+ "f" 'find-file
  "v" 'evil-visual-line
 
  "n" 'dired-next-marked-file
@@ -3115,6 +3115,8 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE rebind dired =f= to find-file
+<2019-03-03 Sun>
 *** DONE various smaller changes
 <2019-03-03 Sun>
 **** make disable-all-themes interactive
