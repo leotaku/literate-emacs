@@ -2764,6 +2764,7 @@ The default keybindings for =<return>= and =<C-return>= only really work for out
 
 (general-define-key
  :keymaps 'org-mode-map
+ :states 'insert
  "<return>" 'org-return-indent
  "<C-return>" 'unpackaged/org-return-dwim)
 
@@ -3256,6 +3257,8 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE fix org-return keybindings
+<2019-03-03 Sun>
 *** DONE add elfeed + configurations
 <2019-03-03 Sun>
 *** DONE add org-download
