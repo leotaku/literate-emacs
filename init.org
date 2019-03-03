@@ -2704,11 +2704,13 @@ Officially load the org-plus-contrib package and also require some optional pack
 #+end_src
 
 **** Personal
-These are the personal settings I need for managing my notes on my system.
+These are the personal settings I need for managing my notes (as well as my [[RSS/Elfeed]] feeds) on my system.
 Even if you want to copy some of my settings, you will almost definitely want to change these.
 
 #+begin_src elisp
 (setq org-default-notes-file "~/Projects/notes.org")
+(setq rmh-elfeed-org-files (list "~/Projects/feeds.org"))
+
 (setq org-todo-keywords
       '((sequence "TODO" "DOING" "|" "DONE BUT" "DONE")
         (sequence "MAYBE" "CANCELED" "|")))
@@ -3067,6 +3069,127 @@ Using the same mechanism, I also define the =reload-org= command, which acts lik
 **** PDF/pdf-tools
 **** EPUB/nov.el
 *** RSS/Elfeed
+The elfeed package provides an easy to use and configurable RSS reader for Emacs.
+Sensible vi-bindings are provided by evil-collection.
+
+You will also have to make sure to have the =curl= binary/application installed to fetch feeds asynchronously.
+
+#+begin_src elisp
+
+(use-package elfeed
+  :straight t
+  :defer t
+  :config
+  (evil-collection-elfeed-setup))
+
+#+end_src
+
+I bind the provided =elfeed= command to =C-x w= for easy access.
+
+#+begin_src elisp
+(general-define-key
+ "C-x w" 'elfeed)
+#+end_src
+
+There is also support for specifying your subscriptions/feeds from an Org file through the elfeed-org package.
+The default feeds file is set inside the [[Personal]] subtree.
+
+#+begin_src elisp
+
+(use-package elfeed-org
+  :straight t
+  :after elfeed
+  :config
+  (elfeed-org))
+
+#+end_src
+
+This system also allows me to easily tag all of my RSS feeds.
+I use the "unimportant" tag to tag feeds I don't necessarily want to see when I'm not specifically searching for them.
+Thus I set the default =elfeed-search-filter= variable to ignore entries tagged this way.
+
+#+begin_src elisp
+(setq-default elfeed-search-filter "@6-months-ago +unread -unimportant")
+#+end_src
+
+I also define some functional content-type tags that are later used for determining how to handle the posts using my =my/elfeed-search-handle-entry= command.
+
+#+begin_src elisp
+
+(defconst my/elfeed-handler-alist
+  '((youtube . my/elfeed-search-mpv-entry-link)
+    (manga . my/elfeed-search-browse-entry-link)
+    (t . elfeed-search-show-entry)))
+
+(defun my/elfeed-search-handle-entry ()
+  (interactive)
+  (let* ((entry (elfeed-search-selected t))
+         (tags (elfeed-entry-tags entry))
+         (handler-cons (--first (-contains? tags (car it))
+                                my/elfeed-handler-alist)))
+    (apply (cdr handler-cons) `(,entry))))
+
+(defun my/elfeed-search-browse-entry-link (entry)
+  (interactive
+   (list (elfeed-search-selected t)))
+  (let* ((link (elfeed-entry-link entry)))
+    (browse-url link)
+    (elfeed-untag-1 entry 'unread)
+    (elfeed-search-update-entry entry)))
+
+(defun my/elfeed-search-mpv-entry-link (entry)
+  (interactive
+   (list (elfeed-search-selected t)))
+  (let* ((link (elfeed-entry-link entry)))
+    (async-start `(lambda ()
+                    (call-process "mpv" nil "*mpv-process*" t ,link))
+                 `(lambda (e)
+                    (if (= e 0)
+                        (message "playing video in external mpv window")
+                      (error "playing video in mpv window failed: %s" e))))
+    (elfeed-untag-1 entry 'unread)
+    (elfeed-search-update-entry entry)))
+
+;; (defun my/elfeed-search-mpv-entry-link (&optional entry)
+;;   (interactive)
+;;   (let* ((entry (or entry (elfeed-search-selected t)))
+;;          (link (elfeed-entry-link entry))
+;;          (exit (call-process "mpv" nil "*mpv-process*" t link)))
+;;     (if (= exit 0)
+;;         (message "playing video in external mpv window")
+;;       (error "playing video in mpv window failed: %s" e))))
+
+#+end_src
+
+I then bind some of these handler functions to =<return>=, =<C-return>=, or =<M-return>= respectively.
+
+#+begin_src elisp
+
+(use-config elfeed
+  (general-define-key
+   :keymaps 'elfeed-search-mode-map
+   :states '(normal insert visual emacs)
+   "<return>" 'my/elfeed-search-handle-entry
+   "<C-return>" 'elfeed-search-show-entry
+   "<M-return>" 'my/elfeed-search-browse-entry-link))
+
+#+end_src
+
+I also add some other bindings for convenience.
+
+#+begin_src elisp
+
+(general-define-key
+ :keymaps 'elfeed-search-mode-map
+ :states '(normal insert visual emacs)
+ "d" 'my/elfeed-search-filter-default)
+
+(defun my/elfeed-search-filter-default ()
+  (interactive)
+  (elfeed-search-set-filter (default-value 'elfeed-search-filter)))
+
+#+end_src
+
 *** IRC/?
 *** Shell-pop
 Shell-pop is an Emacs package that allows you to quickly pop up a unix shell in the current directory.
@@ -3133,6 +3256,8 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE add elfeed + configurations
+<2019-03-03 Sun>
 *** DONE add org-download
 <2019-03-03 Sun>
 *** DONE rebind dired =f= to find-file
