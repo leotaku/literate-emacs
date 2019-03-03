@@ -1394,65 +1394,87 @@ Unfortunately the original author of the package seems to have lost interest in 
 The [[https://github.com/bbatsov/prelude#helm][Emacs Prelude]] project, among other things, provides a set of helpful and generic keybindings for editing text.
 I have extracted some of them for my own configuration.
 
-**** Number operations
+**** Operate-on-number
 These are bindings for operating on numbers arround point.
 
-Implementation of =my/operate-on-number=.
+The operate-on-number package used by Emacs Prelude is over-complicated and buggy, so I implement my own version here.
 
 #+begin_src elisp
 
-(defun my/operate-on-number (fun count)
-  (setq old-point (point))
-  (skip-chars-backward "1-9")
-  (or (looking-at "[0-9]+")
-      (user-error "No number at point"))
-  (let* ((old-string (match-string 0))
-         (result (apply fun `(,(string-to-number old-string) ,count)))
-         (new-string (format "%s" result)))
-    (replace-match new-string)
+(defun my/operate-on-number (fun &rest args)
+  (let* ((old-point (point))
+         (match (or (my/oon-find-number) (user-error "No number at point")))
+         (old-string (nth 2 match))
+         (result (apply fun `(,(string-to-number old-string) ,@args)))
+         (add-operator (if (and (nth 3 match) (>= result 0)) "+" ""))
+         (new-string (format "%s%s" add-operator result)))
+    (delete-region (nth 0 match) (nth 1 match))
+    (insert new-string)
     (goto-char old-point)
     (backward-char (- (length old-string)
                       (length new-string)))))
 
-(defun my/operate-on-number-key (&optional arg)
-  (interactive "P")
-  (let* ((key-vec (this-command-keys-vector))
-         (key-str (key-description key-vec))
-         (key (car (last (s-slice-at "." key-str)))))
-    (my/operate-on-number (intern-soft key)
-                          (if arg arg 1))))
+(defun my/oon-find-number ()
+  (save-excursion 
+    (when (looking-at "[+-]")
+      (forward-char))
+    (skip-chars-backward "0-9.")
+    (when (looking-back "e[-+]")
+      (backward-char 2)
+      (skip-chars-backward "0-9."))
+    (when (looking-back "[+-]")
+      (backward-char))
+    (if (looking-at "\\([+-]\\)?[0-9]+\\(\\.[0-9]+\\)?\\(e[+-][0-9]+\\)?")
+        (let* ((has-operator (if (match-beginning 1) t nil))
+               (start (match-beginning 0))
+               (end (match-end 0))
+               (num (buffer-substring-no-properties start end)))
+          `(,start ,end ,num ,has-operator))
+      nil)))
 
-(defmacro my/operate-on-number-generate-operation (fun default-arg)
-  (let ((operation
-         `(lambda (&optional arg)
-            (interactive "P")
-            (my/operate-on-number ',(eval fun)
-                                  (if arg
-                                      arg
-                                    ,default-arg)))))
-    `(identity ,operation)))
+(defun my/oon-defop (fun default-arg &optional name-symbol)
+  (let* ((name-symbol (cond (name-symbol (intern name-symbol))
+                            ((symbolp fun) fun)
+                            (t (user-error "Please provide either a named function or a name to oon-defop"))))
+         (name (format "operate-%s-default-%s" name-symbol default-arg)))
+    (eval `(defun ,(intern name)
+               (&optional arg)
+             (interactive "P")
+             (my/operate-on-number ',fun
+                                   (if arg
+                                       arg
+                                     ,default-arg))))))
 
+(defun my/oon-calc ()
+  (interactive)
+  (my/operate-on-number (lambda (num)
+                          (string-to-number
+                           (calc-eval
+                            (read-from-minibuffer
+                             "calc: "
+                             (number-to-string num)))))))
 #+end_src
 
-I bind several operations to keys under the =C-.= prefix.
+I bind several of these operations to keys under the normal === prefix.
 
 #+begin_src elisp
 
 (general-unbind
-  :states '(normal visual insert emacs)
-  "C-.")
+  :states '(normal visual)
+  "=")
 
 (general-define-key
- :states '(normal visual insert emacs)
- :prefix "C-."
- "+" 'my/operate-on-number-key
- "-" 'my/operate-on-number-key
- "*" (my/operate-on-number-generate-operation '* 2)
- "/" (my/operate-on-number-generate-operation '/ 2)
- "^" (my/operate-on-number-generate-operation 'exp 2)
- "<" (my/operate-on-number-generate-operation 'ash 1)
- ">" (my/operate-on-number-generate-operation (lambda (val arg) (ash val (- arg))) 1)
- "%" (my/operate-on-number-generate-operation '% 2))
+ :states '(normal visual)
+ :prefix "="
+ "+" (my/oon-defop '+ 1)
+ "-" (my/oon-defop '- 1)
+ "*" (my/oon-defop '* 2)
+ "/" (my/oon-defop '/ 2)
+ "^" (my/oon-defop 'expt 2)
+ "<" (my/oon-defop 'ash 1 "lsh")
+ ">" (my/oon-defop (lambda (val arg) (ash val (- arg))) 1 "rsh")
+ "%" (my/oon-defop '% 2)
+ "=" 'my/oon-calc)
 
 #+end_src
 
@@ -3120,6 +3142,9 @@ Hydra or transient are compelling, less intrusive alternatives.
 **** make disable-all-themes interactive
 **** defer visual-fill-collumn
 **** error messages with command name prefix
+*** DONE BUT refactor operate-on-number
+<2019-03-03 Sun>
+Decide what needs to be done about "+" prefix
 *** DONE add help support to counsel
 <2019-03-03 Sun>
 closes [[add help support to counsel-M-x]]
