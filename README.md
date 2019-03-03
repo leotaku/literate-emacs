@@ -15,7 +15,8 @@ This repository contains several important files:
 - var :: managed by [no-littering.el](https://github.com/emacscollective/no-littering)
 - etc :: managed by no-littering.el
 
-In the future this repo will also contain a valid [nix](https://nixos.org/nix/) expression for the ntangle tool, which I use to tangle my org-mode configuration files.
+This repo also contains a valid [nix](https://nixos.org/nix/) expressions for the ntangle tool, which I use to tangle my org-mode configuration files.
+Look in the main init.org file for setup instructions.
 
-## Current look
+## Current look (outdated)
 ![](scrot.png)
