@@ -609,14 +609,22 @@ Some keys for easier dashboard navigation are bound.
   (setq dashboard-items '((recents  . 5)
                           (projects . 5)
                           (bookmarks . 5)
-                          (agenda . 5))))
+                          (agenda . 5)))
+  (set-face-bold 'dashboard-heading-face t))
 
 (general-define-key
  :keymaps 'dashboard-mode-map
  :states 'normal
- "SPC" 'dashboard-next-section
- "S-SPC" 'dashboard-previous-section
- "r" 'dashboard-refresh-buffer)
+ "gr" 'dashboard-refresh-buffer)
+
+(add-hook 'dashboard-mode-hook
+          (lambda ()
+            (general-define-key
+             :keymaps 'dashboard-mode-map
+             :states 'normal
+             "p" (lookup-key dashboard-mode-map "p")
+             "r" (lookup-key dashboard-mode-map "r")
+             "m" (lookup-key dashboard-mode-map "m"))))
 
 #+end_src
 
@@ -3276,6 +3284,8 @@ Decide what needs to be done about "+" prefix
 *** DONE add help support to counsel
 <2019-03-03 Sun>
 closes [[add help support to counsel-M-x]]
+*** DONE BUT update dashboard config
+<2019-03-03 Sun>
 *** DONE refactor next-prev buffer
 <2019-03-03 Sun>
 *** DONE fix straight org mode
