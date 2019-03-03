@@ -2526,6 +2526,18 @@ I bind the menu to =o=.
 
 #+end_src
 
+Despite its name, org-download also provides drag and drop functionality to dired.
+I only use it for this purpose and therefor place its configuration in the [[Dired]] (this) subtree.
+
+#+begin_src elisp
+
+(use-package org-download
+  :straight t
+  :defer t
+  :hook (dired-mode . org-download-enable))
+
+#+end_src
+
 *** Git/Magit
 Git is the most common VC system today.
 Most open-source project use it, partly because of its great hosting support with Github and Gitlab providing near-unlimited public storage.
@@ -3115,6 +3127,8 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE add org-download
+<2019-03-03 Sun>
 *** DONE rebind dired =f= to find-file
 <2019-03-03 Sun>
 *** DONE various smaller changes
