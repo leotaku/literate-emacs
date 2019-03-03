@@ -492,6 +492,7 @@ Sometimes I want to just remove all active themes for debugging purposes. Add a 
 
 #+begin_src elisp
 (defun disable-all-themes ()
+  (interactive)
   "disable all active themes."
   (dolist (i custom-enabled-themes)
     (disable-theme i)))
@@ -1526,6 +1527,7 @@ Visual-fill-column provides a =fill-column=-like experience for buffers using =v
 #+begin_src elisp
 (use-package visual-fill-column
   :straight t
+  :defer t
   ;; :hook (visual-line-mode . visual-fill-column-mode)
   )
 #+end_src
@@ -1924,7 +1926,7 @@ stdenv.mkDerivation {
 (defun ad-hoc-env-exit ()
   (interactive)
   (unless (bound-and-true-p ad-hoc-in-env)
-    (user-error "Not in ad-hoc environment"))
+    (user-error "ad-hoc-env: Not in ad-hoc environment"))
   (setq ad-hoc-in-env nil)
   (if ad-hoc-direnv-was-enabled
       (direnv--enable)
@@ -2053,7 +2055,7 @@ The command used for spell checking can be changed. I personally use hunspell, w
 (setq ispell-program-name "hunspell")
 #+end_src
 
-Flyspell can be very slow at times. These settings supposedly improve its performance at times.
+Flyspell can be very slow at times. These settings supposedly improve its performance.
 
 #+begin_src elisp
 (use-config flyspell
@@ -3096,6 +3098,11 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** TODO Incorporate prescient.el
 <2019-02-26 Tue>
 ** Done
+*** DONE various smaller changes
+<2019-03-03 Sun>
+**** make disable-all-themes interactive
+**** defer visual-fill-collumn
+**** error messages with command name prefix
 *** DONE fix straight org mode
 <2019-03-03 Sun>
 The snippet from the README only works when loaded from an external file.
