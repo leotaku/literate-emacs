@@ -707,31 +707,13 @@ These are the library functions I define:
 
 #+begin_src elisp
 
-(defun my/prev-buffer-filtered (include-current blacklist)
-  (let ((this-buffer (current-buffer)))
-    (when (not include-current) (previous-buffer))
-    (setq count 0)
-    (while
-        (not (or (--all? (not (eval it)) blacklist)
-                 (and
-                  (eq this-buffer (current-buffer))
-                  (> count 0)))
-             ;; (message (format "%s" count))
-             (previous-buffer)
-             (setq count (1+ count))))))
-
-(defun my/next-buffer-filtered (include-current blacklist)
-  (let ((this-buffer (current-buffer)))
-    (when (not include-current) (next-buffer))
-    (setq count 0)
-    (while
-        (not (or (--all? (not (eval it)) blacklist)
-                 (and
-                  (eq this-buffer (current-buffer))
-                  (> count 0)))
-             ;; (message (format "%s" count))
-             (next-buffer)
-             (setq count (1+ count))))))
+(defun my/switch-buffer-whitelist (switch-fn whitelist initial-buffer switch-this-run)
+  (when switch-this-run
+    (apply switch-fn nil)
+    (when (eq initial-buffer (current-buffer))
+      (user-error "switch-buffer-whitelist: Buffer switch looped")))
+  (when (not (--any? (eval it) whitelist))
+    (my/switch-buffer-whitelist switch-fn whitelist initial-buffer t)))
 
 #+end_src
 
@@ -741,36 +723,38 @@ I then create some end-user functions based on them and bind them to the right k
 
 (defun my/prev-buffer (&optional include-current)
   (interactive)
-  (my/prev-buffer-filtered include-current
-                           my/default-buffer-blacklist))
+  (my/switch-buffer-whitelist 'previous-buffer
+                              my/switch-buffer-whitelist
+                              (current-buffer)
+                              (not include-current)))
 
 (defun my/next-buffer (&optional include-current)
   (interactive)
-  (my/next-buffer-filtered include-current
-                           my/default-buffer-blacklist))
+  (my/switch-buffer-whitelist 'next-buffer
+                              my/switch-buffer-whitelist
+                              (current-buffer)
+                              (not include-current)))
 
 (defun my/quit-window-kill-buffer ()
   (interactive)
   (quit-window t)
   (my/prev-buffer t))
 
-(defconst my/default-buffer-blacklist
-  '((string-match-p "\\*helm.*?\\*" (buffer-name))
-    (string-match-p "\\*Completions\\*" (buffer-name))
-    (string-match-p "\\*Calculator\\*" (buffer-name))
-    (string-match-p "\\*Calc Trail\\*" (buffer-name))
-    (string-match-p "\\*info\\*" (buffer-name))
-    (string-match-p "\\*straight-process\\*" (buffer-name))
-    (string-match-p "\\*Help\\*" (buffer-name))
-    (string-match-p "\\*mpd\\*" (buffer-name))
-    (string-match-p "\\*MPDEL.*?\\*" (buffer-name))
-    (string-match-p "\\*Backtrace\\*" (buffer-name))))
+(defconst my/switch-buffer-whitelist
+  '((buffer-file-name)
+    (bound-and-true-p dired-filter-mode)
+    (string-match-p "\\*elfeed-search\\*" (buffer-name))))
 
+;; TODO: fix help/info/etc
 (general-define-key
- :states '(insert normal visual motion emacs)
  "<XF86Back>" 'my/prev-buffer
  "<XF86Forward>" 'my/next-buffer
  "C-q" 'my/quit-window-kill-buffer)
+
+(general-define-key
+ :keymaps 'help-mode-map
+ "<XF86Back>" 'help-go-back
+ "<XF86Forward>" 'help-go-forward)
 
 #+end_src
 
@@ -3139,6 +3123,8 @@ Hydra or transient are compelling, less intrusive alternatives.
 *** DONE add help support to counsel
 <2019-03-03 Sun>
 closes [[add help support to counsel-M-x]]
+*** DONE refactor next-prev buffer
+<2019-03-03 Sun>
 *** DONE fix straight org mode
 <2019-03-03 Sun>
 The snippet from the README only works when loaded from an external file.
