@@ -967,14 +967,14 @@ Also bind =j+k= to go from insert to normal state through key-chord. [TODO: test
 
 One problem with evil I have is that, when it is enabled for the minibuffer, it binds the =<escape>= key to normal mode overriding the default exit function.
 This works well for =eval-expression= and maybe others, but not for things like ivy, helm, or even the evil command line.
-For this reason I rebind the =<escape>= keys for the evil command line here. The other interfaces are managed in ther respective subtrees.
+For this reason I rebind the =<escape>= keys for the evil command line, as well as vanilla minibuffer here. The other interfaces are managed in ther respective subtrees.
 For when I really want to utilize normal mode I also rebind =C-o= to =evil-ex-normal=.
 The hook is needed so that evil immediately recognizes we are in insert state in the minibuffer.
 
 #+begin_src elisp
 
 (general-define-key
- :keymaps '(evil-ex-completion-map evil-ex-search-keymap)
+ :keymaps '(evil-ex-completion-map evil-ex-search-keymap minibuffer-local-map)
  :states 'insert
  "C-o" 'evil-normal-state
  "<escape>" 'keyboard-escape-quit)
@@ -984,7 +984,33 @@ The hook is needed so that evil immediately recognizes we are in insert state in
 #+end_src
 
 As previously mentioned, I want =<escape>= to bring me to normal mode for =eval-expression=.
-However an =<escape>= press when already in normal mode should always allow me to exit the minibuffer.
+
+#+begin_src elisp
+
+(defvar my/minibuffer-evil-commands
+  '(eldoc-eval-expression eval-expression))
+
+(defun my/minibuffer-maybe-setup-evil ()
+  (if (--any? (eq it this-command) my/minibuffer-evil-commands)
+      (setq-local my/minibuffer-wants-evil t)
+    (setq-local my/minibuffer-wants-evil nil)))
+
+(add-hook 'minibuffer-setup-hook 'my/minibuffer-maybe-setup-evil)
+
+(defun my/minibuffer-normal-or-exit ()
+  (interactive)
+  (if my/minibuffer-wants-evil
+      (evil-normal-state)
+    (keyboard-escape-quit)))
+
+(general-define-key
+ :keymaps 'minibuffer-local-map
+ :states 'insert
+ "<escape>" 'my/minibuffer-normal-or-exit)
+
+#+end_src
+
+However an =<escape>= key-press when already in normal mode should always allow me to exit the minibuffer.
 
 #+begin_src elisp
 (general-define-key
@@ -3284,6 +3310,8 @@ Decide what needs to be done about "+" prefix
 *** DONE add help support to counsel
 <2019-03-03 Sun>
 closes [[add help support to counsel-M-x]]
+*** DONE fix evil escape in minibuffer
+<2019-03-03 Sun>
 *** DONE BUT update dashboard config
 <2019-03-03 Sun>
 *** DONE refactor next-prev buffer
