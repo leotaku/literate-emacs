@@ -1064,6 +1064,23 @@ It thus replaces the default isearch/evil-isearch for me.
  
 #+end_src
 
+Counsel provides the =counsel-describe-map= which has bindings for going to the definition of commands (=C-.=) as well as acessing the info documentation (=C-,=), but not for acessing help documentation.
+I mainly use this functionality from =counsel-M-x=.
+
+#+begin_src elisp
+
+(defun my/counsel-help-lookup-symbol ()
+  "Lookup the current symbol in the help docs."
+  (interactive)
+  (ivy-exit-with-action (lambda (x) (describe-symbol (intern x)))))
+
+(general-define-key
+ :keymaps 'counsel-describe-map
+ "C-h" 'my/counsel-help-lookup-symbol)
+
+#+end_src
+
+
 A hydra for easier navigation is also provided. Keys for accessing the hydra in ivy-minibuffers are bound.
 I also rebind =<escape>= here to ensure it always closes the hydra.
 
@@ -3103,6 +3120,9 @@ Hydra or transient are compelling, less intrusive alternatives.
 **** make disable-all-themes interactive
 **** defer visual-fill-collumn
 **** error messages with command name prefix
+*** DONE add help support to counsel
+<2019-03-03 Sun>
+closes [[add help support to counsel-M-x]]
 *** DONE fix straight org mode
 <2019-03-03 Sun>
 The snippet from the README only works when loaded from an external file.
