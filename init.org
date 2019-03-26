@@ -1417,20 +1417,74 @@ Savehist seems to be the default Emacs mechanism to save minibuffer history. I o
 (savehist-mode 1)
 #+end_src
 
-**** Undo-tree
+*** TODO Undo
+The default Emacs =undo= command is somewhat unusual, requiring aid of additional plugins for me to use comfortably.
+
+**** TODO undo-propose
+Undo-propose aims to be a non-intrusive, minimal addition to the undo-system, by preserving the existing undo functionality of Emacs, but isolating it into its own, separate buffer.
+
+#+begin_src elisp
+(use-package undo-propose
+  :straight t)
+#+end_src
+
+I define my own hydra for it, whose body then replaces the default undo bindings.
+
+#+begin_src elisp
+
+(eval
+ `(defhydra hydra-undo-propose (;;
+                                :exit nil
+                                :foreign-keys warn
+                                :hint nil
+                                :body-pre (undo-propose))
+    "
+Undo: _u_, _q_, other
+"
+    ,@(-map (lambda (key) `(,key (undo-propose-finish) :exit t))
+            (-union
+             (-map 'char-to-string
+                   (number-sequence ?a ?z))
+             '("<up>" "<down>" "<left>" "<right>")))
+    ("<escape>" (progn nil))
+    ("u" (undo))
+    ("d" (message "hydra-undo-propose: diff not yet implemented"))
+    ("q" (undo-propose-cancel) :exit t)))
+
+(general-define-key
+ :keymaps 'global
+ :states '(normal)
+ "u" 'hydra-undo-propose/body)
+
+;; override undo keys in undo-propose buffers
+(general-define-key
+ :definer 'minor-mode
+ :keymaps 'undo-propose-mode
+ :states '(normal)
+ "u" 'undo-propose-undo)
+
+#+end_src
+
+**** MAYBE undohist
+**** REMOVED undo-tree
 Undo-tree is an Emacs package that tries to improve Emacs' undo and redo functionality by offering a tree-style undo action viewer, as well as undo persistence. It is depended on by evil.
 
 Unfortunately the original author of the package seems to have lost interest in updating it. For this reason it is plagued by bugs. [TODO: find alternative]
 
-#+begin_src elisp
+For now I just disable it as it otherwise may cause Emacs to crash.
 
+#+begin_src elisp
+(use-config undo-tree
+  (warn "undo-tree was required"))
+#+end_src
+
+#+begin_src elisp :tangle no
 (use-package undo-tree
   :straight t
   :config
   (setq undo-tree-auto-save-history t)
   (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/var/undo")))
-  (global-undo-tree-mode 1))
-
+  (global-undo-tree-mode 0))
 #+end_src
 
 ** Editing
