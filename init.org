@@ -809,7 +809,10 @@ I then create some end-user functions based on them and bind them to the right k
 ;; TODO: fix help/info/etc
 (general-define-key
  "<XF86Back>" 'my/prev-buffer
- "<XF86Forward>" 'my/next-buffer
+ "<XF86Forward>" 'my/next-buffer)
+
+(general-define-key
+ :keymaps 'override
  "C-q" 'my/quit-window-kill-buffer)
 
 (general-define-key
