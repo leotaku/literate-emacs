@@ -134,7 +134,12 @@ The code uses =with-eval-after-load= instead of the superior =use-config= becaus
 
 (with-eval-after-load 'straight
   (with-eval-after-load 'hydra
-    (defhydra hydra-straight-helper (:hint nil)
+    (defhydra hydra-straight-helper (;
+                                     :hint nil
+                                     :post (let ((buffer "*straight*"))
+                                             ;; For now, automatically close the fetcher window when this hydra exits
+                                             (delete-window (get-buffer-window buffer))
+                                             (kill-buffer buffer)))
       "
 _c_heck package   |_f_etch package     |_m_erge package  |_n_ormalize pack  |p_u_sh package
 _C_heck all       |_F_etch all (async) |_M_erge all      |_N_ormlize all    |p_U_sh all    
@@ -161,14 +166,7 @@ _R_ebuild all     |_P_ull all          |_V_ersions thaw  |_W_atcher quit    |pru
       ("W" straight-watcher-quit)
       ("g" straight-get-recipe)
       ("e" straight-prune-build)
-      ;; For now, automatically close the fetcher window when this hydra exits
-      ("q" (lambda ()
-             (interactive)
-             (ignore-errors
-               (let ((buffer "*straight*"))
-                 (delete-window (get-buffer-window buffer))
-                 (kill-buffer buffer))))
-       :color blue))))
+      ("q" nil :color blue))))
 
 (with-eval-after-load 'general
   (general-define-key
