@@ -2364,10 +2364,10 @@ The Rust major mode adds basic highlighting and indentation support for the Rust
   :mode "\\.rs\\'") ;; this is already done by rust-mode
 
 ;; [TODO: document removal]
-;; (use-package flycheck-rust
-;;   :straight t
-;;   :after rust-mode
-;;   :hook (rust-mode . flycheck-rust-setup))
+(use-package flycheck-rust
+  :straight t
+  :after rust-mode
+  :hook (flycheck-mode . flycheck-rust-setup))
 
 (use-package cargo
   :straight t
@@ -2375,6 +2375,75 @@ The Rust major mode adds basic highlighting and indentation support for the Rust
   :hook (rust-mode . cargo-minor-mode))
 
 #+end_src
+
+#+begin_src elisp
+
+(el-patch-feature cargo-process)
+
+;; (defcustom cargo-process--custom-path-to-bin
+;;   (el-patch-swap
+;;     (or (executable-find "cargo")
+;;         (expand-file-name "cargo" "~/.cargo/bin")
+;;         "/usr/local/bin/cargo")
+;;     nil)
+;;   "Custom path to the cargo executable"
+;;   :type 'file
+;;   :group 'cargo-process)
+
+;; (defcustom cargo-process--rustc-cmd
+;;   (el-patch-swap
+;;     (or (executable-find "rustc")
+;;         (expand-file-name "rustc" "~/.cargo/bin")
+;;         "/usr/local/bin/rustc")
+;;     nil)
+;;   "Custom path to the rustc executable"
+;;   :type 'file
+;;   :group 'cargo-process)
+
+(use-config cargo-process
+  (el-patch-defun cargo-process--start (name command &optional last-cmd opens-external)
+    "Start the Cargo process NAME with the cargo command COMMAND.
+OPENS-EXTERNAL is non-nil if the COMMAND is expected to open an external application."
+    (set-rust-backtrace command)
+    (let* ((buffer (concat "*Cargo " name "*"))
+           (project-root (cargo-process--project-root))
+           (cmd
+            (or last-cmd
+                (cargo-process--maybe-read-command
+                 (cargo-process--augment-cmd-for-os opens-external
+                                                    (mapconcat #'identity (list (el-patch-swap
+                                                                                  cargo-process--custom-path-to-bin
+                                                                                  (executable-find "cargo"))
+                                                                                command
+                                                                                (manifest-path-argument name)
+                                                                                cargo-process--command-flags)
+                                                               " ")))))
+           (default-directory (or project-root default-directory)))
+      (save-some-buffers (not compilation-ask-about-save)
+                         (lambda ()
+                           (and project-root
+                                buffer-file-name
+                                (string-prefix-p project-root (file-truename buffer-file-name)))))
+      (setq cargo-process-last-command (list name command cmd))
+      (let ((default-directory (or (cargo-process--workspace-root)
+                                   default-directory)))
+        (compilation-start cmd 'cargo-process-mode (lambda(_) buffer)))
+      (set-process-sentinel (get-buffer-process buffer) 'cargo-process--finished-sentinel)))
+
+  (el-patch-defun cargo-process--workspace-root ()
+    "Find the workspace root using `cargo metadata`."
+    (when (cargo-process--project-root)
+      (let* ((metadata-text (shell-command-to-string
+                             (concat (el-patch-swap
+                                       cargo-process--custom-path-to-bin
+                                       (executable-find "cargo"))
+                                     " metadata --format-version 1 --no-deps")))
+             (metadata-json (json-read-from-string metadata-text))
+             (workspace-root (cdr (assoc 'workspace_root metadata-json))))
+        workspace-root))))
+
+#+end_src
+
 
 The Rust Language Server as well as Flycheck need some specific environment variables to be set in order to work correctly.
 Set them after the first call to =rust-mode-hook=.
@@ -2400,7 +2469,7 @@ Set them after the first call to =rust-mode-hook=.
   ;; only call once
   (remove-hook 'rust-mode-hook 'my/setup-rust-env))
 
-(add-hook 'rust-mode-hook 'my/setup-rust-env)
+;; (add-hook 'rust-mode-hook 'my/setup-rust-env)
 
 #+end_src
 
