@@ -638,6 +638,12 @@ I also define a simple function that allows me to change the global font. My fon
     (set-frame-font (format "%s-%d" my/current-font my/current-font-size) nil t)))
 #+end_src
 
+Disable non-monospace fonts (eg. variable-pitch).
+
+#+begin_src elisp
+(set-face-attribute 'variable-pitch nil :family "default")
+#+end_src
+
 **** Dashboard
 Dashboard is an Emacs package ripped from the Spacemacs distribution.
 It, like the name suggests, provides a dashboard that can display all different types of content.
