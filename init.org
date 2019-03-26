@@ -1851,7 +1851,8 @@ I also used to bind normal =-= to =er/cotract-region=, but that does not work wi
 #+begin_src elisp
 
 (use-package expand-region
-  :straight t)
+  :straight t
+  :commands er/expand-region)
 
 (general-define-key
  "C-0" 'er/expand-region)
