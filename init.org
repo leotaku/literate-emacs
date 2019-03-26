@@ -1476,10 +1476,8 @@ I define my own hydra for it, whose body then replaces the default undo bindings
 Undo: _u_, _q_, other
 "
     ,@(-map (lambda (key) `(,key (undo-propose-finish) :exit t))
-            (-union
              (-map 'char-to-string
-                   (number-sequence ?a ?z))
-             '("<up>" "<down>" "<left>" "<right>")))
+                   (number-sequence ?a ?z)))
     ("<escape>" (progn nil))
     ("u" (undo))
     ("d" (message "hydra-undo-propose: diff not yet implemented"))
