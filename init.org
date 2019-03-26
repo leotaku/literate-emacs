@@ -1895,7 +1895,9 @@ Some languages may need additional packages for LSP support. These are managed i
 (use-package lsp-mode
   :straight t
   :after projectile
-  :commands lsp)
+  :commands lsp
+  :init
+  (setq lsp-prefer-flymake :none))
 
 (use-package lsp-ui
   :straight t
@@ -1905,7 +1907,8 @@ Some languages may need additional packages for LSP support. These are managed i
   (setq lsp-ui-doc-enable nil)
   (setq lsp-ui-imenu-enable nil)
   (setq lsp-ui-peek-enable nil)
-  (setq lsp-ui-sideline-enable nil))
+  (setq lsp-ui-sideline-enable nil)
+  (setq lsp-ui-flycheck-enable nil))
 
 (use-package company-lsp
   :straight t
