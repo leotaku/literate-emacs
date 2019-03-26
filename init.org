@@ -42,8 +42,20 @@ As using Emacs without any extensions[fn:extensions] is pretty undesirable, the 
 
 For this reason I choose to leave package.el behind and instead use the new and shiny straight.el in conjunction with use-package, which acts as an improved =require= wrapper.
 
-** straight.el
+This subtree also contains some other configurations related to loading external code and package administration.
 
+** customize
+The Emacs customize system normally appends its configurations to the end of the main =init.el= file. This behavior however gets annoying very quickly and also prevents generated configurations (eg. org-mode tangle) from working.
+
+So I simply tell the customize system to write to a another file, =custom.el=.
+I also currently do not load this file, as I dislike using the customize sytem for anything other than testing.
+
+#+begin_src elisp
+(setq custom-file (concat user-emacs-directory "custom.el"))
+;; (load custom-file)
+#+end_src
+
+** straight.el
 This package is responsible for correctly setting the load path to various collections of elisp code that live in =.emacs.d/straight=. straight.el ensures absolute configuration reproducibility through its use of a lockfile located in =straight/versions/default.el=. It also allows my own packages to comfortably live inside =straight/repos= as it's various end-user functions allow for interactively managing state changes.
 
 #+begin_src elisp
@@ -175,7 +187,6 @@ _R_ebuild all     |_P_ull all          |_V_ersions thaw  |_W_atcher quit    |pru
 #+end_src
 
 ** use-package
-
 This package provides a wrapper macro around Emacs' builtin way of =require=ing packages. It allows for easily specifying the correct order elisp code should be run at, without heavily jeopardizing the actual structure of said code.
 
 Straight.el also provides integration with use-package, allowing for the use of =:straight t=[fn:use-straight] instead of the builtin =:ensure t=. Use-package itself of course gets loaded using only the =straight-use-package= function provided by straight.el
@@ -202,8 +213,41 @@ Especially with org-tangle, where I can specify the =use-config= macro to wrap a
    
 #+end_src
 
-** no-littering
+** el-patch
+El-patch is a package that allows one to override external package internals in a save manner.
+Whenever a value is overridden using one of the =el-patch-*= wrappers, =el-patch-validate= can then be used to validate that the modified code/value has not become outdated due to package updates.
 
+#+begin_src elisp
+
+(use-package el-patch
+  :straight t)
+
+#+end_src
+
+** benchmark-init
+I load this package immediately after initializing the use-package/straight system, so it can reliably benchmark all of my startup.
+
+#+begin_src elisp
+
+(use-package benchmark-init
+  :straight t
+  :config
+  ;; To disable collection of benchmark data after init is done.
+  (add-hook 'after-init-hook 'benchmark-init/deactivate))
+
+#+end_src
+
+** bug-hunter
+Like benchmark-init, for bug-hunter to be most useful we need to load it as early as possible in our configuration.
+This way, even if the configuration fails later, bug-hunter can be used to reliably debug the problem.
+
+#+begin_src elisp
+(use-package bug-hunter
+  :straight t
+  :defer t)
+#+end_src
+
+** no-littering
 No-littering is a useful Emacs extension that tries to revert any inconsistent paths used by popular or builtin packages and instead sets them to semantic entries in either =.emacs.d/var= or =.emacs.d/etc=.
 
 #+begin_src elisp
@@ -224,15 +268,6 @@ Headers are grouped by their most significant functionality. If no logical order
 ** Helpers
 This header contains configurations or packages with the main purpose of easing the configuration of other packages.
 For this reason they have to be loaded very early during the initialization. [fn:always-use]
-
-*** bug-hunter
-Putting this package here might seem like a bit of a stretch, but I think being able to easily debug generic problems is important for any Emacs configuration.
-
-#+begin_src elisp
-(use-package bug-hunter
-  :straight t
-  :defer t)
-#+end_src
 
 *** general
 General allows for easy mapping of keys to commands by adding an abstraction over the builtin =define-key= many well known key-centric extensions such as evil.
@@ -287,12 +322,11 @@ Key-chord strangely sends a message when it is enabled. Mitigate this by checkin
 
 *** unpackaged.el
 Unpackaged.el is a collection of miscellaneous lisp snippets that are useful, but are not substantial enough to be packaged.
-I use some of its functionality in my configuration.
-
-[MAYBE: remove this and copy all used snippets for easier editing]
+I pull it with straight but then =:ignore= the use-package form, as loading all of it would cause slowdowns.
 
 #+begin_src elisp
 (use-package unpackaged
+  :disabled t
   :straight (unpackaged :type git :host github
                         :repo "alphapapa/unpackaged.el"))
 #+end_src
