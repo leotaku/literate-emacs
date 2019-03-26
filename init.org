@@ -445,9 +445,11 @@ They are not prefixed with =my/=.
     'kill-buffer))
 
 (defun nuke-emacs ()
-  "Kill all buffers and emacs"
+  "Kill all buffers and emacs, preserving \*scratch\* for persistent scratch"
   (interactive)
-  (-each (buffer-list) 'kill-buffer)
+  (--each (buffer-list)
+    (unless (string-equal (buffer-name it) "*scratch*")
+      (kill-buffer it)))
   (kill-emacs))
 
 #+end_src
@@ -619,6 +621,7 @@ Just like with themes, I would like Emacs to remember the my font across restart
   (add-to-list 'desktop-globals-to-save 'my/current-font-size))
 
 (add-hook 'after-make-frame-functions 'my/restore-font)
+(advice-add 'load-theme :before 'my/restore-font)
 #+end_src
 
 I also define a simple function that allows me to change the global font. My font-remembrance method relies on this function being used to correctly determine the current font. [TODO: maybe read frame font]
