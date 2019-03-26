@@ -450,6 +450,18 @@ By default Emacs is not much to look at, but by setting some builtin options and
 
 #+end_src
 
+*** Terminal
+Using Emacs in your terminal unfortunately currently isn't the best experience.
+For this reason I still use Vim for most of my on-terminal editing needs.
+However I hope that after reconfiguring some of the most common problems when dealing with Emacs in terminal, Emacs will soon be able to fully replace my Vim setup.
+
+First rebind all keys to their correct GUI counterparts.
+
+#+begin_src elisp
+;; TAB to actual tab
+(define-key input-decode-map "\C-i" [\?t])
+#+end_src
+
 **** Themes
 There are many nice themes for Emacs.
 I personally happen to enjoy the doom, sanityinc and poet families of themes.
