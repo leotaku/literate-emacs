@@ -2398,7 +2398,7 @@ AucTeX is a popular Emacs extension that majorly improves the editing of TeX fil
 
 #+end_src
 
-Set Zathura as the default pdf viewer for TeX. This also allows using source-correlate through SyncTeX.
+Set Zathura as the default pdf viewer for TeX. This setup allows using source-correlate through SyncTeX.
 
 #+begin_src elisp
 (use-config tex
@@ -2413,6 +2413,32 @@ Set Zathura as the default pdf viewer for TeX. This also allows using source-cor
                  ("zathura %o"
                   (mode-io-correlate " --synctex-forward %n:0:%b -x \"emacsclient --socket-name=%sn --no-wait +%{line} %{input}\""))
                  "zathura")))
+#+end_src
+
+I prefer managing my LaTeX compilation using latexmk and putting all output files into an =out= subdirectory.
+This conflicts with the default SyncTeX setup that expects both the output pdf as well as the synctex.gz archive to be in the same directory as the compiled TeX file.
+So I override the =TeX-view= command.
+[TODO: add el-patch-abstraction]
+
+#+begin_src elisp
+
+(el-patch-feature tex-buf)
+
+(use-config tex-buf
+  (el-patch-defun TeX-view ()
+    "Start a viewer without confirmation.
+The viewer is started either on region or master file,
+depending on the last command issued."
+    (interactive)
+    (let ((output-file (el-patch-swap (TeX-active-master (TeX-output-extension))
+                                      (f-join "out" (TeX-active-master (TeX-output-extension))))))
+      (if (file-exists-p output-file)
+	      (TeX-command "View" (el-patch-swap 'TeX-active-master
+                                             (lambda (&rest _)
+                                               output-file))
+                       0)
+        (message "Output file %S does not exist." output-file)))))
+
 #+end_src
 
 *** Markdown
