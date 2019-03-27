@@ -3639,13 +3639,17 @@ Maybe also rename =key-fn= -> =key-fun=.
 *** TODO make use-config more useful
 <2019-03-03 Sun>
 Options:
++ cl-defmacro style
++ nested requirements
 + el-patch integration
 + advice
 + error handling (use-package)
   + use-package-verbose?
 + configuration after hooks
-*** TODO improve undo situation
+*** DONE BUT improve undo situation
 <2019-02-28 Thu>
+undo-propose, still needs improvements, undohist, general-simulate
+<2019-03-26 Tue>
 *** TODO fix ispell error
 <2019-02-28 Thu>
 *** TODO configure shackle
