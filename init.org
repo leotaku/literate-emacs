@@ -1872,7 +1872,7 @@ Automatically highlight the pair opposite to the one at point.
   
 #+end_src
 
-*** Snippets
+*** TODO Snippets
 Snippets are reusable fragments of text that can be saved and later inserted into files or buffers. They serve to aviod having to retype commonly used structures.
 
 I use yasnippet which works by expanding abbreviations to predefined templates. These abbreviations are most commonly expanded by pressing the =<TAB>= key when the point is situated behind them, but can also be triggered through other means. (eg. an NCS search)
@@ -1893,7 +1893,7 @@ Templates may also be automatically created by other extensions, such as company
 
 Yasnippet comes with a set of snippets preinstalled. I additionaly define my own snippets in the [[file:snippets.org]] file, which is automatically tangled by org-babel. [TODO]
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 ;; [TODO: manage snippets]
 (use-config org
   (org-babel-tangle-file (f-join user-emacs-directory "snippets.org"))
