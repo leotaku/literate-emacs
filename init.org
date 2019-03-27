@@ -224,7 +224,10 @@ Whenever a value is overridden using one of the =el-patch-*= wrappers, =el-patch
 
 #+end_src
 
-** benchmark-init
+** early load
+This subtree contains packages that don't necessarily have anything to do with package management, but need to be loaded as early as possible.
+
+*** benchmark-init
 I load this package immediately after initializing the use-package/straight system, so it can reliably benchmark all of my startup.
 
 #+begin_src elisp
@@ -237,7 +240,7 @@ I load this package immediately after initializing the use-package/straight syst
 
 #+end_src
 
-** bug-hunter
+*** bug-hunter
 Like benchmark-init, for bug-hunter to be most useful we need to load it as early as possible in our configuration.
 This way, even if the configuration fails later, bug-hunter can be used to reliably debug the problem.
 
@@ -247,7 +250,7 @@ This way, even if the configuration fails later, bug-hunter can be used to relia
   :defer t)
 #+end_src
 
-** no-littering
+*** no-littering
 No-littering is a useful Emacs extension that tries to revert any inconsistent paths used by popular or builtin packages and instead sets them to semantic entries in either =.emacs.d/var= or =.emacs.d/etc=.
 
 #+begin_src elisp
