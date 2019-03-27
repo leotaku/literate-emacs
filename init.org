@@ -2657,8 +2657,9 @@ Dired is also very extensible through custom keybindings and extensions, which I
 
 (use-package dired
   :defer t
-  :init
   ;; most of these bindings are overriden later
+  :config
+  (setq dired-mode-map (make-sparse-keymap))
   (evil-collection-dired-setup))
 
 (use-config dired
@@ -2675,11 +2676,7 @@ Dired is also very extensible through custom keybindings and extensions, which I
 
 (general-define-key
  :keymaps 'dired-mode-map
- :states '(normal visual)
- "h" 'backward-char
- "j" 'next-line
- "k" 'previous-line
- "l" 'forward-char
+ :states '(visual normal)
  "f" 'find-file
  "v" 'evil-visual-line
 
@@ -2697,6 +2694,11 @@ Dired is also very extensible through custom keybindings and extensions, which I
 
  "q" 'quit-window)
 
+(general-unbind
+ :keymaps 'dired-mode-map
+ :states 'visual
+ "k" "j")
+
 #+end_src
 
 **** Extensions
@@ -2708,18 +2710,20 @@ Additionally, I bind the =image-dired= command to =C-t C-r=
 
 #+begin_src elisp
 
-(use-package dired+
-  :straight (dired+
-             :type git :host github
-             :repo "emacsmirror/emacswiki.org"
-             :files ("dired+.el"))
-  :after dired
-  :hook (dired-mode . image-dired-minor-mode)
-  :init
-  ;; setup evil and add missing lazy binds
-  (evil-collection-image-dired-setup))
+  ;; FIXME: I dont know what this does
+  (setq dired-omit-files "idontfuckingknow")
 
-(general-define-key
+  (use-package dired+
+    :straight (dired+
+               :type git :host github
+               :repo "emacsmirror/emacswiki.org"
+               :files ("dired+.el"))
+    :after dired
+    :init
+    ;; setup evil and add missing lazy binds
+    (evil-collection-image-dired-setup))
+
+  (general-define-key
    :keymaps 'image-dired-thumbnail-mode-map
    :states 'normal
    "<left>" 'image-dired-backward-image
@@ -2849,7 +2853,7 @@ I bind the menu to =o=.
 #+end_src
 
 Despite its name, org-download also provides drag and drop functionality to dired.
-I only use it for this purpose and therefor place its configuration in the [[Dired]] (this) subtree.
+I only use it for this purpose and therefor place its configuration in the [[Files/Dired]] (this) subtree.
 
 #+begin_src elisp
 
@@ -2860,6 +2864,7 @@ I only use it for this purpose and therefor place its configuration in the [[Dir
 
 #+end_src
 
+*** TODO Diff/Ediff
 *** Git/Magit
 Git is the most common VC system today.
 Most open-source project use it, partly because of its great hosting support with Github and Gitlab providing near-unlimited public storage.
