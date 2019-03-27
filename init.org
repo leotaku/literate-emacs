@@ -873,7 +873,19 @@ These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
  "C-h" (key-fn evil-window-move-far-left)
  "C-l" (key-fn evil-window-move-far-right))
 
-;; [TODO: define functions]
+;; [TODO: use el-patch]
+(defun my/eyebrowse-buffer ()
+  (interactive)
+  (setq this-command #'ivy-switch-buffer)
+  (ivy-read "Switch to buffer: " #'internal-complete-buffer
+            :keymap ivy-switch-buffer-map
+            :preselect (buffer-name (other-buffer (current-buffer)))
+            :action (lambda (b)
+                      (eyebrowse-create-window-config)
+                      (delete-other-windows)
+                      (switch-to-buffer b))
+            :matcher #'ivy--switch-buffer-matcher
+            :caller 'ivy-switch-buffer))
 
 (defun my/eyebrowse-projectile-project ()
   (interactive)
