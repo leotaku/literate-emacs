@@ -2069,7 +2069,7 @@ It also has great support for =nix= through use of the =use_nix= statement.
 (use-package direnv
   :straight t
   :config
-  (direnv-mode 0))
+  (direnv-mode 1))
 #+end_src
 
 **** ad-hoc
