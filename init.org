@@ -2177,9 +2177,10 @@ Misc company setting, mostly related to frontend display. [TODO: set best fronte
  :states nil
  "RET" nil
  "<return>" nil
+ ";" 'company-complete
  "<tab>" 'company-select-next
  "<backtab>" 'company-select-previous
- "<C-y>" 'company-complete)
+ "C-y" 'company-complete)
 
 #+end_src
 
