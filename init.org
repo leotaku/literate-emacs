@@ -3593,6 +3593,41 @@ While the [[Done]] subheading should be a full log, only larger planned changes 
 This should complement the usual usage of state keywords in headings and my current system of just using [STATE] or comments containing state keywords [TODO: write integration layer] with permanent tracking of changes.
 
 ** Planned
+*** TODO yasnippet
+<2019-03-27 Wed>
+*** DONE investigate general-simulate-keypress
+<2019-03-26 Tue>
+*** TODO shell-command w/o newline
+<2019-03-26 Tue>#
+*** TODO org-mode things
+<2019-03-26 Tue>
+habit, schedule, agenda, clocking
+*** TODO keyfreq-mode
+<2019-03-26 Tue>
+*** TODO ediff
+<2019-03-22 Fri>
+*** TODO debug-on-error as default
+<2019-03-13 Wed>
+*** TODO replace unpackaged.el org-return
+<2019-03-11 Mon>
+Insert new heading below when in heading
+*** TODO smart backspace in non prog-mode
+<2019-03-05 Tue>
+*** DONE BUT persistent scratch
+Bad code. Needs to ensure if =*scratch*= exists.
+<2019-03-04 Mon>
+*** TODO configure SyncTeX
+<2019-03-04 Mon>
+*** TODO fix dired bindings
+<2019-03-04 Mon>
+*** TODO fix flyspell bindings
+<2019-03-04 Mon>
+*** MAYBE fix modeline setup for message buffers
+<2019-03-03 Sun>
+Thsi might already work
+*** DONE better closing of straight-x-fetch-all
+<2019-03-03 Sun>
+<2019-03-26 Tue>
 *** TODO better org-mode dwim keys
 <2019-03-03 Sun>
 *** TODO better eyebrowse navigation
