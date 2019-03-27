@@ -1701,7 +1701,8 @@ Note that motions that operate on lines such as for example "dd" still operate o
 
 (general-define-key
  :states 'normal
- :keymaps 'visual-line-mode-map
+ :definer 'minor-mode
+ :keymaps 'visual-line-mode
  "j" 'evil-next-visual-line
  "k" 'evil-previous-visual-line
  "^" 'evil-first-non-blank-of-visual-line
@@ -1715,8 +1716,9 @@ Note that motions that operate on lines such as for example "dd" still operate o
  "<up>" 'evil-previous-visual-line)
 
 (general-define-key
+ :definer 'minor-mode
+ :keymaps 'visual-line-mode
  :states '(normal insert)
- :keymaps 'visual-line-mode-map
  "<down>" 'evil-next-visual-line
  "<up>" 'evil-previous-visual-line)
 
@@ -2306,10 +2308,36 @@ Lispy is a package that provides an improved Lisp editing experience.
 It is a spiritual sucessor to the popular paredit.
 
 #+begin_src elisp
+
 (use-package lispy
   :straight t
   :defer t
   :hook (emacs-lisp-mode . lispy-mode))
+
+(use-package lispyville
+  :straight t
+  :after lispy
+  :config
+  (require 'lispyville))
+
+(general-define-key
+ :definer 'minor-mode
+ :keymaps 'lispy-mode
+ :states 'insert
+ "<backspace>" 'lispy-delete-backward)
+
+(general-define-key
+ :definer 'minor-mode
+ :keymaps 'lispy-mode
+ :states '(normal visual)
+ "x" 'lispyville-delete-char-or-splice
+ "d" 'lispyville-delete
+ "D" 'lispyville-delete-line
+ "c" 'lispyville-change
+ "C" 'lispyville-change-line
+ "y" 'lispyville-yank
+ "Y" 'lispyville-yank-line)
+
 #+end_src
 
 Aggressive-indent automatically updates indentation after every keystroke, for instant visual feedback.
@@ -2567,7 +2595,7 @@ Some of these might be overriden by specific comint-derived modes, this is then 
 #+begin_src elisp
 
 (general-define-key
- :keymaps '(comint-mode-map)
+ :keymaps 'comint-mode-map
  "C-l" 'comint-clear-buffer
  "<up>" 'comint-previous-input
  "<down>" 'comint-next-input
@@ -2670,9 +2698,10 @@ It als offers in-dired thumbmail display bound to =C-t C-t=.
 #+begin_src elisp
 
 (general-define-key
- :states '(normal visual insert emacs)
  :keymaps 'dired-mode-map
+ :states '(normal visual insert emacs)
  "C-t" (cdr (assoc 20 image-dired-minor-mode-map))
+ "C-t C-t" 'image-dired-dired-toggle-marked-thumbs
  "C-t C-r" 'image-dired)
 
 (evil-set-initial-state 'image-dired-minor-mode 'emacs)
