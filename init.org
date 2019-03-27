@@ -3087,8 +3087,8 @@ The default keybindings for =<return>= and =<C-return>= only really work for out
 (general-define-key
  :keymaps 'org-mode-map
  :states 'insert
- "<return>" 'org-return-indent
- "<C-return>" 'unpackaged/org-return-dwim)
+ "<return>" 'org-return-indent)
+ ; TODO: "<C-return>" 'unpackaged/org-return-dwim)
 
 #+end_src
 
