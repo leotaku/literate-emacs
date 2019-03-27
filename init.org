@@ -2256,12 +2256,6 @@ Flyspell offers more traditional "red underline" spell-checking using Emacs ispe
   :defer t)
 #+end_src
 
-The command used for spell checking can be changed. I personally use hunspell, which has better support for some languages and is also used by the LibreOffice project.
-
-#+begin_src elisp
-(setq ispell-program-name "hunspell")
-#+end_src
-
 Flyspell can be very slow at times. These settings supposedly improve its performance.
 
 #+begin_src elisp
@@ -2270,7 +2264,21 @@ Flyspell can be very slow at times. These settings supposedly improve its perfor
   (setq flyspell-issue-message-flag nil))
 #+end_src
 
+The command used for spell checking can be changed. I personally use hunspell, which has better support for some languages and is also used by the LibreOffice project.
+
+#+begin_src elisp
+(setq ispell-program-name "hunspell")
+#+end_src
+
 Currently for me running an ispell/flyspell command for the first time in a session results in an inexplicable type error. [TODO: find a fix for this]
+
+I mitigate this problem by running =ispell-change-dictionary "default"= wrapped in an =ignore-errors= form whenever ispell is loaded. [HACK]
+
+#+begin_src elisp
+(use-config ispell
+  (ignore-errors
+    (ispell-change-dictionary "default")))
+#+end_src
 
 **** Dictionaries
 The language to spell-check for will usually be set as a file-local variable.
