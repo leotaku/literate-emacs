@@ -3504,7 +3504,7 @@ I also add some other bindings for convenience.
 
 #+end_src
 
-*** IRC/?
+*** TODO IRC/?
 *** Scratch
 The =*scratch*= buffer automatically gets spawned by Emacs on startup.
 It is intended for quick elisp evaluation and testing, but could also serve any other purpose.
