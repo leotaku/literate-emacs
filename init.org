@@ -3471,6 +3471,34 @@ I also add some other bindings for convenience.
 #+end_src
 
 *** IRC/?
+*** Scratch
+The =*scratch*= buffer automatically gets spawned by Emacs on startup.
+It is intended for quick elisp evaluation and testing, but could also serve any other purpose.
+
+By default the scratch buffer starts in lisp-interaction-mode, which only slightly changes the behavior of =eval-print-last-sexp=.
+
+I want my scratch buffer to always be persistent.
+To work reliably this system also requires some additional help from =nuke-emacs= in [[Commands]].
+[TODO: find an elegant solution to this and crashes]
+
+Scratch is only saved/restored when [[Desktop]] is also enabled, which is only the case for the first running Emacs session.
+
+#+begin_src elisp
+
+(use-package persistent-scratch
+  :straight t
+  :config
+  (persistent-scratch-autosave-mode -1))
+
+;; add desktop mode hooks
+(use-config (persistent-scratch desktop)
+  (add-hook 'desktop-after-read-hook 'persistent-scratch-restore)
+  (add-hook 'desktop-save-hook (lambda ()
+                                 (when (get-buffer "*scratch*")
+                                   (persistent-scratch-save)))))
+
+#+end_src
+
 *** Shell-pop
 Shell-pop is an Emacs package that allows you to quickly pop up a unix shell in the current directory.
 I use it to quickly open up an =ansi-term= terminal when I need one.
