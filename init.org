@@ -3592,6 +3592,7 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 #+begin_src elisp
 
 (general-define-key
+ ; [TODO] other bindings
  :keymaps '(term-raw-map term-mode-map)
  :states '(insert normal visual emacs)
  ;; dirty shell-pop intergration
