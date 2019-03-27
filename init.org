@@ -3675,7 +3675,7 @@ undo-propose, still needs improvements, undohist, general-simulate
 *** MAYBE switch away from evil-mode
 <2019-02-26 Tue>
 Hydra or transient are compelling, less intrusive alternatives.
-** Done
+** Done                                                             :ARCHIVE:
 *** HALTING retire "Done" for now
 <2019-03-27 Wed>
 This does not make too much sense. I should instead focus on writing sensible commit messages.
