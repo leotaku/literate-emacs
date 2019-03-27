@@ -323,6 +323,18 @@ Key-chord strangely sends a message when it is enabled. Mitigate this by checkin
    (key-chord-mode 1)))
 #+end_src
 
+*** keyfreq
+Keyfreq is a package that records your most-often used interactive commands and shows them to you in a table indexed by relative weight.
+This allows you ti then look into optimizing your most common (possibly inefficient) actions.
+
+#+begin_src elisp
+(use-package keyfreq
+  :straight t
+  :config
+  (keyfreq-mode 1)
+  (keyfreq-autosave-mode 1))
+#+end_src
+
 *** unpackaged.el
 Unpackaged.el is a collection of miscellaneous lisp snippets that are useful, but are not substantial enough to be packaged.
 I pull it with straight but then =:ignore= the use-package form, as loading all of it would cause slowdowns.
