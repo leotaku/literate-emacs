@@ -2912,7 +2912,7 @@ Simply enable evil integration for help-mode.
   (evil-collection-help-setup))
 #+end_src
 
-*** Images/Image
+*** TODO Images/Image
 *** Music/MPD
 MPD is an daemon for playing music.
 Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel for Emacs. There's also ivy-mpdel which allows for using the ivy NCS to select songs.
@@ -2929,7 +2929,7 @@ Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel fo
 
 #+end_src
 
-*** Mail
+*** TODO Mail
 Emacs is, in my opinion, the best MUA currently out there.
 
 This is my current setup for mail in Emacs:
@@ -3387,7 +3387,7 @@ Using the same mechanism, I also define the =reload-org= command, which acts lik
 
 #+end_src
 
-*** Reading
+*** TODO Reading
 **** PDF/pdf-tools
 **** EPUB/nov.el
 *** RSS/Elfeed
@@ -3580,8 +3580,7 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 
 #+end_src
 
-*** Tramp
-
+*** TODO Tramp
 * Changelog
 An experiment for a changelog of major changes of the configuration file.
 All changes that could potentially affect the end-user (me) should ideally be logged.
