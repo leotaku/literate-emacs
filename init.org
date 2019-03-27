@@ -3076,6 +3076,7 @@ I personally enjoy easy to access DWIM keys and menus over having to memorize a 
 Some of these I have created myself, some are provided by Org.
 
 I enjoy writing prose in visual line mode. Add the required hook here.
+
 #+begin_src elisp
 (add-hook 'org-mode-hook 'visual-line-mode)
 #+end_src
