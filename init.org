@@ -386,6 +386,17 @@ This is the subtree for configurations that affect all of Emacs.
 *** Default
 This subtree contains redefinitions for built-in Emacs settings I dislike/want changed.
 
+Force the coding system to be UTF-8 per default everywhere.
+#+begin_src elisp
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; also from xselection
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+#+end_src
+
 Increase garbage collector threshold. Also manually set maximum recursion and definiton values.
 #+begin_src elisp
 (setq gc-cons-threshold 50000000)
