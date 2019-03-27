@@ -1944,7 +1944,6 @@ I also used to bind normal =-= to =er/cotract-region=, but that does not work wi
  ;;"-" 'er/contract-region
  )
 
-
 #+end_src
 
 ** Programming
@@ -2609,12 +2608,15 @@ I don't really know how to use Emacs' builtin calc calculator yet.
 [[https://github.com/ahyatt/emacs-calc-tutorials][Here]] is a set of seemingly very competent tutorials for it.
 
 For now, bind the main =calc= command to =C-x c=.
-Also enable evil-integration.
 
 #+begin_src elisp
 (general-define-key
   "C-x c" 'calc)
+#+end_src
 
+Also enable evil-integration.
+
+#+begin_src elisp
 (use-config (calc evil-collection)
   (evil-collection-calc-setup))
 #+end_src
