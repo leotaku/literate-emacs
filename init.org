@@ -1751,7 +1751,7 @@ I like this behavior, so I implement and bind it here.
     (my/sb-delete-to-previous-line))
    (t
     ;; delete char normally 
-    (delete-char -1))))
+    (call-interactively 'backward-delete-char))))
 
 (defun my/smart-backspace-word ()
   (interactive)
@@ -1760,7 +1760,7 @@ I like this behavior, so I implement and bind it here.
     (my/sb-delete-to-previous-line))
    (t
     ;; delete word normally
-    (backward-kill-word 1))))
+    (call-interactively 'backward-kill-word))))
 
 (defun my/sb-delete-to-previous-line ()
   ;; delete all spaces
@@ -1773,7 +1773,7 @@ I like this behavior, so I implement and bind it here.
     (indent-according-to-mode)))
 
 (general-define-key
- :keymaps 'prog-mode-map
+ :keymaps '(prog-mode-map text-mode-map)
  :states 'insert
  "<backspace>" 'my/smart-backspace
  "<C-backspace>" 'my/smart-backspace-word)
