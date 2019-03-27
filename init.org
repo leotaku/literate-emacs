@@ -3662,6 +3662,21 @@ undo-propose, still needs improvements, undohist, general-simulate
 <2019-02-26 Tue>
 Hydra or transient are compelling, less intrusive alternatives.
 ** Done
+*** HALTING retire "Done" for now
+<2019-03-27 Wed>
+This does not make too much sense. I should instead focus on writing sensible commit messages.
+*** DONE various org-related refactoring
+<2019-03-27 Wed>
+*** DONE various rust changes
+<2019-03-27 Wed>
+Patch cargo, remove setup hook, add flycheck
+*** DONE new undo system
+<2019-03-27 Wed>
+undo-propose
+<2019-03-27 Wed>
+*** DONE reorganize package management section
+<2019-03-27 Wed>
+Also add customize
 *** DONE fix org-return keybindings
 <2019-03-03 Sun>
 *** DONE add elfeed + configurations
