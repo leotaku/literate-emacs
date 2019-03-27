@@ -3427,11 +3427,11 @@ The default feeds file is set inside the [[Personal]] subtree.
 #+end_src
 
 This system also allows me to easily tag all of my RSS feeds.
-I use the "unimportant" tag to tag feeds I don't necessarily want to see when I'm not specifically searching for them.
-Thus I set the default =elfeed-search-filter= variable to ignore entries tagged this way.
+For example, I could use the "unimportant" tag to tag feeds I don't necessarily want to see when I'm not specifically searching for them.
+In this case I would also set the default =elfeed-search-filter= variable to ignore entries tagged this way.
 
 #+begin_src elisp
-(setq-default elfeed-search-filter "@6-months-ago +unread -unimportant")
+(setq-default elfeed-search-filter "@6-months-ago +unread ")
 #+end_src
 
 I also define some functional content-type tags that are later used for determining how to handle the posts using my =my/elfeed-search-handle-entry= command.
@@ -3440,16 +3440,17 @@ I also define some functional content-type tags that are later used for determin
 
 (defconst my/elfeed-handler-alist
   '((youtube . my/elfeed-search-mpv-entry-link)
-    (manga . my/elfeed-search-browse-entry-link)
+    (web . my/elfeed-search-browse-entry-link)
     (t . elfeed-search-show-entry)))
 
 (defun my/elfeed-search-handle-entry ()
   (interactive)
   (let* ((entry (elfeed-search-selected t))
          (tags (elfeed-entry-tags entry))
-         (handler-cons (--first (-contains? tags (car it))
+         (handler-cons (--first (or (-contains? tags (car it))
+                                    (eq (car it) t))
                                 my/elfeed-handler-alist)))
-    (apply (cdr handler-cons) `(,entry))))
+    (apply (cdr handler-cons) (list entry))))
 
 (defun my/elfeed-search-browse-entry-link (entry)
   (interactive
@@ -3471,15 +3472,6 @@ I also define some functional content-type tags that are later used for determin
                       (error "playing video in mpv window failed: %s" e))))
     (elfeed-untag-1 entry 'unread)
     (elfeed-search-update-entry entry)))
-
-;; (defun my/elfeed-search-mpv-entry-link (&optional entry)
-;;   (interactive)
-;;   (let* ((entry (or entry (elfeed-search-selected t)))
-;;          (link (elfeed-entry-link entry))
-;;          (exit (call-process "mpv" nil "*mpv-process*" t link)))
-;;     (if (= exit 0)
-;;         (message "playing video in external mpv window")
-;;       (error "playing video in mpv window failed: %s" e))))
 
 #+end_src
 
