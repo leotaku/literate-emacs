@@ -853,7 +853,7 @@ These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
  "O" (key-fn other-window -1)
 
  "d" (key-fn switch-to-buffer "*dashboard*")
- "c" 'my/eyebrowse-projectile-project
+ "c" 'my/eyebrowse-buffer
  
  "n" 'eyebrowse-next-window-config
  "p" 'eyebrowse-prev-window-config
