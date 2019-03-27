@@ -1632,6 +1632,29 @@ I bind several of these operations to keys under the normal === prefix.
 
 #+end_src
 
+**** Insert-shell-command
+The default =shell-command= has interactive functionality and can even be inserted into the buffer with the =C-u= prefix argument.
+Unfortunately it does not trim trailing whitespace from the returned output.
+
+So I define my own version and bind it to some easily acessible keys. 
+
+#+begin_src elisp
+
+(defun my/insert-shell-command (command)
+  (interactive
+   (list (read-string "Shell command: ")))
+  (insert
+   (s-trim-right (shell-command-to-string command))))
+
+(general-define-key
+ :states '(normal visual)
+ "=!" 'my/insert-shell-command)
+
+(general-define-key
+ "C-!" 'my/insert-shell-command)
+
+#+end_src
+
 *** Visual line
 When I have enabled =visual-line-mode=, I want visual lines to be treated nearly the same as hard lines would be without it.
 This means that some evil keys have to be rebound.
