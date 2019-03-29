@@ -3247,40 +3247,6 @@ It may also be used in conjunction with the ivy/helm-bibtex packages.
 
 #+end_src
 
-The uppercase versions of BibTeX links defined by org-ref clutter the insert link menu while not having any apparent use. Remove them for now. [TODO: test this -- doesn't work]
-
-#+begin_src elisp
-
-(setq org-ref-biblatex-types
-  '(;; "Cite"
-    "parencite" ;; "Parencite"
-    "footcite" "footcitetext"
-    "textcite"  ;; "Textcite"
-    "smartcite" ;; "Smartcite"
-    "cite*" "parencite*" "supercite"
-    "autocite"  ;; "Autocite"
-    "autocite*" ;; "Autocite*"
-    ;; "Citeauthor*"
-    "citetitle" "citetitle*"
-    "citedate" "citedate*"
-    "citeurl"
-    "fullcite" "footfullcite"
-    ;; "volcite" "Volcite" cannot support the syntax
-    "notecite"  ;; "Notecite"
-    "pnotecite" ;; "Pnotecite"
-    "fnotecite"
-    ;; multicites. Very limited support for these.
-    "cites"      ;; "Cites"
-    "parencites" ;; "Parencites"
-    "footcites" "footcitetexts"
-    "smartcites"  ;; "Smartcites"
-    "textcites" ;; "Textcites"
-    "supercites" "autocites"
-    ;; "Autocites"
-    ))
-
-#+end_src
-
 I don't like the way ivy and helm org-ref-cite display possible citations.
 Moreover the system for choosing the correct NCS implementation for org-ref is a broken mess.
 Thus I manually set the desired values for the completion functions.
