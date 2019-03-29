@@ -3217,6 +3217,7 @@ I mainly use the following exporters:
 These can be accessed using the default =C-c C-e= binding provided by org mode.
 
 Set the LaTeX backend to export to pdf using the =latexmk= utility.
+
 #+begin_src elisp
 (use-config org
   (setq org-latex-pdf-process
@@ -3224,11 +3225,10 @@ Set the LaTeX backend to export to pdf using the =latexmk= utility.
 #+end_src
 
 Load and configure the external backends.
-#+begin_src elisp
 
+#+begin_src elisp
 (use-package ox-hugo
   :straight t)
-
 #+end_src
 
 **** Org-ref
@@ -3279,11 +3279,13 @@ Thus I manually set the desired values for the completion functions.
 Org-babel is a system for literate programming with support for many popular languages. I use it to literally configure my Emacs editor.
 
 Don't uselessly split org-src windows.
+
 #+begin_src elisp
 (setq org-src-window-setup 'current-window)
 #+end_src
 
 Make source code indentation work as expected.
+
 #+begin_src elisp
 (setq org-src-preserve-indentation nil 
       org-edit-src-content-indentation 0
@@ -3295,13 +3297,11 @@ Narrowed buffers support automatic saving to their parent buffers. Org-src tries
 Manually add support for it here.
 
 #+begin_src elisp
-
 (advice-add 'evil-write :before-until 'my/advice-evil-write)
 (defun my/advice-evil-write (&rest ignore)
   (when (org-src-edit-buffer-p)
     (org-edit-src-save)
     t))
-
 #+end_src
 
 **** Tangle
