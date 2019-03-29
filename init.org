@@ -1509,7 +1509,7 @@ Undo-tree is an Emacs package that tries to improve Emacs' undo and redo functio
 
 Unfortunately the original author of the package seems to have lost interest in updating it. For this reason it is plagued by bugs.
 
-Because Emacs does not currently have another undo system I deem "intuitive" or even "usable" at this point, I am still willing to put up with the danger of undo-tree messing up my workflow.
+Because Emacs does not currently have another undo system I deem "intuitive" or even "usable" at this point, I am still willing to put up with the danger of undo-tree eventually messing up something.
 
 Important problems with undo-tree:
 + auto-save-history feature may cause emacs to inexplicably crash
@@ -1576,29 +1576,7 @@ Undo: _u_, _q_, other
  "u" 'undo-propose-undo)
 
 #+end_src
-
-**** MAYBE undohist
-**** REMOVED undo-tree
-Undo-tree is an Emacs package that tries to improve Emacs' undo and redo functionality by offering a tree-style undo action viewer, as well as undo persistence. It is depended on by evil.
-
-Unfortunately the original author of the package seems to have lost interest in updating it. For this reason it is plagued by bugs. [TODO: find alternative]
-
-For now I just disable it as it otherwise may cause Emacs to crash.
-
-#+begin_src elisp
-(use-config undo-tree
-  (warn "undo-tree was required"))
-#+end_src
-
-#+begin_src elisp :tangle no
-(use-package undo-tree
-  :straight t
-  :config
-  (setq undo-tree-auto-save-history t)
-  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/var/undo")))
-  (global-undo-tree-mode 0))
-#+end_src
-
+.
 ** Editing
 *** Prelude-esque
 The [[https://github.com/bbatsov/prelude#helm][Emacs Prelude]] project, among other things, provides a set of helpful and generic keybindings for editing text.
