@@ -2178,7 +2178,7 @@ Company is automatically enabled in all programming buffers. Yasnippet is needed
 (use-package company
   :straight t
   :defer t
-  :hook ((prog-mode . company-mode)
+  :hook (((prog-mode text-mode) . company-mode)
          (company-mode . yas-minor-mode)))
 
 #+end_src
