@@ -2586,35 +2586,6 @@ OPENS-EXTERNAL is non-nil if the COMMAND is expected to open an external applica
 
 #+end_src
 
-
-The Rust Language Server as well as Flycheck need some specific environment variables to be set in order to work correctly.
-Set them after the first call to =rust-mode-hook=.
-
-#+begin_src elisp
-
-;; [TODO: replace this with managed direnv setup]
-(defun my/setup-rust-env ()
-  "RLS requires some environment variables to be setup. We use rustup to get the values."
-  (when (executable-find "rustup")
-    (setq rust-default-toolchain
-          ;; [TODO: s.el]
-          (car (s-split " " (-first
-                             (lambda (line) (s-match "default" line)) 
-                             (s-lines (shell-command-to-string "rustup toolchain list"))))))
-    ;; tell racer to use the rustup-managed rust-src
-    ;; rustup component add rust-src
-    (setq rust-src-path (f-join (getenv "HOME") ".multirust/toolchains" rust-default-toolchain "lib/rustlib/src/rust/src"))
-    (setq rust-bin-path (f-join (getenv "HOME") ".multirust/toolchains" rust-default-toolchain "bin"))
-    (setq racer-rust-src-path rust-src-path)
-    (setenv "RUST_SRC_PATH" rust-src-path)
-    (setenv "RUSTC" rust-bin-path))
-  ;; only call once
-  (remove-hook 'rust-mode-hook 'my/setup-rust-env))
-
-;; (add-hook 'rust-mode-hook 'my/setup-rust-env)
-
-#+end_src
-
 *** Scheme
 Geiser is an interaction mode similar to SLIME but for Scheme-like languages.
 General highlighting/indentation support is provided by Emacs.
