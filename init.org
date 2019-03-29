@@ -859,6 +859,8 @@ Eyebrowse is an extension that offers basic tab functionality in Emacs. It works
   (eyebrowse-mode 1))
 
 (use-config eyebrowse
+  ;; unbind default eyebrowse keys
+  (setq eyebrowse-mode-map (make-sparse-keymap))
   (setq eyebrowse-wrap-around t))
 
 #+end_src
