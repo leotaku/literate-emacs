@@ -571,7 +571,7 @@ Sometimes I want to just remove all active themes for debugging purposes. Add a 
 #+end_src
 
 Because I switch between different themes relatively often, I would like Emacs to always remember and load my currently active theme.
-This is achieved here using desktop-mode. [TODO: test this]
+This is achieved here using desktop-mode.
 
 #+begin_src elisp
 ;; [TODO: maybe use-config]
@@ -832,7 +832,6 @@ I then create some end-user functions based on them and bind them to the right k
     (bound-and-true-p dired-filter-mode)
     (string-match-p "\\*elfeed-search\\*" (buffer-name))))
 
-;; TODO: fix help/info/etc
 (general-define-key
  "<XF86Back>" 'my/prev-buffer
  "<XF86Forward>" 'my/next-buffer)
@@ -1050,7 +1049,7 @@ Evil surround and commentary emulate the popular vim plugins of the same name. T
 [TODO: Evil multiedit or mc]
 [TODO: Evil terminal cursor]
 
-Also bind =j+k= to go from insert to normal state through key-chord. [TODO: test this]
+Also bind =j+k= to go from insert to normal state through key-chord.
 
 #+begin_src elisp
 
@@ -1172,7 +1171,6 @@ It thus replaces the default isearch/evil-isearch for me.
 #+begin_src elisp
 
 (general-define-key
- ;; TODO test this :keymaps 'override
  :states '(normal visual)
  "/" 'swiper)
  
@@ -2297,7 +2295,7 @@ The command used for spell checking can be changed. I personally use hunspell, w
 (setq ispell-program-name "hunspell")
 #+end_src
 
-Currently for me running an ispell/flyspell command for the first time in a session results in an inexplicable type error. [TODO: find a fix for this]
+Currently for me running an ispell/flyspell command for the first time in a session results in an inexplicable type error.
 
 I mitigate this problem by running =ispell-change-dictionary "default"= wrapped in an =ignore-errors= form whenever ispell is loaded. [HACK]
 
@@ -2320,7 +2318,7 @@ Using ispell with hunspell requires some additional setup to correctly handle di
 
 #+begin_src elisp
 
-;; [TODO: fix dictionaries]
+;; [TODO: more dictionaries]
 (setq my/ispell-wanted-dictionary-list
       '("en_US" "de_AT"
         "en_US,de_AT"))
@@ -2500,7 +2498,6 @@ The Rust major mode adds basic highlighting and indentation support for the Rust
   :straight t
   :mode "\\.rs\\'") ;; this is already done by rust-mode
 
-;; [TODO: document removal]
 (use-package flycheck-rust
   :straight t
   :after rust-mode
@@ -2629,7 +2626,7 @@ General highlighting/indentation support is provided by Emacs.
 
 #+end_src
 
-*** Shell
+*** TODO Shell
 ** Misc
 *** Calculator/Calc
 I don't really know how to use Emacs' builtin calc calculator yet.
