@@ -1501,20 +1501,50 @@ Savehist seems to be the default Emacs mechanism to save minibuffer history. I o
 (savehist-mode 1)
 #+end_src
 
-*** TODO Undo
+*** Undo
 The default Emacs =undo= command is somewhat unusual, requiring aid of additional plugins for me to use comfortably.
 
-**** TODO undo-propose
-Undo-propose aims to be a non-intrusive, minimal addition to the undo-system, by preserving the existing undo functionality of Emacs, but isolating it into its own, separate buffer.
+**** undo-tree
+Undo-tree is an Emacs package that tries to improve Emacs' undo and redo functionality by offering a tree-style undo action viewer, as well as undo persistence. It is depended on by evil.
+
+Unfortunately the original author of the package seems to have lost interest in updating it. For this reason it is plagued by bugs.
+
+Because Emacs does not currently have another undo system I deem "intuitive" or even "usable" at this point, I am still willing to put up with the danger of undo-tree messing up my workflow.
+
+Important problems with undo-tree:
++ auto-save-history feature may cause emacs to inexplicably crash
++ "branches" in the undo-tree will sometimes prevent you from redoing changes
 
 #+begin_src elisp
+(use-package undo-tree
+  :straight t
+  :config
+  (setq undo-tree-auto-save-history t)
+  (setq undo-tree-history-directory-alist '(("." . "~/.emacs.d/var/undo")))
+  (global-undo-tree-mode 1))
+#+end_src
+
+Never hide the place where undos are happening in org-mode.
+
+#+begin_src elisp
+(defun my/undo-tree-org-reveal (&rest _)
+  (org-reveal))
+(advice-add 'undo-tree-undo :after 'my/undo-tree-org-reveal)
+(advice-add 'undo-tree-undo :after 'my/undo-tree-org-reveal)
+#+end_src
+
+**** MAYBE undohist                                                 :ARCHIVE:
+**** undo-propose                                                   :ARCHIVE:
+Undo-propose aims to be a non-intrusive, minimal addition to the undo-system, by preserving the existing undo functionality of Emacs, but isolating it into its own, separate buffer.
+
+#+begin_src elisp :tangle no
 (use-package undo-propose
   :straight t)
 #+end_src
 
 I define my own hydra for it, whose body then replaces the default undo bindings.
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 
 (eval
  `(defhydra hydra-undo-propose (;;
