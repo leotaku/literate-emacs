@@ -833,9 +833,9 @@ I then create some end-user functions based on them and bind them to the right k
                               (current-buffer)
                               (not include-current)))
 
-(defun my/delete-window-or-kill-buffer ()
+(defun my/delete-window-or-kill-buffer (&optional kill-always)
   (interactive)
-  (unless (window--delete)
+  (unless (window--delete nil nil kill-always)
     (kill-buffer))
   (my/prev-buffer t))
 
