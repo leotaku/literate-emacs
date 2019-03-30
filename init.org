@@ -2962,6 +2962,12 @@ I bind the main interface to =C-x g= for easy access.
 
 #+end_src
 
+Writing commit messages is usually a pretty quick process, so I would like to start in insert state.
+
+#+begin_src elisp
+(evil-set-initial-state 'git-commit-mode 'insert)
+#+end_src
+
 More recently Magit also gained support for working with git forges through the additional "forge" package.
 In order to correctly install and use magit-forge, you will need to have a C compiler (eg. gcc) when first running any forge command. [TODO: this is suboptimal]
 
