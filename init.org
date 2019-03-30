@@ -291,12 +291,12 @@ It also makes use of general which-key integration to automatically show clear d
 
 #+begin_src elisp
 (defmacro key-fun (action &rest args)
-  (let* ((hint (concat (symbol-name action) "-"
-                       (mapconcat (lambda (it) (format "%s" it)) args "-")))
-         (func `(lambda (&optional _)
-                  (interactive)
-                  (apply ',action ',args))))
-    `(list ,func :wk ,hint)))
+  (let* ((args `(,@args))
+         (hint (concat (symbol-name action) "-" (mapconcat (lambda (it) (format "%s" it)) args "-")))
+         (fun `(lambda (&optional _)
+                (interactive)
+                (apply ',action ',args))))
+    `(list ,fun :wk ,hint)))
 (put 'key-fun 'lisp-indent-function 'defun)
 #+end_src
 
