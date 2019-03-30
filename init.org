@@ -1022,15 +1022,53 @@ Vim also inexplicably has =Y= mapped to yanking the whole line instead of point 
 
 #+end_src
 
+***** Bindings
+Some mode-agnostic additional evil bindings.
+
+I bind =j+k= to go from insert to normal state through key-chord.
+
+#+begin_src elisp
+(general-define-key
+ :states '(insert)
+ (general-chord "jk") 'evil-normal-state
+ (general-chord "kj") 'evil-normal-state)
+#+end_src
+
+***** TODO Additional
+Vim has some well-liked plugins, some of which have been ported to evil.
+I enable the ones I like here.
+
+****** Motions
+Evil surround and commentary emulate the popular vim plugins of the same name. They automatically bind their keys through =evil-surround-mode= and =evil-commentary-mode=.
+
+#+begin_src elisp
+(use-package evil-surround
+  :straight t
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+
+#+begin_src elisp
+(use-package evil-commentary
+  :straight t
+  :after evil
+  :config
+  (evil-commentary-mode 1))
+#+end_src
+
+****** TODO Multiple cursors
+evil-multiedit or evil-mc
+****** TODO Evil-terminal-cursor-change
+***** Integration
+****** Evil-collection
 Evil-collection aims to bring the advantages of the vim modal editing model to many popular Emacs modes. It can sometimes be problematic, as it may override user-defined bindings.
 
 #+begin_src elisp
-
 (use-package evil-collection
   :straight t
   :init
   (setq evil-collection-setup-minibuffer t))
-
 #+end_src
 
 Integration may be activated for a specific mode in the following fashion:
@@ -1042,40 +1080,28 @@ Integration may be activated for a specific mode in the following fashion:
 Where MODE is the mode to which you want to add the evil integration.
 I usually do this in the =:init= part of any particular use-package declaration.
 
-As previously mentioned there exists a huge number of additional packages improving on evil-mode. I personally load quite a few of them.
-
-Evil surround and commentary emulate the popular vim plugins of the same name. They automatically bind their keys through =evil-surround-mode= and =evil-commentary-mode=.
-
-#+begin_src elisp
-
-(use-package evil-surround
-  :straight t
-  :after evil
-  :config
-  (global-evil-surround-mode 1))
-
-(use-package evil-commentary
-  :straight t
-  :after evil
-  :config
-  (evil-commentary-mode 1))
-
-#+end_src
-
-[TODO: Evil multiedit or mc]
-[TODO: Evil terminal cursor]
-
-Also bind =j+k= to go from insert to normal state through key-chord.
+****** Custom
+Some builtin Emacs modes don't properly integrate with evil-mode and also have no evil-collection support.
+I add basic support for them here.
 
 #+begin_src elisp
-
 (general-define-key
- :states '(insert)
- (general-chord "jk") 'evil-normal-state
- (general-chord "kj") 'evil-normal-state)
-
+ :keymaps 'finder-mode-map
+ :states '(insert normal visual)
+ "q" 'finder-exit
+ "<return>" 'finder-select)
 #+end_src
 
+#+begin_src elisp
+(general-define-key
+ :keymaps 'package-menu-mode-map
+ :states 'emacs
+ "j" 'forward-button
+ "k" 'backward-button)
+;; (add-hook 'package-menu-mode-hook 'forward-button)
+#+end_src
+
+****** Minibuffer
 One problem with evil I have is that, when it is enabled for the minibuffer, it binds the =<escape>= key to normal mode overriding the default exit function.
 This works well for =eval-expression= and maybe others, but not for things like ivy, helm, or even the evil command line.
 For this reason I rebind the =<escape>= keys for the evil command line, as well as vanilla minibuffer here. The other interfaces are managed in ther respective subtrees.
@@ -1130,6 +1156,7 @@ However an =<escape>= key-press when already in normal mode should always allow 
  "<escape>" 'keyboard-escape-quit)
 #+end_src
 
+****** Mouse
 To perfectly emulate vim, evil also rebinds certain mouse clicks/actions. I find most of these annoying as they sometimes interfere with other Emacs functionality (eg. buttons), so I try to rebind them. [TODO: rebind all]
 
 #+begin_src elisp
