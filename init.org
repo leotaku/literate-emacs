@@ -1376,13 +1376,22 @@ Hydra is a package that allows the end user or library authors to define keyboar
 
 #+end_src
 
-**** Smex
+**** Smex                                                           :ARCHIVE:
 Smex is a smart replacement for the default =M-x= interface using the IDO NCS system.
 =counsel-M-x= automatically detects when smex is loaded and then interfaces with it.
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 (use-package smex
  :straight t)
+#+end_src
+.
+**** Amx
+Amx is an alternative to the no longer maintained smex.
+Like smex it also has =counsel-M-x= integration.
+
+#+begin_src elisp
+(use-package amx
+  :straight t)
 #+end_src
 
 **** Which-key
