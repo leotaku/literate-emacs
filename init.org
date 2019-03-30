@@ -216,17 +216,6 @@ Whenever a value is overridden using one of the =el-patch-*= wrappers, =el-patch
 ** early load
 This subtree contains packages and configurations that don't necessarily have anything to do with package management, but should be loaded as early as possible.
 
-*** customize
-The Emacs customize system normally appends its configurations to the end of the main =init.el= file. This behavior however gets annoying very quickly and also prevents generated configurations (eg. org-mode tangle) from working.
-
-So I simply tell the customize system to write to a another file, =custom.el=.
-I also currently do not load this file, as I dislike using the customize sytem for anything other than testing.
-
-#+begin_src elisp
-(setq custom-file (concat user-emacs-directory "custom.el"))
-;; (load custom-file)
-#+end_src
-
 *** benchmark-init
 I load this package immediately after initializing the use-package/straight system, so it can reliably benchmark all of my startup.
 
@@ -262,6 +251,17 @@ No-littering is a useful Emacs extension that tries to revert any inconsistent p
   (add-to-list 'recentf-exclude no-littering-var-directory)
   (add-to-list 'recentf-exclude no-littering-etc-directory))
 
+#+end_src
+
+*** customize
+The Emacs customize system normally appends its configurations to the end of the main =init.el= file. This behavior however gets annoying very quickly and also prevents generated configurations (eg. org-mode tangle) from working.
+
+So I simply tell the customize system to write to a another file, =custom.el=.
+I also currently do not load this file, as I dislike using the customize sytem for anything other than testing.
+
+#+begin_src elisp
+(setq custom-file (concat no-littering-etc-directory "custom.el"))
+;; (load custom-file)
 #+end_src
 
 * Configuration
