@@ -254,7 +254,6 @@ No-littering is a useful Emacs extension that tries to revert any inconsistent p
 #+end_src
 
 *** customize
-*** TODO secrets
 The Emacs customize system normally appends its configurations to the end of the main =init.el= file. This behavior however gets annoying very quickly and also prevents generated configurations (eg. org-mode tangle) from working.
 
 So I simply tell the customize system to write to a another file, =custom.el=.
