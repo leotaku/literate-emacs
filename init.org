@@ -3106,7 +3106,7 @@ These are the personal settings I need for managing my notes (as well as my [[RS
 Even if you want to copy some of my settings, you will almost definitely want to change these.
 
 #+begin_src elisp
-(setq org-default-notes-file "~/Projects/notes.org")
+(setq org-default-notes-file "~/notes.org")
 (setq rmh-elfeed-org-files (list "~/Projects/feeds.org"))
 
 (setq org-todo-keywords
