@@ -2992,7 +2992,18 @@ Simply enable evil integration for help-mode.
   (evil-collection-help-setup))
 #+end_src
 
-*** TODO Images/Image
+*** Images/Image
+Image-mode is a mode used for displaying bitmap images in Emacs.
+
+Like with most no-self-insert-modes, I want =q= to close the window and buffer.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'image-mode-map
+ "q" 'my/delete-window-or-kill-buffer)
+(evil-set-initial-state 'image-mode 'emacs)
+#+end_src
+
 *** Music/MPD
 MPD is an daemon for playing music.
 Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel for Emacs. There's also ivy-mpdel which allows for using the ivy NCS to select songs.
