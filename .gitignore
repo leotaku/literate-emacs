@@ -4,8 +4,9 @@
 # auto-generated default.nix (ad-hoc-env)
 /.direnv/active/default.nix
 
-# auto-filled directories
+# auto-filled directories and files
 /games/*
 /var/*
 /straight/*
 !/straight/versions
+/etc/yasnippet/snippets/**/.yas-compiled-snippets.el
