@@ -828,17 +828,19 @@ I then create some end-user functions based on them and bind them to the right k
 
 (defun my/quit-window-kill-buffer ()
   (interactive)
-  (quit-window t)
+  (unless (window--delete)
+    (kill-buffer))
   (my/prev-buffer t))
 
 (defconst my/switch-buffer-whitelist
   '((buffer-file-name)
+    (bound-and-true-p org-src-mode)
     (bound-and-true-p dired-filter-mode)
     (string-match-p "\\*elfeed-search\\*" (buffer-name))))
 
 (general-define-key
- "<XF86Back>" 'my/prev-buffer
- "<XF86Forward>" 'my/next-buffer)
+"<XF86Back>" 'my/prev-buffer
+"<XF86Forward>" 'my/next-buffer)
 
 (general-define-key
  :keymaps 'override
