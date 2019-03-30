@@ -3186,7 +3186,7 @@ It also provides some additional functions for common Org task such as refiling 
 
 #+end_src
 
-Worf also makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting. [TODO: with evil,hook,"]"]
+Worf makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting. [TODO: with evil]
 
 #+begin_src elisp
 (use-package worf
