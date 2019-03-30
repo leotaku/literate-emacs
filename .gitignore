@@ -1,4 +1,11 @@
+# compiled init.el
+/init.el
+
+# auto-generated default.nix (ad-hoc-env)
+/.direnv/active/default.nix
+
+# auto-filled directories
+/games/*
 /var/*
 /straight/*
 !/straight/versions
-/.direnv/active/default.nix
