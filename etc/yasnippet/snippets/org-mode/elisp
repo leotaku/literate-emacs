@@ -1,0 +1,7 @@
+# key: <e
+# name: elisp
+# condition: (looking-back "^<e" nil)
+# --
+#+begin_src elisp
+$0
+#+end_src

@@ -1969,22 +1969,33 @@ Templates may also be automatically created by other extensions, such as company
 
 (use-package yasnippet
   :straight t
-  :defer t)
+  :defer t
+  :config
+  (yas-global-mode 1)
+  (evil-set-initial-state 'snippet-mode 'insert))
 
 (use-package ivy-yasnippet
   :straight t
-  :after yasnippet)
+  :after yasnippet
+  :config
+  (setq ivy-yasnippet-new-snippet yas-new-snippet-default))
 
 #+end_src
 
-Yasnippet comes with a set of snippets preinstalled. I additionaly define my own snippets in the [[file:snippets.org]] file, which is automatically tangled by org-babel. [TODO]
+Yasnippet snippets are generally stored as single files of directories corresponding to the mode they should be used in.
 
-#+begin_src elisp :tangle no
-;; [TODO: manage snippets]
-(use-config org
-  (org-babel-tangle-file (f-join user-emacs-directory "snippets.org"))
-  (load-file (f-join user-emacs-directory "snippets.el")))
+Because of no-littering this structure is located in [[file:etc/yasnippet/snippets]]
 
+I define some custom snippets, most notably:
++ org-mode :: replacements for common org-tempo commands
+
+I also bind the most common yasnippet commands to more easily acessible bindings.
+
+#+begin_src elisp
+(general-define-key
+ :states '(normal visual)
+ :prefix "C-c"
+ "i" 'ivy-yasnippet)
 #+end_src
 
 *** Jumping

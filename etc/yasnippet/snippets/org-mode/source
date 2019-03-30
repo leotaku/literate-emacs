@@ -1,0 +1,7 @@
+# key: <s
+# name: source
+# condition: (looking-back "^<s" nil)
+# --
+#+begin_src $1
+$0
+#+end_src

@@ -1,0 +1,7 @@
+# key: <l
+# name: latex
+# condition: (looking-back "^<l" nil)
+# --
+#+begin_latex
+$0
+#+end_latex
