@@ -3372,6 +3372,14 @@ Manually add support for it here.
     t))
 #+end_src
 
+I also bind =C-c C-c= in org-src buffers to emulate org-babel code execution.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'org-src-mode-map
+ "C-c C-c" 'eval-buffer)
+#+end_src
+
 **** Tangle
 Babel-tangle is org-babels builtin way of exporting source blocks to actual code.
 It provides a rich syntax for specifing how any specific source block should be tangled.
