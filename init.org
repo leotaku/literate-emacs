@@ -651,7 +651,7 @@ Instead, simply flash the modeline red as an indicator. [TODO: what is red?]
 Just like with themes, I would like Emacs to remember the my font across restarts. Again, I use desktop-mode for this.
 
 #+begin_src elisp
-;; [TODO: maybe use-config]
+;; TODO: maybe use-config
 (with-eval-after-load 'desktop
   (add-to-list 'desktop-globals-to-save 'my/current-font)
   (add-to-list 'desktop-globals-to-save 'my/current-font-size))
@@ -660,7 +660,7 @@ Just like with themes, I would like Emacs to remember the my font across restart
 (advice-add 'load-theme :before 'my/restore-font)
 #+end_src
 
-I also define a simple function that allows me to change the global font. My font-remembrance method relies on this function being used to correctly determine the current font. [TODO: maybe read frame font]
+I also define a simple function that allows me to change the global font. My font-remembrance method relies on this function being used to correctly determine the current font.
 
 #+begin_src elisp
 (defun set-font (font size)
@@ -989,7 +989,7 @@ Other than that there is also hydra, a package for defining colorful keyboard-ce
 
 **** Evil
 Evil is the extensible vi(m) layer for Emacs. It provides WORD vim emulation for Emacs, including motions, text objects visual, visual block and line selection, the vim command line, improved isearch [TODO fix ugly artefacts], interactive search and replace as well as ports of many popular vim extensions.
-Evil is activated through the global-only =evil-mode= and changes a huge amount of mappings. It also introduces the concept of states and intercept keymaps [TODO: understand this and then fix issues] which are fortunately handled relatively well by general.
+Evil is activated through the global-only =evil-mode= and changes a huge amount of mappings. It also introduces the concept of states and intercept keymaps which are fortunately handled relatively well by general.
 
 Vim also inexplicably has =Y= mapped to yanking the whole line instead of point -> eol like =D= and =C=. Evil has an option to disable this behavior.
 
@@ -1457,10 +1457,8 @@ Saving/Preserving state in Emacs is a complicated affair, here are my settings f
 
 **** Auto-save
 Periodically save edited buffers. This can be helpful should Emacs/your computer decide to crash during an editing session.
-[TODO: visibly activate global auto save]
 
 #+begin_src elisp
-
 (setq auto-save-list-file-prefix "~/.emacs.d/var/auto-save/files")
 (setq auto-save-file-name-transforms '((".*" "~/.emacs.d/var/auto-save/files" t)))
 #+end_src
@@ -1827,8 +1825,6 @@ Most IDEs by default have some sort of "smart-backspace" functionality that allo
 What that mostly boils down to is that when on an empty line indented, pressing =<backspace>= deletes the whole line and goes to the previous lines indentation.
 
 I like this behavior, so I implement and bind it here.
-[TODO: find out how/if this conflicts with special lispy bindings or others]
-[TODO: the keybindings are currently only bound in =prog-mode=, so that other functionality (eg. ansi-term) is not affected. Find out how to fix this]
 
 #+begin_src elisp
 
@@ -2256,7 +2252,7 @@ Company is automatically enabled in all programming buffers. Yasnippet is needed
 
 #+end_src
 
-Misc company setting, mostly related to frontend display. [TODO: set best frontends]
+Misc company setting, mostly related to frontend display.
 
 #+begin_src elisp
 
@@ -2392,7 +2388,7 @@ Using ispell with hunspell requires some additional setup to correctly handle di
 
 #+begin_src elisp
 
-;; [TODO: more dictionaries]
+;; TODO: more dictionaries
 (setq my/ispell-wanted-dictionary-list
       '("en_US" "de_AT"
         "en_US,de_AT"))
@@ -3637,6 +3633,9 @@ While the [[Done]] subheading should be a full log, only larger planned changes 
 This should complement the usual usage of state keywords in headings and my current system of just using [STATE] or comments containing state keywords [TODO: write integration layer] with permanent tracking of changes.
 
 ** Planned
+*** TODO investigate csetq
+<2019-03-30 Sat>
+https://oremacs.com/2015/01/17/setting-up-ediff/
 *** TODO find out how to get theme-agnostic colors
 <2019-03-30 Sat>
 *** DONE rework organization arround first headings
