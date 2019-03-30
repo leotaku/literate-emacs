@@ -3573,6 +3573,15 @@ The =*scratch*= buffer automatically gets spawned by Emacs on startup.
 It is intended for quick elisp evaluation and testing, but could also serve any other purpose.
 
 By default the scratch buffer starts in lisp-interaction-mode, which only slightly changes the behavior of =eval-print-last-sexp=.
+This also enables us to bind scratch-only keybindings. I use =C-c C-c= for quick evaluation.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'lisp-interaction-mode-map
+ "C-c C-c" (key-defun eval-buffer
+             (message "executing Elisp code buffer...")
+             (message "%s" (eval-buffer))))
+#+end_src
 
 I want my scratch buffer to always be persistent.
 To work reliably this system also requires some additional help from =nuke-emacs= in [[Commands]].
