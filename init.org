@@ -3360,13 +3360,13 @@ Don't uselessly split org-src windows.
 Make source code indentation work as expected.
 
 #+begin_src elisp
-(setq org-src-preserve-indentation nil 
+(setq org-src-preserve-indentation nil
       org-edit-src-content-indentation 0
-      ;; [TODO make this work with custom bindings]
+      ;; TODO: make this work with custom bindings
       org-src-tab-acts-natively t)
 #+end_src
 
-Narrowed buffers support automatic saving to their parent buffers. Org-src tries to emulate this functionality but does not support the evil =:w= command.
+Narrowed buffers support automatic saving to their parent buffers. Org-src tries to emulate this functionality but does not consider the evil =:w= command.
 Manually add support for it here.
 
 #+begin_src elisp
