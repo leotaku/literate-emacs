@@ -3169,14 +3169,9 @@ The default keybindings for =<return>= and =<C-return>= only really work for out
 
 #+end_src
 
-As of Org 9.2 "org-tempo" is no longer loaded by default. It allows for easy insertion of code blocks through contextual binding like =<s|<TAB>=.
-Load it here.
-#+begin_src elisp
-(load-library "org-tempo")
-#+end_src
-
 Navigating huge Org buffers can be difficult. org-pretty-jump tries to make that task easier by providing a good-looking ivy-based menu that can be used to jump to any headline.
 It also provides some additional functions for common Org task such as refiling as well as an easy to understand API for creating custom actions using the central menu.
+
 #+begin_src elisp
 
 (use-package org-pretty-jump
