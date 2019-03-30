@@ -2942,7 +2942,23 @@ I only use it for this purpose and therefor place its configuration in the [[Fil
 
 #+end_src
 
-*** TODO Diff/Ediff
+*** Diff/Ediff
+Ediff is Emacs' builtin tool for viewing file diffs.
+It has got some pretty suboptimal defaults and keybindings, so I set some of my preferences and enable evil integration here.
+
+#+begin_src elisp
+
+(use-config ediff
+  (evil-collection-ediff-setup))
+
+(use-config ediff
+  (setq ediff-window-setup-function 'ediff-setup-windows-plain)
+  (setq ediff-split-window-function 'split-window-horizontally)
+  (setq ediff-diff-options "-w")
+  (add-hook 'ediff-prepare-buffer-hook #'show-all))
+
+#+end_src
+
 *** Git/Magit
 Git is the most common VC system today.
 Most open-source project use it, partly because of its great hosting support with Github and Gitlab providing near-unlimited public storage.
