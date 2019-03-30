@@ -3200,6 +3200,14 @@ The default keybindings for =<return>= and =<C-return>= only really work for out
 
 #+end_src
 
+The org-mark ring can be pretty useful, but isn't consistently bound.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'org-mode-map
+ "C-c ´" (key-fun org-mark-ring-goto))
+#+end_src
+
 Navigating huge Org buffers can be difficult. org-pretty-jump tries to make that task easier by providing a good-looking ivy-based menu that can be used to jump to any headline.
 It also provides some additional functions for common Org task such as refiling as well as an easy to understand API for creating custom actions using the central menu.
 
