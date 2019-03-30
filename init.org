@@ -2955,18 +2955,14 @@ I bind the main interface to =C-x g= for easy access.
   :straight t
   :after (magit)
   :config
-  (evil-magit-init))
+  (evil-magit-init)
+  ;; writing commit messages is usually a pretty quick process, so I would like to start in insert state.
+  (evil-set-initial-state 'git-commit-mode 'insert))
 
 (general-define-key
  :prefix "C-x"
  "g" 'magit-status)
 
-#+end_src
-
-Writing commit messages is usually a pretty quick process, so I would like to start in insert state.
-
-#+begin_src elisp
-(evil-set-initial-state 'git-commit-mode 'insert)
 #+end_src
 
 More recently Magit also gained support for working with git forges through the additional "forge" package.
