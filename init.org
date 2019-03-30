@@ -832,7 +832,7 @@ I then create some end-user functions based on them and bind them to the right k
                               (current-buffer)
                               (not include-current)))
 
-(defun my/quit-window-kill-buffer ()
+(defun my/delete-window-or-kill-buffer ()
   (interactive)
   (unless (window--delete)
     (kill-buffer))
@@ -850,7 +850,7 @@ I then create some end-user functions based on them and bind them to the right k
 
 (general-define-key
  :keymaps 'override
- "C-q" 'my/quit-window-kill-buffer)
+ "C-q" 'my/delete-window-or-kill-buffer)
 
 (general-define-key
  :keymaps 'help-mode-map
@@ -2626,7 +2626,7 @@ General highlighting/indentation support is provided by Emacs.
 
 (general-define-key
  :keymaps 'geiser-repl-mode-map
- "C-d" 'my/quit-window-kill-buffer)
+ "C-d" 'my/delete-window-or-kill-buffer)
 
 #+end_src
 
@@ -2666,7 +2666,7 @@ Some of these might be overriden by specific comint-derived modes, this is then 
  "<up>" 'comint-previous-input
  "<down>" 'comint-next-input
  "C-r" 'comint-history-isearch-backward
- "C-d" 'my/quit-window-kill-buffer
+ "C-d" 'my/delete-window-or-kill-buffer
  "C-c" 'comint-interrupt-subjob)
 
 #+end_src
@@ -3570,7 +3570,7 @@ I bind some keys to emulate the "typical" UNIX-terminal.
          (interactive)
          (if (string= (buffer-name) shell-pop-last-shell-buffer-name)
              (call-interactively 'shell-pop)
-           (my/quit-window-kill-buffer)))
+           (my/delete-window-or-kill-buffer)))
  "C-a t" 'shell-pop
  "C-c" 'term-interrupt-subjob
  "C-h" help-map
