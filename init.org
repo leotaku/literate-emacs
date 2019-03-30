@@ -1961,7 +1961,7 @@ Automatically highlight the pair opposite to the one at point.
   
 #+end_src
 
-*** TODO Snippets
+*** Snippets/Yasnippet
 Snippets are reusable fragments of text that can be saved and later inserted into files or buffers. They serve to aviod having to retype commonly used structures.
 
 I use yasnippet which works by expanding abbreviations to predefined templates. These abbreviations are most commonly expanded by pressing the =<TAB>= key when the point is situated behind them, but can also be triggered through other means. (eg. an NCS search)

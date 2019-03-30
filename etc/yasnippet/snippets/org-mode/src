@@ -2,6 +2,6 @@
 # name: source
 # condition: (looking-back "^<s" nil)
 # --
-#+begin_src $1
+#+begin_src ${1:elisp}
 $0
 #+end_src
