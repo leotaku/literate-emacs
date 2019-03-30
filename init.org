@@ -2264,6 +2264,7 @@ Misc company setting, mostly related to frontend display. [TODO: set best fronte
   (setq company-minimum-prefix-length 1)
   (setq company-idle-delay 0.2)
   (setq company-dabbrev-downcase nil)
+  (setq company-dabbrev-ignore-case nil)
   (setq company-require-match nil)
   (setq company-tooltip-align-annotations t)
   (setq company-frontends '(company-tng-frontend
