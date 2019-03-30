@@ -264,9 +264,10 @@ I also currently do not load this file, as I dislike using the customize sytem f
 ;; (load custom-file)
 #+end_src
 
+*** TODO secrets
 * Configuration
 The heart and soul of this file and by extension of my Emacs configuration.
-Headers are grouped by their most significant functionality. If no logical order is present, alphabetical order should be upheld. [TODO] [fn:because-vc]
+Headers are grouped by their most significant functionality. If no logical order is present, alphabetical order should be upheld. [fn:because-vc]
 
 ** Helpers
 This header contains configurations or packages with the main purpose of easing the configuration of other packages.
