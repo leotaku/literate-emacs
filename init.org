@@ -3252,7 +3252,8 @@ It may also be used in conjunction with the ivy/helm-bibtex packages.
   :after (org ivy-bibtex)
   :requires (doi-utils org-ref-isbn org-ref-ivy org-ref-helm)
   :init
-  (setq org-ref-completion-library 'org-ref-ivy-cite))
+  (setq org-ref-completion-library 'org-ref-ivy-cite)
+  (org-ref-ivy-cite-completion))
 
 #+end_src
 
