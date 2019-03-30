@@ -3641,9 +3641,9 @@ While the [[Done]] subheading should be a full log, only larger planned changes 
 This should complement the usual usage of state keywords in headings and my current system of just using [STATE] or comments containing state keywords [TODO: write integration layer] with permanent tracking of changes.
 
 ** Planned
-*** TODO rework organization arround first headings
+*** DONE rework organization arround first headings
 <2019-03-27 Wed>
-*** TODO yasnippet
+*** DONE yasnippet
 <2019-03-27 Wed>
 *** DONE investigate general-simulate-keypress
 <2019-03-26 Tue>
@@ -3652,7 +3652,7 @@ This should complement the usual usage of state keywords in headings and my curr
 *** TODO org-mode things
 <2019-03-26 Tue>
 habit, schedule, agenda, clocking
-*** TODO keyfreq-mode
+*** DONE keyfreq-mode
 <2019-03-26 Tue>
 *** TODO ediff
 <2019-03-22 Fri>
