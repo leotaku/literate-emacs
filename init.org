@@ -3222,23 +3222,24 @@ Add the required entries here.
 
 #+end_src
 
-Moreover, I would like highlighting for some additional TODO states.
+Moreover, I would like highlighting for all additional TODO states I may or may not ever use.
 
 #+begin_src elisp
 
-;; [TODO: ensure this works]
-; (defface org-canceled '(:color red) "")
-; (defface org-maybe    '(:color magenta) "")
+(defface org-bad '((t :foreground "red" :inherit 'org-todo)) "")
+(defface org-maybe  '((t :foreground "magenta" :inherit 'org-todo)) "")
 
 (setq org-todo-keyword-faces
       '(("TODO"      . 'org-todo)
         ("DOING"     . 'org-todo)
+        ("FUTURE"    . 'org-todo)
         ("DONE BUT"  . 'org-done)
         ("DONE"      . 'org-done)
         ("MAYBE"     . 'org-maybe)
         ("PLANNED"   . 'org-maybe)
-        ("CANCELED"  . 'org-canceled)
-        ("DROPPED"   . 'org-canceled)))
+        ("CANCELED"  . 'org-bad)
+        ("DROPPED"   . 'org-bad)
+        ("FAILED"    . 'org-bad)))
 
 #+end_src
 
@@ -3641,6 +3642,8 @@ While the [[Done]] subheading should be a full log, only larger planned changes 
 This should complement the usual usage of state keywords in headings and my current system of just using [STATE] or comments containing state keywords [TODO: write integration layer] with permanent tracking of changes.
 
 ** Planned
+*** TODO find out how to get theme-agnostic colors
+<2019-03-30 Sat>
 *** DONE rework organization arround first headings
 <2019-03-27 Wed>
 *** DONE yasnippet
