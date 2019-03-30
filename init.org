@@ -283,30 +283,36 @@ General allows for easy mapping of keys to commands by adding an abstraction ove
 
 #+end_src
 
-**** general key-fn
+**** key-fun, key-defun
 
-=key-fn= is an elisp macro written by myself in order to ease the mapping of non-=interactive= functions to keys with general. 
+=key-fun= is an elisp macro written by myself in order to ease the mapping of non-=interactive= functions to keys with general. 
 It also makes use of general which-key integration to automatically show clear descriptions.
 
 #+begin_src elisp
-
-(defmacro key-fn (action &rest args)
-  (let* ((args `(,@args))
-         (desc (concat (symbol-name action) "-" (mapconcat (lambda (it) (format "%s" it)) args "-")))
-         (fn `(lambda (&optional _)
-                (interactive)
-                (apply ',action ',args))))
-    `(list ,fn :wk ,desc)))
-
+(defmacro key-fun (action &rest args)
+  (let* ((hint (concat (symbol-name action) "-"
+                       (mapconcat (lambda (it) (format "%s" it)) args "-")))
+         (func `(lambda (&optional _)
+                  (interactive)
+                  (apply ',action ',args))))
+    `(list ,func :wk ,hint)))
+(put 'key-fun 'lisp-indent-function 'defun)
 #+end_src
 
 Here are some usage examples:
 
 #+begin_src elisp :tangle no
-
 (general-define-key
- "C-y" (key-fn insert "yes"))
+ "C-y" (key-fun insert "yes"))
+#+end_src
 
+=key-defun= is a more general implementation of a similar concept that just takes a name and a body to generate a general-compatible keybinding.
+
+#+begin_src elisp
+(defmacro key-defun (name &rest body)
+  (let* ((hint (symbol-name name)))
+    `(list (lambda () (interactive) ,@body) :wk ,hint)))
+(put 'key-defun 'lisp-indent-function 'defun)
 #+end_src
 
 *** key-chord
@@ -498,7 +504,7 @@ I bind them to shorter/easier keys in this subtree.
  "C-c R" 'auto-revert-mode)
 
 (general-define-key
- "C-=" (key-fn text-scale-set 0)
+ "C-=" (key-fun text-scale-set 0)
  "C-+" 'text-scale-increase
  "C--" 'text-scale-decrease)
 
@@ -883,9 +889,9 @@ These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
  :prefix "C-a"
  "s" 'ace-window
  "o" 'other-window
- "O" (key-fn other-window -1)
+ "O" (key-fun other-window -1)
 
- "d" (key-fn switch-to-buffer "*dashboard*")
+ "d" (key-fun switch-to-buffer "*dashboard*")
  "c" 'my/eyebrowse-buffer
  
  "n" 'eyebrowse-next-window-config
@@ -894,17 +900,21 @@ These keys depend on the ace-window, evil, eyebrowse, and dashboard packages.
  "x" 'my/close-window-or-eyebrowse
  "X" 'eyebrowse-close-window-config
 
- "w" 'split-window-vertically
- "q" 'split-window-horizontally
+ "w" (key-defun split-window-vertically
+        (split-window-below)
+        (evil-window-down 1))
+ "q" (key-defun split-window-horizontally
+        (split-window-right)
+        (evil-window-right 1))
  
  "h" 'evil-window-left
  "j" 'evil-window-down
  "k" 'evil-window-up
  "l" 'evil-window-right
- "C-k" (key-fn evil-window-move-very-top)
- "C-j" (key-fn evil-window-move-very-bottom)
- "C-h" (key-fn evil-window-move-far-left)
- "C-l" (key-fn evil-window-move-far-right))
+ "C-k" (key-fun evil-window-move-very-top)
+ "C-j" (key-fun evil-window-move-very-bottom)
+ "C-h" (key-fun evil-window-move-far-left)
+ "C-l" (key-fun evil-window-move-far-right))
 
 ;; [TODO: use el-patch]
 (defun my/eyebrowse-buffer ()
@@ -2823,7 +2833,7 @@ Dired-ranger does not provide any keybindings itself, so I bind the most importa
  :keymaps 'dired-mode-map
  :states '(normal visual)
  "y" 'dired-ranger-copy
- "a" (key-fn dired-ranger-copy t)
+ "a" (key-fun dired-ranger-copy t)
  "pc" 'dired-ranger-paste
  "pm" 'dired-ranger-move
 
@@ -3130,7 +3140,7 @@ It also provides some additional functions for common Org task such as refiling 
 (general-define-key
  :states '(normal visual)
  "gh" 'opj-contrib/jump
- "gH" (key-fn opj-contrib/jump 1))
+ "gH" (key-fun opj-contrib/jump 1))
 
 #+end_src
 
@@ -3624,9 +3634,9 @@ Thsi might already work
 dwim keys, =C-a c= without projectile
 <2019-03-27 Wed>
 =C-a c= now does eyebrowse-buffer
-*** TODO add key-lambda
+*** DONE add key-lambda
 <2019-03-03 Sun>
-Maybe also rename =key-fn= -> =key-fun=.
+Maybe also rename =key-fun= -> =key-fun=.
 *** TODO make use-config more useful
 <2019-03-03 Sun>
 Options:
