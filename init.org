@@ -1722,6 +1722,8 @@ I bind several of these operations to keys under the normal === prefix.
 The default =shell-command= has interactive functionality and can even be inserted into the buffer with the =C-u= prefix argument.
 Unfortunately it does not trim trailing whitespace from the returned output.
 
+The =evil-shell-command= also behaves unituitively.
+
 So I define my own version and bind it to some easily acessible keys. 
 
 #+begin_src elisp
