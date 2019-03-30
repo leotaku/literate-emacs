@@ -463,19 +463,23 @@ They are not prefixed with =my/=.
     (load user-init-file)))
 
 (defun nuke-buffers ()
-  "Kill all emacs buffers but *dashboard* and current"
+  "Kill all emacs buffers but current and internal, but only after saving \*scratch\*"
   (interactive)
-  (-each (-difference
-          (buffer-list)
-          `(,(get-buffer "*dashboard*") ,(current-buffer)))
-    'kill-buffer))
+  (when (get-buffer "*scratch*")
+    (persistent-scratch-save))
+  (--each (-difference
+           (--filter
+            (not (s-prefix? " " (buffer-name it)))
+            (buffer-list))
+           `(,(current-buffer)))
+    (kill-buffer it))
+  (delete-other-windows))
 
 (defun nuke-emacs ()
-  "Kill all buffers and emacs, preserving \*scratch\* for persistent scratch"
+  "Kill all buffers and emacs, but only after saving \*scratch\*"
   (interactive)
-  (--each (buffer-list)
-    (unless (string-equal (buffer-name it) "*scratch*")
-      (kill-buffer it)))
+  (nuke-buffers)
+  (kill-buffer (current-buffer))
   (kill-emacs))
 
 #+end_src
