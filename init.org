@@ -2291,21 +2291,21 @@ Misc company setting, mostly related to frontend display.
 
 #+end_src
 
-*** Outline/shine
+*** Outline/shine                                                   :ARCHIVE:
 Outline is a library for structuring files using nested headings that can be folded. It is most famously used by the org-mode extension.
 
 Outshine is a package that promises to bring the advantages of structuring your files with outline to all programming languages.
 
 I personally only use it for Elisp and would like to remove it as soon as possible, because it is very unstable and requires intrusive hacks in order to work properly.
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 (use-package outshine
   :straight t
   :after org
   :hook (emacs-lisp-mode . outshine-mode))
 #+end_src
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 
 (defun my/outshine-smart-tab ()
   (interactive)
