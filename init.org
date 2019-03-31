@@ -2334,7 +2334,7 @@ I personally only use it for Elisp and would like to remove it as soon as possib
   (set-face-attribute 'outshine-level-8 nil :inherit 'org-level-8))
 
 #+end_src
-
+.
 *** Flycheck
 Flycheck is an alternative to the builtin flymake. It offers asyncronous buffer syntax checking with good support for external tools.
 
