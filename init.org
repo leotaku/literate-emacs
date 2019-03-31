@@ -1035,7 +1035,7 @@ I bind =j+k= to go from insert to normal state through key-chord.
  (general-chord "kj") 'evil-normal-state)
 #+end_src
 
-***** TODO Additional
+***** Additional [0/2]
 Vim has some well-liked plugins, some of which have been ported to evil.
 I enable the ones I like here.
 
