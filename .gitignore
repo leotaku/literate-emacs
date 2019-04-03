@@ -10,3 +10,4 @@
 /straight/*
 !/straight/versions
 /etc/yasnippet/snippets/**/.yas-compiled-snippets.el
+/etc/custom.el
