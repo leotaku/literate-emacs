@@ -662,12 +662,12 @@ Some keys for easier dashboard navigation are bound.
                           (projects . 5)
                           (bookmarks . 5)
                           (agenda . 5)))
-  (set-face-bold 'dashboard-heading-face t))
+  (set-face-bold 'dashboard-heading-face t)
 
 (general-define-key
  :keymaps 'dashboard-mode-map
  :states 'normal
- "gr" 'dashboard-refresh-buffer)
+ "gr" 'dashboard-refresh-buffer))
 
 (add-hook 'dashboard-mode-hook
           (lambda ()
