@@ -1410,7 +1410,7 @@ Smex is a smart replacement for the default =M-x= interface using the IDO NCS sy
 #+end_src
 .
 **** Amx
-Amx is an alternative to the no longer maintained smex.
+Amx is the successor to the no longer maintained smex.
 Like smex it also has =counsel-M-x= integration.
 
 #+begin_src elisp
@@ -1423,14 +1423,12 @@ Which-key is a package that initially comes from the Spacemacs distribution.
 It shows a grid of valid further key combinations after an initial keypress.
 
 #+begin_src elisp
-
 (use-package which-key
   :straight t
   :init
   :config
   (setq which-key-allow-evil-operators t)
   (which-key-mode 1))
-
 #+end_src
 
 *** Saving
@@ -1464,7 +1462,6 @@ Desktop-save-mode is a global minor mode that allows storing information about t
 It is mostly useful for preserving opened buffers and edits made to them, but additional variables can be preserved by adding them to =desktop-globals-to-save=.
 
 #+begin_src elisp
-
 (setq desktop-dirname             "~/.emacs.d/var/desktop/"
       desktop-base-file-name      "emacs.desktop"
       desktop-base-lock-name      "lock"
@@ -1475,9 +1472,7 @@ It is mostly useful for preserving opened buffers and edits made to them, but ad
       desktop-auto-save-timeout   0
       desktop-restore-frames      nil
       desktop-restore-eager       20
-      
       desktop-restore-in-current-display nil)
-
 #+end_src
 
 Multiple running Emacsen confuse desktop-save, causing it to uslessly prompt the user. Only enable desktop-save-mode in the first Emacs instance that is spawned.
@@ -2401,7 +2396,7 @@ Emacs Lisp is a Lisp dialect used mainly as a scripting and configuration langua
 As Emacs Lisp is the only Lisp dialect I regularly use, this subtree also contains settings that affect general Lisp editing.
 
 Lispy is a package that provides an improved Lisp editing experience.
-It is a spiritual sucessor to the popular paredit.
+It is a spiritual successor to the popular paredit.
 
 #+begin_src elisp
 
@@ -3608,7 +3603,7 @@ Scratch is only saved/restored when [[Desktop]] is also enabled, which is only t
                                    (persistent-scratch-save)))))
 
 #+end_src
-
+.
 *** Shell-pop
 Shell-pop is an Emacs package that allows you to quickly pop up a unix shell in the current directory.
 I use it to quickly open up an =ansi-term= terminal when I need one.
@@ -3821,7 +3816,6 @@ I'm pretty sure putting this here actually makes no difference for my setup but 
 #+end_src
 
 ** Footnotes
-
 [fn:dotfiles] Why? [[https://www.anishathalye.com/2014/08/03/managing-your-dotfiles/]]
 [fn:extensions] extensions, packages, collections of elisp code, ...
 [fn:org-hack] some more context can be found [[https://github.com/raxod502/straight.el#installing-org-with-straightel][here]]
