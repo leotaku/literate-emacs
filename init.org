@@ -384,6 +384,16 @@ I use it in some of my functions and configurations.
   :straight t)
 #+end_src
 
+**** persist
+Persist is an emacs-lisp library that aims to provide a simple and reliable interface to session-persistent variables.
+It is written by me and not yet ready for production, however I use it in my personal configuration.
+
+#+begin_src elisp :tangle no
+(use-package persist
+  :straight (persist :type git :host github
+                     :repo "leotaku/persist.el"))
+#+end_src
+
 **** s
 S is a modern emacs-lisp library for string manipulation.
 I use it in some of my functions and configurations.
