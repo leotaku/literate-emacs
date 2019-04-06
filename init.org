@@ -924,8 +924,11 @@ I also bind some other commands for finding buffers and files. These are primari
  :prefix "C-x"
  :keymaps 'override
  "b" 'ivy-switch-buffer
- "k" 'kill-buffer
+ "k" 'kill-buffer)
 
+(general-define-key
+ :prefix "C-x"
+ :keymaps 'override
  "f" 'counsel-find-file
  "C-f" 'counsel-locate
  "F" 'counsel-fzf)
