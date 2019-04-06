@@ -3059,7 +3059,17 @@ While we're at it, also configure sendmail.
 
 #+end_src
 
-Sending mail is a potentially dangerous action, so I want to be asked to confirm it.
+Message mode for some reason associates a file with new message buffers.
+This causes problems with my modeline (doom) and also seems like a bad idea in general, so I unset the buffers file when message-mode is enabled.
+
+#+begin_src elisp
+(add-hook 'message-mode-hook
+          (lambda nil
+            (rename-buffer (f-filename (buffer-file-name)))
+            (setf (buffer-file-name) nil)
+            (set-buffer-modified-p nil)
+            (force-mode-line-update)))
+#+end_src
 
 #+begin_src elisp
 
