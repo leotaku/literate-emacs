@@ -3637,17 +3637,16 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 #+end_src
 
 *** TODO Tramp
-* Changelog
-An experimental changelog for functional changes in the configuration file.
-All changes that could potentially affect the end-user (me) should ideally be logged.
-
-Planned changes go into [[Planned]], completed ones into [[Done]]. [TODO: Find out if hierarchical links are possible]
-They should still receive an appropriate org keyword, as well as a timestamp.
-While the [[Done]] subheading should be a full log, only larger planned changes are to be put into [[Planned]] as a reminder.
-
-This should complement the usual usage of state keywords in headings and my current system of just using [STATE] or comments containing state keywords [TODO: write integration layer] with permanent tracking of changes.
-
-** Planned
+* Changelog                                                        :noexport:
+** Planned [14/35]
+*** TODO move lispy and agressive indent out of [[Emacs Lisp]]
+*** TODO learn lispy and bind tab + C-l
+*** TODO add use-package binary dependecy checks
+*** TODO ensure literate-emacs stays modular
+*** MAYBE create custom mua
+*** TODO improve delete-or-kill with content-aware
+*** TODO org-cycle-separator-lines
+<2019-04-01 Mon>
 *** TODO investigate csetq
 <2019-03-30 Sat>
 https://oremacs.com/2015/01/17/setting-up-ediff/
