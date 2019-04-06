@@ -1975,8 +1975,7 @@ I also bind the most common yasnippet commands to more easily acessible bindings
 #+begin_src elisp
 (general-define-key
  "<f1>" 'yas-new-snippet
- "<f2>" 'yas-visit-snippet-file
- "<f3>" (key-defun yas-dired (dired yas/root-directory)))
+ "<f2>" (key-defun yas-dired (dired yas/root-directory)))
 #+end_src
 
 #+begin_src elisp
@@ -1987,6 +1986,7 @@ I also bind the most common yasnippet commands to more easily acessible bindings
    :keymaps 'snippet-mode-map
    "<f1>" 'yas-load-snippet-buffer-and-close
    "<f2>" yas-abort
+   "C-c C-c" 'yas-load-snippet-buffer-and-close
    "C-c C-k" yas-abort))
 #+end_src
 
