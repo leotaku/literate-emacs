@@ -554,8 +554,7 @@ Because I switch between different themes relatively often, I would like Emacs t
 This is achieved here using desktop-mode.
 
 #+begin_src elisp
-;; [TODO: maybe use-config]
-(with-eval-after-load 'desktop
+(use-config desktop
   (add-to-list 'desktop-globals-to-save 'custom-enabled-themes)
   (add-hook 'desktop-after-read-hook (lambda ()
                                        (mapc 'load-theme
