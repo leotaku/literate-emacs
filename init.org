@@ -936,6 +936,7 @@ Being able to actually browse modern webpages is OFC also a plus.
 #+begin_src elisp
 (setq browse-url-generic-program "firefox")
 #+end_src
+
 #+begin_src elisp
 
 (use-package openwith
