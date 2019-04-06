@@ -1409,10 +1409,8 @@ The default =hippie-expand= gets bound to =<C-y>= in insert and normal mode.
 Hydra is a package that allows the end user or library authors to define keyboard-centric menus of arbitrary complexity. They may also define a doc-string which is then displayed as a formatted, visual presentation of the menu.
 
 #+begin_src elisp
-
 (use-package hydra
   :straight t)
-
 #+end_src
 
 **** Smex                                                           :ARCHIVE:
