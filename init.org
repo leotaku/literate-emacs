@@ -3288,6 +3288,12 @@ These are other capture-related settings not specific to my personal setup.
   (add-hook 'org-capture-mode-hook (lambda () (evil-append 1))))
 #+end_src
 
+Update todo counter when capturing to subtree.
+
+#+begin_src elisp
+(use-config org-capture
+  (add-hook 'org-capture-before-finalize-hook 'org-update-parent-todo-statistics))
+#+end_src
 **** Export
 The org ecosystem offers many different export backends for a wide range of usecases.
 
