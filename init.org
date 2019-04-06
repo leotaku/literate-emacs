@@ -3691,7 +3691,7 @@ Thsi might already work
 <2019-03-03 Sun>
 *** TODO better org-mode dwim keys
 <2019-03-03 Sun>
-*** STARTED better eyebrowse navigation
+*** DONE BUT better eyebrowse navigation
 <2019-03-03 Sun>
 dwim keys, =C-a c= without projectile
 <2019-03-27 Wed>
