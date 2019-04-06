@@ -976,7 +976,7 @@ Vim also inexplicably has =Y= mapped to yanking the whole line instead of point 
   (setq evil-want-keybinding nil)
   (setq evil-want-minibuffer t)
   (setq evil-want-Y-yank-to-eol t)
-  (setq evil-want-fine-undo nil)
+  (setq evil-want-fine-undo t)
   :config
   (evil-mode 1))
 
