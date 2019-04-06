@@ -1604,7 +1604,8 @@ The operate-on-number package used by Emacs Prelude is over-complicated and bugg
 
 (defun my/operate-on-number (fun &rest args)
   (let* ((old-point (point))
-         (match (or (my/oon-find-number) (user-error "No number at point")))
+         (match (or (my/oon-find-number)
+                    (user-error "No number at point")))
          (old-string (nth 2 match))
          (result (apply fun `(,(string-to-number old-string) ,@args)))
          (add-operator (if (and (nth 3 match) (>= result 0)) "+" ""))
