@@ -585,7 +585,7 @@ The Emacs modeline is a place for buffers to display arbitrary information group
 The content it shows is defined in the =mode-line-format= variable.
 
 There are different packages that allow one to easily create nice modeline setups.
-I currently am switching between doom-modeline and moody.
+I am currently using doom-modeline.
 
 #+begin_src elisp
 
@@ -597,15 +597,6 @@ I currently am switching between doom-modeline and moody.
 (use-package all-the-icons
   :straight t
   :defer t)
-
-;; (use-package moody
-;;   :straight t)
-
-;; (use-config moody
-;;   (setq x-underline-at-descent-line t)
-;;   (when (not (member '(vc-mode moody-vc-mode) mode-line-format))
-;;     (moody-replace-mode-line-buffer-identification)
-;;     (moody-replace-vc-mode)))
 
 (use-config doom-modeline
   (setq doom-modeline-height 25)
@@ -621,26 +612,28 @@ I currently am switching between doom-modeline and moody.
 
 #+end_src
 
+#+begin_src elisp
+(use-config doom-modeline
+  (doom-modeline-def-modeline 'mine
+    '(bar workspace-number window-number evil-state matches buffer-info remote-host buffer-position selection-info)
+    '(misc-info lsp debug minor-modes input-method buffer-encoding major-mode process vcs checker))
+  (doom-modeline-set-modeline 'mine 'default))
+#+end_src
+
 **** Bell
-I find both the default Emacs beep as well as the visual bell to be annoying.
-Instead, simply flash the modeline red as an indicator. [TODO: what is red?]
+I think that both the default beep and the visual bell are too annoying.
+Currently I just don't have an abort indicator at all.
 
 #+begin_src elisp
-(setq ring-bell-function
-      (lambda ()
-        (let ((orig-fg (face-foreground 'mode-line)))
-          (set-face-foreground 'mode-line (face-foreground 'org-level-1))
-          (run-with-idle-timer 0.1 nil
-                               (lambda (fg) (set-face-foreground 'mode-line fg))
-                               orig-fg))))
+(setq visual-bell nil)
+(setq ring-bell-function nil)
 #+end_src
 
 **** Fonts
 Just like with themes, I would like Emacs to remember the my font across restarts. Again, I use desktop-mode for this.
 
 #+begin_src elisp
-;; TODO: maybe use-config
-(with-eval-after-load 'desktop
+(use-config desktop
   (add-to-list 'desktop-globals-to-save 'my/current-font)
   (add-to-list 'desktop-globals-to-save 'my/current-font-size))
 
