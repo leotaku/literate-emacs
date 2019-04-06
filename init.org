@@ -470,20 +470,16 @@ They are not prefixed with =my/=.
     (load user-init-file)))
 
 (defun nuke-buffers ()
-  "Kill all emacs buffers but current and internal, but only after saving \*scratch\*"
+  "Kill all emacs buffers but current and internal"
   (interactive)
-  (when (get-buffer "*scratch*")
-    (persistent-scratch-save))
-  (--each (-difference
-           (--filter
-            (not (s-prefix? " " (buffer-name it)))
-            (buffer-list))
-           `(,(current-buffer)))
-    (kill-buffer it))
-  (delete-other-windows))
+  (delete-other-windows)
+  (--each (--filter
+           (not (or (s-prefix? " " (buffer-name it))))
+           (cdr (buffer-list)))
+    (kill-buffer it)))
 
 (defun nuke-emacs ()
-  "Kill all buffers and emacs, but only after saving \*scratch\*"
+  "Kill all buffers and emacs"
   (interactive)
   (nuke-buffers)
   (kill-buffer (current-buffer))
@@ -3582,13 +3578,14 @@ This also enables us to bind scratch-only keybindings. I use =C-c C-c= for quick
              (message "%s" (eval-buffer))))
 #+end_src
 
+**** Persistent-scratch                                             :ARCHIVE:
 I want my scratch buffer to always be persistent.
 To work reliably this system also requires some additional help from =nuke-emacs= in [[Commands]].
 [TODO: find an elegant solution to this and crashes]
 
 Scratch is only saved/restored when [[Desktop]] is also enabled, which is only the case for the first running Emacs session.
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 
 (use-package persistent-scratch
   :straight t
