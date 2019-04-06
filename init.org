@@ -683,6 +683,7 @@ Some keys for easier dashboard navigation are bound.
 I like to see my dashboard when I open a new frame.
 
 #+begin_src elisp
+
 (defun my/get-or-create-dashboard (&optional concise)
   ;; DONE: Prevent recursive calls from server-process-filter.
   (let ((buffer (get-buffer "*dashboard*")))
@@ -756,14 +757,9 @@ I set most shackle rules for builtin Emacs buffer types here. Extensions that pr
 I also set =help-window-select= here because that is something that my shackle setup relies on and it doesn't fit anywhere else.
 
 #+begin_src elisp
-
 (setq shackle-default-rule '()
       shackle-rules '())
-
-;; TODO: add shackle rules
-
 (setq help-window-select t)
-
 #+end_src
 
 **** Buffer list
