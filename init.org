@@ -1048,7 +1048,7 @@ Integration may be activated for a specific mode in the following fashion:
 Where MODE is the mode to which you want to add the evil integration.
 I usually do this in the =:init= part of any particular use-package declaration.
 
-****** Custom
+****** Builtin
 Some builtin Emacs modes don't properly integrate with evil-mode and also have no evil-collection support.
 I add basic support for them here.
 
