@@ -3200,12 +3200,37 @@ It also provides some additional functions for common Org task such as refiling 
 
 #+end_src
 
-Worf makes working with Org buffers easier by adding additional stateful editing which is automatically activated when the point sits somewhere interesting. [TODO: with evil]
+Additionally i define a hydra for navigating between headlines and performing the most common operations on them.
 
 #+begin_src elisp
-(use-package worf
-  :straight t
-  :after org)
+
+(defhydra hydra-org-ship (;;
+                          :body-pre (progn
+                                      (org-mark-ring-push)
+                                      (ignore-errors
+                                        (org-back-to-heading)))
+                          :foreign-keys exit
+                          :hint nil
+                          :exit nil)
+  "
+org-ship: _j_, _k_, _l_, _g_ act: _w_, _t_, _T_ exit: _b_, _q_, other"
+  ("j" (org-next-visible-heading 1))
+  ("k" (org-previous-visible-heading 1))
+  ("l" (org-up-heading-all 1))
+  ("g" (opj-contrib/jump))
+  ("<tab>" (org-cycle))
+  ("<backtab>" (progn (org-global-cycle) (org-reveal)))
+  ("w" (org-refile))
+  ("t" (org-todo))
+  ("T" (org-todo '(4)))
+  ("b" (org-mark-ring-goto) :exit t)
+  ("C-l" (org-mark-ring-goto) :exit t)
+  ("q" nil :exit t))
+
+(general-define-key
+ :keymaps 'org-mode-map
+ "C-l" 'hydra-org-ship/body)
+
 #+end_src
 
 Do not adapt indentation by inserting whitespace. This is better handled by =org-indent-mode=.
@@ -3294,6 +3319,33 @@ Update todo counter when capturing to subtree.
 (use-config org-capture
   (add-hook 'org-capture-before-finalize-hook 'org-update-parent-todo-statistics))
 #+end_src
+
+The org-capture menu in my opinion is more complex than it needs to be.
+Instead, I use a hydra that simply shows me all capture templates, except for the ones that have "protocol" in their description.
+
+#+begin_src elisp
+(defun hydra-org-capture/dynamic ()
+  (interactive)
+  (funcall (eval `(defhydra hydra-org-capture (;;
+                                               :exit t
+                                               :foreign-keys exit)
+                    "
+org-capture: "
+                    ,@(--map (let ((char (car it))
+                                   (name (cadr it)))
+                               `(,char (org-capture nil ,char) ,name))
+                             (--filter (not (s-contains? "protocol" (cadr it) t))
+                                       org-capture-templates))
+                    ("q" nil "exit")))))
+#+end_src
+
+I bind it to =C-c c= for easy access.
+
+#+begin_src elisp
+(general-define-key
+ "C-c c" 'hydra-org-capture/dynamic)
+#+end_src
+
 **** Export
 The org ecosystem offers many different export backends for a wide range of usecases.
 
