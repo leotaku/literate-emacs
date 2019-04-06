@@ -2894,11 +2894,9 @@ Both dired-filter and dired-ranger are maintained by the dired-hacks project.
 Dired-quick-sort is another package that aims to improve the process of easily finding the files you need by offering a hydra menu that gives access to most relevant ways of sorting files.
 
 #+begin_src elisp
-
 (use-package dired-quick-sort
   :straight t
   :after dired)
-
 #+end_src
 
 I bind the menu to =o=.
