@@ -799,10 +799,13 @@ I then create some end-user functions based on them and bind them to the right k
                               (current-buffer)
                               (not include-current)))
 
+;; TODO: improve with content-aware delete/kill
 (defun my/delete-window-or-kill-buffer (&optional kill-always)
   (interactive)
   (unless (window--delete nil nil kill-always)
-    (kill-buffer))
+    (if (string= (buffer-name) "*scratch*")
+        (previous-buffer)
+      (kill-buffer)))
   (my/prev-buffer t))
 
 (defconst my/switch-buffer-whitelist
