@@ -709,23 +709,21 @@ I like to see my dashboard when I open a new frame.
 
 (setq inhibit-splash-screen nil)
 (setq initial-buffer-choice (lambda () (my/get-or-create-dashboard)))
+
 #+end_src
 
-**** Scrollbar
+**** Scrollbar                                                      :ARCHIVE:
 The yascroll package provides a nice vertical scrollbar that also works in  the terminal. Unfortunately it is no longer maintained and somewhat buggy.
 Disable it for now.
 
-#+begin_src elisp
-
-;; (use-package yascroll
-;;   :straight t
-;;   :defer t
-;;   :config
-;;   (require 'cl)
-;;   (setq yascroll:delay-to-hide 0.5))
-
-;; (global-yascroll-bar-mode 1)
-
+#+begin_src elisp :tangle no
+(use-package yascroll
+  :straight t
+  :defer t
+  :config
+  (require 'cl)
+  (setq yascroll:delay-to-hide 0.5)
+  (global-yascroll-bar-mode 1))
 #+end_src
 
 **** Page breaks
