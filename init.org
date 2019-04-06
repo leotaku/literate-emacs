@@ -3125,14 +3125,9 @@ Probably only "g - Generic" stands out. It uses org-pretty-jump to capture to an
 #+begin_src elisp
 (setq org-capture-templates
       '(("g" "Generic" entry
-         ;; [TODO: make this work]
          (file+function "" (lambda ()
-                             (goto-char (opj/get-pos t))))
+                             (goto-char (opj/get-heading-pos t))))
          "* %?%i")
-        ("t" "Task" entry (file+headline org-default-notes-file "Tasks")
-         "* TODO %?\n  %i\n")
-        ("i" "Idea" entry (file+headline org-default-notes-file "Ideas")
-         "* %?")
         ("L" "Protocol Link" entry (file+headline org-default-notes-file "Weblinks")
          "* %:description%?\n[[%:link]]\n%t"
          :immediate-finish t)
