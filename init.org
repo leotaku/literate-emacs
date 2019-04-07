@@ -2458,6 +2458,47 @@ It is a spiritual successor to the popular paredit.
  "C" 'lispyville-change-line
  "y" 'lispyville-yank
  "Y" 'lispyville-yank-line)
+#+end_src
+
+These are my personal lispy additions, mostly for better evil integration.
+They are still experimental and probably clash with some of abo-abos design choices for lispy.
+
+#+begin_src elisp
+
+(defun my/lispy-up-insert ()
+  (interactive)
+  (let ((old-point (point)))
+    (lispy-left 1)
+    (when (= old-point (point))
+      (lispy-up 1)))
+  (evil-insert 1))
+
+(defun my/lispy-step ()
+  (interactive)
+  (let ((old-point (point)))
+    (lispy-down 1)
+    (when (>= old-point (point))
+      (lispy-forward 1))))
+
+(defun my/lispy-step-backward ()
+  (interactive)
+  (let ((old-point (point)))
+    (lispy-up 1)
+    (when (= old-point (point))
+      (lispy--out-backward 1))))
+
+(general-define-key
+ :definer 'minor-mode
+ :keymaps 'lispy-mode
+ :states '(insert emacs)
+ "<tab>" 'my/lispy-step
+ "<backtab>" 'my/lispy-step-backward)
+
+(general-define-key
+ :definer 'minor-mode
+ :keymaps 'lispy-mode
+ :states '(normal visual insert emacs)
+ "C-l" 'my/lispy-up-insert)
 
 #+end_src
 
