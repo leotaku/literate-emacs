@@ -3843,7 +3843,8 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 
 *** TODO Tramp
 * Changelog                                                        :noexport:
-** Planned [17/37]
+** Planned [17/38]
+*** TODO find a better way for in-buffer capture templates
 *** MAYBE investigate if evil works with multi-instances
 *** TODO use delete-indentation in smart-backspace
 *** TODO move lispy and agressive indent out of [[Emacs Lisp]]
@@ -4014,3 +4015,8 @@ I'm pretty sure putting this here actually makes no difference for my setup but 
 [fn:always-use] this could be changed by always using use-package
 [fn:evil-where] evil might sound like a prime candidate for the =Editing= section, but because it also provides utilities like a command prompt and global keybinds, I choose to put it unter =Integration=
 [fn:dired-where] while dired is technically used to find files, it is flexible enough to warrant being but under =Misc=
+
+** Variables                                                       :noexport:
+# Local Variables:
+# eval: (add-to-list 'org-capture-templates `("l" "Literate Emacs Task" entry (file+headline ,(buffer-file-name) "Planned") "* TODO %^{Task}" :immediate-finish t :prepend t))
+# End:
