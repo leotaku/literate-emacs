@@ -3843,9 +3843,11 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 
 *** TODO Tramp
 * Changelog                                                        :noexport:
-** Planned [14/35]
+** Planned [17/37]
+*** MAYBE investigate if evil works with multi-instances
+*** TODO use delete-indentation in smart-backspace
 *** TODO move lispy and agressive indent out of [[Emacs Lisp]]
-*** TODO learn lispy and bind tab + C-l
+*** DONE BUT learn lispy and bind tab + C-l
 *** TODO add use-package binary dependecy checks
 *** TODO ensure literate-emacs stays modular
 *** MAYBE create custom mua
@@ -3865,14 +3867,14 @@ https://oremacs.com/2015/01/17/setting-up-ediff/
 <2019-03-26 Tue>
 *** DONE shell-command w/o newline
 <2019-03-26 Tue>#
-*** TODO org-mode things
+*** DONE BUT org-mode things
 <2019-03-26 Tue>
 habit, schedule, agenda, clocking
 *** DONE keyfreq-mode
 <2019-03-26 Tue>
-*** TODO ediff
+*** DONE ediff
 <2019-03-22 Fri>
-*** TODO debug-on-error as default
+*** CANCELED debug-on-error as default
 <2019-03-13 Wed>
 *** TODO replace unpackaged.el org-return
 <2019-03-11 Mon>
