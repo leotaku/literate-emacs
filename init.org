@@ -3091,16 +3091,100 @@ This causes problems with my modeline (doom) and also seems like a bad idea in g
             (force-mode-line-update)))
 #+end_src
 
+I find that message-mode buffers are usually hard to edit, requiring many keystrokes to compose a simple message.
+However this can be helped by "wrapping" any message buffer using ivy for completions and yasnippet for quickly jumping through the template.
+
+This setup currently only works with notmuch, but could be easily generalized further. [TODO]
+
 #+begin_src elisp
 
+(defun my/message-wrap-buffer (&rest _)
+  (let ((yas-snippet (my/message-generate-yas-for-buffer)))
+    (erase-buffer)
+    (goto-line 0)
+    (yas-expand-snippet yas-snippet)
+    (evil-insert 1)
+    (setq-local my/message-buffer-wrapped t)))
+
+(defun my/message-generate-yas-for-buffer ()
+  (concat
+   (s-join "\n"
+           (--map-indexed
+            (if (s-matches? "^\\w*:" it)
+                (let* ((line (s-split-up-to ":" it 1))
+                       (key (car line))
+                       (value (s-trim (cadr line))))
+                  (concat key ": "
+                          (my/message-generate-key-function key value)))
+              it)
+            (s-split "\n" (buffer-string))))
+   "$0"))
+
+(defun my/message-generate-key-function (key value)
+  (cond
+   ((and (string= key "To") (string= value ""))
+    (ivy-read "To: " (hash-table-keys notmuch-address-completions)
+              :initial-input value))
+   ((string= key "Subject")
+    (concat "${1:" value "}"))
+   (t
+    value)))
+
+(general-define-key
+ :keymaps 'message-mode-map
+ "<tab>" (key-fun my/message-wrap-buffer))
+
+#+end_src
+
+Sending mail is a potentially dangerous action, so I want to be asked to confirm it.
+
+#+begin_src elisp
 (add-hook 'message-send-hook
           (lambda ()
             (unless (y-or-n-p "Sure you want to send this?")
               (signal 'quit nil))))
-
 #+end_src
 
 **** Notmuch
+Notmuch is a mature maildir indexing program with several frontends.
+The Emacs frontend is also called Notmuch.
+
+#+begin_src elisp
+(use-package notmuch
+  :straight t
+  :commands (notmuch-tree
+             notmuch-search
+             notmuch-hello)
+  :init
+  (evil-collection-notmuch-setup)
+  :config
+  (notmuch-address-harvest))
+#+end_src
+
+I bind =notmuch-tree= to =C-x m= for easy access.
+
+#+begin_src elisp
+(general-define-key
+ "C-x m" (key-fun notmuch-tree "tag:unread"))
+#+end_src
+
+Remove the default message-inherited hooks from =notmuch-mua-send-hook=, as they otherwise get run twice when sending.
+
+#+begin_src elisp
+(remove-hook 'notmuch-mua-send-hook 'notmuch-mua-message-send-hook)
+#+end_src
+
+Notmuch-search by default does not immediately show when a message has been read, fix that.
+
+#+begin_src elisp
+(advice-add 'notmuch-search-show-thread :before 'my/advice-notmuch-read)
+(defun my/advice-notmuch-read (&rest arglist)
+  (when (-contains? (notmuch-search-get-tags)
+                    "unread")
+    (notmuch-search-tag
+     (list "-unread"))))
+#+end_src
+
 *** Org
 Org is a system for keeping easily navigable plain text notes, lists, and structured documents.
 It also features literate programming support through org-babel, which this document uses for exporting, a customizable agenda, the ability to easily capture arbitrary text without interrupting your workflow and a large amount of export backends, ranging from LaTeX documents to complex static webpages.
