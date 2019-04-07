@@ -1854,7 +1854,7 @@ I like this behavior, so I implement and bind it here.
 
 #+end_src
 
-Agressive-indent-mode currently overrides this keybinding.
+Aggressive-indent-mode currently overrides this keybinding.
 
 *** Narrowing
 The endlessparens website shows a DWIM-style command that can replace most of the complicated narrowing bindings.
@@ -1999,7 +1999,17 @@ I also bind the most common yasnippet commands to more easily acessible bindings
    "C-c C-k" yas-abort))
 #+end_src
 
-*** TODO Indentation
+*** MAYBE Indentation/Aggressive
+Aggressive-indent automatically updates indentation after every keystroke, for instant visual feedback.
+This is especially useful for Lisp, where most code structure is determined by indentation.
+
+#+begin_src elisp
+(use-package aggressive-indent
+  :straight t
+  :defer t
+  :hook (lispy-mode . aggressive-indent-mode))
+#+end_src
+
 *** TODO Folding
 *** Jumping
 I use avy for jumping to arbitrary characters.
@@ -2419,33 +2429,39 @@ Using ispell with hunspell requires some additional setup to correctly handle di
 #+end_src
 
 ** Languages
-*** TODO All Lisps
-*** Emacs Lisp
-Emacs Lisp is a Lisp dialect used mainly as a scripting and configuration language for GNU Emacs and most other Emacs variants.
+*** All Lisps
+Lisp-like languages all feature a very similar paren-based structure and coding style. Most lisps are also well-suited for an interactive evaluation-oriented workglow.
+For this reason it makes sense to configure some generic options for all lisp-like languages.
 
-As Emacs Lisp is the only Lisp dialect I regularly use, this subtree also contains settings that affect general Lisp editing.
+Lispy is a package that provides an improved Lisp editing experience through state-based navigation, with a special focus on Emacs Lisp and Clojure.
+I also hook aggressive-indent-mode into lispy, as I generally want it enabled for all lisp dialects.
 
-Lispy is a package that provides an improved Lisp editing experience.
-It is a spiritual successor to the popular paredit.
+Relevant dialects may enable lispy in their own subtrees.
 
 #+begin_src elisp
 
 (use-package lispy
   :straight t
   :defer t
-  :hook (emacs-lisp-mode . lispy-mode))
-
-(use-package lispyville
-  :straight t
-  :after lispy
-  :config
-  (require 'lispyville))
+  :hook (lispy-mode . aggressive-indent-mode))
 
 (general-define-key
  :definer 'minor-mode
  :keymaps 'lispy-mode
  :states 'insert
  "<backspace>" 'lispy-delete-backward)
+
+#+end_src
+
+Lispyville provides vim/evil-compatible bindings for lispy.
+
+#+begin_src elisp
+
+(use-package lispyville
+  :straight t
+  :after lispy
+  :config
+  (require 'lispyville))
 
 (general-define-key
  :definer 'minor-mode
@@ -2458,6 +2474,7 @@ It is a spiritual successor to the popular paredit.
  "C" 'lispyville-change-line
  "y" 'lispyville-yank
  "Y" 'lispyville-yank-line)
+
 #+end_src
 
 These are my personal lispy additions, mostly for better evil integration.
@@ -2502,14 +2519,11 @@ They are still experimental and probably clash with some of abo-abos design choi
 
 #+end_src
 
-Aggressive-indent automatically updates indentation after every keystroke, for instant visual feedback.
-This is especially useful for Lisp, where most code structure is determined by indentation.
+*** Emacs Lisp
+Emacs Lisp is a Lisp dialect used mainly as a scripting and configuration language for GNU Emacs and most other Emacs variants.
 
 #+begin_src elisp
-(use-package aggressive-indent
-  :straight t
-  :defer t
-  :hook (lispy-mode . aggressive-indent-mode))
+(add-hook 'emacs-lisp-mode-hook 'lispy-mode)
 #+end_src
 
 *** Haskell
