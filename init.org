@@ -2255,7 +2255,7 @@ Company is automatically enabled in all programming buffers. Yasnippet is needed
 
 #+end_src
 
-Misc company setting, mostly related to frontend display.
+Misc company setting, mostly related to frontend display and keybindings.
 
 #+begin_src elisp
 
