@@ -1092,7 +1092,7 @@ For this reason I configure evil to first deactivate the active mark when switch
 #+begin_src elisp
 (advice-add 'evil-normal-state :around 'my/advice-evil-normal-state)
 (defun my/advice-evil-normal-state (fun &optional arg)
-  (if mark-active
+  (if (and mark-active (evil-insert-state-p))
       (deactivate-mark)
     (apply fun (list arg))))
 #+end_src
