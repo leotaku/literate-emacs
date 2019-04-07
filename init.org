@@ -1999,6 +1999,8 @@ I also bind the most common yasnippet commands to more easily acessible bindings
    "C-c C-k" yas-abort))
 #+end_src
 
+*** TODO Indentation
+*** TODO Folding
 *** Jumping
 I use avy for jumping to arbitrary characters.
 Avy also offers some integration with other constructs and modes (notably lispy).
@@ -2417,6 +2419,7 @@ Using ispell with hunspell requires some additional setup to correctly handle di
 #+end_src
 
 ** Languages
+*** TODO All Lisps
 *** Emacs Lisp
 Emacs Lisp is a Lisp dialect used mainly as a scripting and configuration language for GNU Emacs and most other Emacs variants.
 
@@ -2942,6 +2945,7 @@ I only use it for this purpose and therefor place its configuration in the [[Fil
 
 #+end_src
 
+*** TODO Folding/Origami
 *** Diff/Ediff
 Ediff is Emacs' builtin tool for viewing file diffs.
 It has got some pretty suboptimal defaults and keybindings, so I set some of my preferences and enable evil integration here.
@@ -3402,6 +3406,7 @@ Lastly, lets display images by default, but make sure they get scaled sensibly.
 (setq org-startup-with-inline-images t)
 #+end_src
 
+**** TODO Agenda
 **** Links
 Custom link types live in =Personal/Link Types=.
 These are other link-related settings not specific to my personal setup.
