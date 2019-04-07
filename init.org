@@ -1999,16 +1999,6 @@ I also bind the most common yasnippet commands to more easily acessible bindings
    "C-c C-k" yas-abort))
 #+end_src
 
-*** MAYBE Indentation/Aggressive
-Aggressive-indent automatically updates indentation after every keystroke, for instant visual feedback.
-This is especially useful for Lisp, where most code structure is determined by indentation.
-
-#+begin_src elisp
-(use-package aggressive-indent
-  :straight t
-  :defer t)
-#+end_src
-
 *** TODO Folding
 *** Jumping
 I use avy for jumping to arbitrary characters.
@@ -2165,6 +2155,16 @@ Bind the default projectile map to the =C-x p= prefix.
 (use-config projectile
   (general-define-key
     "C-x p" projectile-command-map))
+#+end_src
+
+*** Aggressive-indent
+Aggressive-indent automatically updates indentation after every keystroke, for instant visual feedback.
+This is especially useful for Lisp, where most code structure is determined by indentation.
+
+#+begin_src elisp
+(use-package aggressive-indent
+  :straight t
+  :defer t)
 #+end_src
 
 *** Direnv
