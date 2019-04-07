@@ -3903,11 +3903,12 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 
 *** TODO Tramp
 * Changelog                                                        :noexport:
-** Planned [17/38]
+** Planned [18/39]
+*** TODO fix outline not skipping fold
 *** TODO find a better way for in-buffer capture templates
 *** MAYBE investigate if evil works with multi-instances
 *** TODO use delete-indentation in smart-backspace
-*** TODO move lispy and agressive indent out of [[Emacs Lisp]]
+*** DONE move lispy and aggressive indent out of [[Emacs Lisp]]
 *** DONE BUT learn lispy and bind tab + C-l
 *** TODO add use-package binary dependecy checks
 *** TODO ensure literate-emacs stays modular
