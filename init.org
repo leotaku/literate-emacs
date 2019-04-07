@@ -2006,8 +2006,7 @@ This is especially useful for Lisp, where most code structure is determined by i
 #+begin_src elisp
 (use-package aggressive-indent
   :straight t
-  :defer t
-  :hook (lispy-mode . aggressive-indent-mode))
+  :defer t)
 #+end_src
 
 *** TODO Folding
