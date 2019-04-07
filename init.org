@@ -2499,8 +2499,8 @@ AucTeX is a popular Emacs extension that majorly improves the editing of TeX fil
                     :repo "emacs-straight/auctex")
   :defer t
   :hook
-  (TeX-mode . visual-line-mode)
-  (LaTeX-mode . visual-line-mode)
+  ((TeX-mode LaTeX-mode) . visual-line-mode)
+  ((TeX-mode LaTeX-mode) . aggressive-indent-mode)
   :config
   (TeX-source-correlate-mode)
   (TeX-PDF-mode))
