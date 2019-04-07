@@ -3621,6 +3621,22 @@ Using the same mechanism, I also define the =reload-org= command, which acts lik
 
 #+end_src
 
+**** Habit
+Org-habit is a org module that provides tracking of recurring tasks (habits) for org.
+Unfortunately the builtin org-habit does not support the sexp date specification format, meaning recurring eg. on specific days of the week is impossible.
+
+Org-habit-plus fixes the problem of recurring on weekdays by defining a new =:HABIT_WEEKDAYS:= property, which can then be used in org-habit dynamic subtrees.
+
+#+begin_src elisp
+(use-package org-habit-plus
+  :straight (org-habit-plus :type git :host github
+                            :repo "oddious/org-habit-plus")
+  :after org
+  :config
+  ;; org-habit-plus doesn't set org-habit-scheduled-past-days
+  (setq org-habit-scheduled-past-days org-scheduled-past-days))
+#+end_src
+
 *** TODO Reading
 **** PDF/pdf-tools
 **** EPUB/nov.el
