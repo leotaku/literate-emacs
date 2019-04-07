@@ -1854,6 +1854,8 @@ I like this behavior, so I implement and bind it here.
 
 #+end_src
 
+Agressive-indent-mode currently overrides this keybinding.
+
 *** Narrowing
 The endlessparens website shows a DWIM-style command that can replace most of the complicated narrowing bindings.
 I adapt it to my liking and then bind it to normal =zn=. 
