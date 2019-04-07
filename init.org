@@ -2276,10 +2276,21 @@ Misc company setting, mostly related to frontend display.
  "RET" nil
  "<return>" nil
  ";" 'company-complete
- "<tab>" 'company-select-next
+ ;; FIXME: not agnostic, needs better solution
+ "<tab>" (key-defun yas-or-company
+           (or (yas-expand)
+               (company-select-next)))
  "<backtab>" 'company-select-previous
  "C-y" 'company-complete)
 
+#+end_src
+
+I prefer the company-postframe frontend, as it doesn't mess with buffer text properties and seems to otherwise be equivalent to the default frontend.
+
+#+begin_src elisp
+(use-package company-posframe
+  :straight t
+  :hook (company-mode . company-posframe-mode))
 #+end_src
 
 *** Outline/shine                                                   :ARCHIVE:
