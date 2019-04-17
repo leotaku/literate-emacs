@@ -626,10 +626,8 @@ Just like with themes, I would like Emacs to remember the my font across restart
 #+begin_src elisp
 (use-config desktop
   (add-to-list 'desktop-globals-to-save 'my/current-font)
-  (add-to-list 'desktop-globals-to-save 'my/current-font-size))
-
-(add-hook 'after-make-frame-functions 'my/restore-font)
-(advice-add 'load-theme :before 'my/restore-font)
+  (add-to-list 'desktop-globals-to-save 'my/current-font-size)
+  (add-hook 'desktop-after-read-hook 'my/restore-font))
 #+end_src
 
 I also define a simple function that allows me to change the global font. My font-remembrance method relies on this function being used to correctly determine the current font.
@@ -641,9 +639,8 @@ I also define a simple function that allows me to change the global font. My fon
   (set-frame-font (format "%s-%d" font size) nil t))
 
 (defun my/restore-font (&rest _)
-  (when (and (bound-and-true-p my/current-font)
-             (bound-and-true-p my/current-font-size))
-    (set-frame-font (format "%s-%d" my/current-font my/current-font-size) nil t)))
+  (let ((font (format "%s-%d" my/current-font my/current-font-size)))
+    (add-to-list 'default-frame-alist `(font . ,font))))
 #+end_src
 
 Disable non-monospace fonts (eg. variable-pitch).
