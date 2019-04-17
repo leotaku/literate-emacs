@@ -2019,6 +2019,8 @@ Bind =<C-tab>= in folded regions to toggle.
  "<C-tab>" 'vimish-fold-refold)
 
 #+end_src
+
+*** Jumping/Avy
 I use avy for jumping to arbitrary characters.
 Avy also offers some integration with other constructs and modes (notably lispy).
 Evil additionally provides motions for all default avy commands.
