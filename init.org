@@ -2642,26 +2642,6 @@ The Rust major mode adds basic highlighting and indentation support for the Rust
 
 (el-patch-feature cargo-process)
 
-;; (defcustom cargo-process--custom-path-to-bin
-;;   (el-patch-swap
-;;     (or (executable-find "cargo")
-;;         (expand-file-name "cargo" "~/.cargo/bin")
-;;         "/usr/local/bin/cargo")
-;;     nil)
-;;   "Custom path to the cargo executable"
-;;   :type 'file
-;;   :group 'cargo-process)
-
-;; (defcustom cargo-process--rustc-cmd
-;;   (el-patch-swap
-;;     (or (executable-find "rustc")
-;;         (expand-file-name "rustc" "~/.cargo/bin")
-;;         "/usr/local/bin/rustc")
-;;     nil)
-;;   "Custom path to the rustc executable"
-;;   :type 'file
-;;   :group 'cargo-process)
-
 (use-config cargo-process
   (el-patch-defun cargo-process--start (name command &optional last-cmd opens-external)
     "Start the Cargo process NAME with the cargo command COMMAND.
