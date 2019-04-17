@@ -3025,12 +3025,43 @@ I currently disable this package, as it still is somewhat buggy and I don't real
 ;;   :after magit)
 #+end_src
 
-*** Help
+*** Help                                                            :ARCHIVE:
 Simply enable evil integration for help-mode.
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 (use-config evil-collection
   (evil-collection-help-setup))
+#+end_src
+.
+*** Helpful
+Helpful is a prettier interface to the Emacs help system.
+
+#+begin_src elisp
+(use-package helpful
+  :straight t
+  :defer t)
+#+end_src
+
+Rebind the default help bindings to helpful equivalents.
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'global
+ :prefix "C-h"
+ "o" 'helpful-symbol
+ "f" 'helpful-callable
+ "v" 'helpful-variable
+ "k" 'helpful-key)
+#+end_src
+
+#+begin_src elisp
+(general-define-key
+ :keymaps 'helpful-mode-map
+ :states '(normal insert visual emacs)
+ "q" 'kill-buffer-and-window
+ "RET" 'push-button
+ "<tab>" 'forward-button
+ "<backtab>" 'backward-button)
 #+end_src
 
 *** Images/Image
