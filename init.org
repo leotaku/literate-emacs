@@ -1128,15 +1128,38 @@ However an =<escape>= key-press when already in normal mode should always allow 
  "<escape>" 'keyboard-escape-quit)
 #+end_src
 
-****** Mouse
+****** Mouse                                                        :ARCHIVE:
 To perfectly emulate vim, evil also rebinds certain mouse clicks/actions. I find most of these annoying as they sometimes interfere with other Emacs functionality (eg. buttons), so I try to rebind them. [TODO: rebind all]
 
-#+begin_src elisp
+#+begin_src elisp :tangle no
 (general-define-key
  :keymaps 'evil-motion-state-map
  [down-mouse-1] nil)
 #+end_src
+.
+****** Vimish-fold
+The evil-vimish-fold package offers evil bindings for vimish fold.
+I enable them here.
 
+#+begin_src elisp
+(use-package evil-vimish-fold
+  :straight t
+  :after (vimish-fold evil)
+  :config
+  (evil-vimish-fold-mode 1))
+#+end_src
+
+***** Terminal
+Evil doesn't really have support for Emacs in terminal by default, so I fix it up myself.
+
+#+begin_src elisp
+(general-define-key
+ :states '(insert normal visual)
+ "TAB" (general-key "<tab>")
+ "S-TAB" (general-key "<backtab>"))
+#+end_src
+
+****** TODO Terminal-cursor-changer
 **** Ivy
 Ivy is the best available narrowing completion framework. It, unlike helm, makes use of the minibuffer for its main interface.
 The ivy repo also includes swiper, an isearch replacement with an overview and the counsel utilities, which are wrappers arround existing commands with added ivy completion.
