@@ -3467,6 +3467,20 @@ Lastly, lets display images by default, but make sure they get scaled sensibly.
 #+end_src
 
 **** TODO Agenda
+I bind the default org-agenda menu to =C-x a= for easy access.
+
+#+begin_src elisp
+(general-define-key
+ "C-x a" 'org-agenda)
+#+end_src
+
+Use the =org-default-notes-file= as the initial source for org-agenda entries.
+
+#+begin_src elisp
+(use-config org-agenda
+  (setq org-agenda-files (list org-default-notes-file)))
+#+end_src
+
 **** Links
 Custom link types live in =Personal/Link Types=.
 These are other link-related settings not specific to my personal setup.
