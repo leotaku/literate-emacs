@@ -3904,25 +3904,28 @@ I bind some keys to emulate the "typical" UNIX-terminal.
 #+begin_src elisp
 
 (general-define-key
- ; [TODO] other bindings
+ ;; [TODO] other bindings
  :keymaps '(term-raw-map term-mode-map)
  :states '(insert normal visual emacs)
  ;; dirty shell-pop intergration
- "C-d" (lambda ()
-         (interactive)
-         (if (string= (buffer-name) shell-pop-last-shell-buffer-name)
-             (call-interactively 'shell-pop)
-           (my/delete-window-or-kill-buffer)))
  "C-a t" 'shell-pop
  "C-c" 'term-interrupt-subjob
  "C-h" help-map
- "M-x" 'counsel-M-x)
+ "M-x" 'counsel-M-x
+ "<escape>" (key-fun term-send-raw-string "\e[[m"))
 
 #+end_src
 
 *** TODO Tramp
 * Changelog                                                        :noexport:
-** Planned [18/39]
+** Planned [18/45]
+*** TODO unifiy terminal configurations
+*** TODO helpful
+*** TODO notmuch tree multiple buffers
+*** TODO org space after headline insert
+[[file:straight/repos/org/lisp/org.el::(defun org-insert-heading (&optional arg invisible-ok top)]]
+*** TODO learn about org-store-link
+*** TODO find buffer group solution
 *** TODO fix outline not skipping fold
 *** TODO find a better way for in-buffer capture templates
 *** MAYBE investigate if evil works with multi-instances
