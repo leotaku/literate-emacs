@@ -828,17 +828,18 @@ I then create some end-user functions based on them and bind them to the right k
 Eyebrowse is an extension that offers basic tab functionality in Emacs. It works by simply saving a list of all the window configurations.
 
 #+begin_src elisp
-
 (use-package eyebrowse
   :straight t
   :init
-  (setq eyebrowse-keymap-prefix nil)
+  (setq eyebrowse-keymap-prefix "")
+  (setq eyebrowse-mode-map (make-sparse-keymap))
   :config
   (eyebrowse-mode 1))
+#+end_src
 
+#+begin_src elisp
 (use-config eyebrowse
   (setq eyebrowse-wrap-around t))
-
 #+end_src
 
 **** Keys
