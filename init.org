@@ -3214,14 +3214,15 @@ The Emacs frontend is also called Notmuch.
   :init
   (evil-collection-notmuch-setup)
   :config
+  ;; Initialize address map (async)
   (notmuch-address-harvest))
 #+end_src
 
-I bind =notmuch-tree= to =C-x m= for easy access.
+I bind =notmuch-search= with =tag:unread= to =C-x m= for easy access.
 
 #+begin_src elisp
 (general-define-key
- "C-x m" (key-fun notmuch-tree "tag:unread"))
+ "C-x m" (key-fun notmuch-search "tag:unread"))
 #+end_src
 
 Remove the default message-inherited hooks from =notmuch-mua-send-hook=, as they otherwise get run twice when sending.
@@ -3239,6 +3240,12 @@ Notmuch-search by default does not immediately show when a message has been read
                     "unread")
     (notmuch-search-tag
      (list "-unread"))))
+#+end_src
+
+It also strangely highlights unread messages, which I dislike and thus turn off.
+
+#+begin_src elisp
+(setq notmuch-search-line-faces (list))
 #+end_src
 
 *** Org
