@@ -446,8 +446,9 @@ Show all messages
 (setq inhibit-message nil)
 #+end_src
 
-Disallow recursive minibuffers, as they can sometimes cause weird glitches that require Emacs to be restarted.
-#+begin_src 
+Disallow recursive minibuffers.
+They are unfortunately required for some specific edge-cases, but can sometimes cause weird glitches.
+#+begin_src elisp
 (setq enable-recursive-minibuffers nil)
 #+end_src
 
