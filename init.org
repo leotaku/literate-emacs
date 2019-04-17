@@ -1050,7 +1050,7 @@ Integration may be activated for a specific mode in the following fashion:
 Where MODE is the mode to which you want to add the evil integration.
 I usually do this in the =:init= part of any particular use-package declaration.
 
-****** Builtin
+****** Builtin Modes
 Some builtin Emacs modes don't properly integrate with evil-mode and also have no evil-collection support.
 I add basic support for them here.
 
@@ -2512,7 +2512,7 @@ Emacs Lisp is a Lisp dialect used mainly as a scripting and configuration langua
 (add-hook 'emacs-lisp-mode-hook 'lispy-mode)
 #+end_src
 
-*** Haskell
+*** TODO Haskell
 Haskell is a statically typed, /"purely functional"/ general-purpose programming language.
 
 *** Nix
@@ -2610,7 +2610,7 @@ Markdown-mode provides a mode for editing generic Markdown files as well as anot
   :init (setq markdown-command "markdown"))
 #+end_src
 
-*** Python
+*** TODO Python
 Python is an easy to understand, duck-typed general purpose scripting and programming language.
 
 I just use it for basic scripting, so the builtin python-mode is sufficient for now.
@@ -2966,7 +2966,6 @@ I only use it for this purpose and therefor place its configuration in the [[Fil
 
 #+end_src
 
-*** TODO Folding/Origami
 *** Diff/Ediff
 Ediff is Emacs' builtin tool for viewing file diffs.
 It has got some pretty suboptimal defaults and keybindings, so I set some of my preferences and enable evil integration here.
@@ -3076,7 +3075,7 @@ Like with most no-self-insert-modes, I want =q= to close the window and buffer.
 (evil-set-initial-state 'image-mode 'emacs)
 #+end_src
 
-*** Music/MPD
+*** TODO Music/MPD
 MPD is an daemon for playing music.
 Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel for Emacs. There's also ivy-mpdel which allows for using the ivy NCS to select songs.
 
@@ -3092,7 +3091,7 @@ Many frontends for the MPD server exist, I use ncmpcpp for terminal and mpdel fo
 
 #+end_src
 
-*** TODO Mail
+*** DOING Mail
 Emacs is, in my opinion, the best MUA currently out there.
 
 This is my current setup for mail in Emacs:
@@ -3329,7 +3328,7 @@ Probably only "g - Generic" stands out. It uses org-pretty-jump to capture to an
          "* %:description\n[[%:link]]\n%t\n#+BEGIN_QUOTE\n%i\n#+END_QUOTE\n%?")))
 #+end_src
 
-**** Buffer
+**** TODO Buffer
 In order to use org-mode effectively it is important to be able to comfortably manage your .org files and buffers.
 I personally enjoy easy to access DWIM keys and menus over having to memorize a large amount of keybindings.
 Some of these I have created myself, some are provided by Org.
