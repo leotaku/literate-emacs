@@ -3340,7 +3340,8 @@ I enjoy writing prose in visual line mode. Add the required hook here.
 (add-hook 'org-mode-hook 'visual-line-mode)
 #+end_src
 
-The default keybindings for =<return>= and =<C-return>= only really work for outline headings. I bind the indentation-aware return to =<return>= and =unpackaged/org-return-dwim= for better list support.
+The default keybindings for =<return>= and =<C-return>= only really work for outline headings. I bind the indentation-aware return to =<return>= for better list support.
+
 
 #+begin_src elisp
 
